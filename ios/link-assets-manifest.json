@@ -1,0 +1,41 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/Anton_400Regular.ttf",
+      "sha1": "726b5b90799781efcdbea11b90722cea38c9d8c7"
+    },
+    {
+      "path": "assets/fonts/Archivo_800ExtraBold.ttf",
+      "sha1": "0faac8db4851614255e39b75abc4e8fb7f8309d4"
+    },
+    {
+      "path": "assets/fonts/Archivo_900Black_Italic.ttf",
+      "sha1": "266553e51e21da24e5345566ab69bf528449bb06"
+    },
+    {
+      "path": "assets/fonts/Archivo_900Black.ttf",
+      "sha1": "28812a46d235370397449a63bc3b66cefcc4c7be"
+    },
+    {
+      "path": "assets/fonts/InstrumentSerif_400Regular_Italic.ttf",
+      "sha1": "1834cba59044f0cfeb60e8a61d93f295ac53c56d"
+    },
+    {
+      "path": "assets/fonts/InstrumentSerif_400Regular.ttf",
+      "sha1": "082088022ba5a4f0d06befbf6677e3b33803c83c"
+    },
+    {
+      "path": "assets/fonts/SpaceGrotesk_400Regular.ttf",
+      "sha1": "23aaf86d93b2c94ebf6fd588f0bc5f62194889f6"
+    },
+    {
+      "path": "assets/fonts/SpaceGrotesk_500Medium.ttf",
+      "sha1": "7d2fe2b9e0c9e76ab5bebf7cd766acd1d5c4dcbb"
+    },
+    {
+      "path": "assets/fonts/SpaceGrotesk_700Bold.ttf",
+      "sha1": "14f3d7d974d0232f0fba31566783b2c262b4d2a2"
+    }
+  ]
+}
