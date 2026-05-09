@@ -156,23 +156,32 @@ function HeaderBar() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
   const toast = useStore((s) => s.toast);
-  const profile = useStore((s) => s.profile);
 
   return (
     <View style={styles.header}>
-      <View style={styles.brandLockup}>
-        <BrandSignet size={20} color={palette.ink} accent={palette.acid} />
-        <RNText style={styles.wordmark} maxFontSizeMultiplier={1.1}>
-          UNDERDAWGS
-        </RNText>
+      <View style={styles.headerLeft}>
+        <Tap
+          onPress={() => router.push('/(tabs)/create')}
+          style={styles.createBtn}
+          burstColor={palette.ink}
+          variant="heavy"
+        >
+          <Ionicons name="add" size={22} color={staticPalette.ink} />
+        </Tap>
+        <View style={styles.brandLockup}>
+          <BrandSignet size={20} color={palette.ink} accent={palette.acid} />
+          <RNText style={styles.wordmark} maxFontSizeMultiplier={1.1}>
+            UNDERDAWGS
+          </RNText>
+        </View>
       </View>
       <View style={styles.headerRight}>
         <Tap
-          onPress={() => toast('Search coming soon.', 'default')}
+          onPress={() => router.push('/(modules)/art')}
           style={styles.iconBtn}
           burstColor={palette.ink}
         >
-          <Ionicons name="search" size={18} color={palette.ink} />
+          <Ionicons name="color-palette-outline" size={18} color={palette.ink} />
         </Tap>
         <Tap
           onPress={() => toast('3 new notifications.', 'default')}
@@ -183,14 +192,11 @@ function HeaderBar() {
           <View style={styles.dot} />
         </Tap>
         <Tap
-          onPress={() => router.push('/(tabs)/profile')}
-          style={styles.avatarSmall}
+          onPress={() => router.push('/(tabs)/inbox')}
+          style={styles.iconBtn}
           burstColor={palette.acid}
-          variant="heavy"
         >
-          <RNText style={styles.avatarSmallText}>
-            {profile.name.slice(0, 1).toUpperCase()}
-          </RNText>
+          <Ionicons name="chatbubble-outline" size={18} color={palette.ink} />
         </Tap>
       </View>
     </View>
@@ -686,6 +692,15 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
+  headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  createBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: palette.acid,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   brandLockup: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   wordmark: {
     fontFamily: fonts.bodyBold,
@@ -714,20 +729,6 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     borderWidth: 1.5,
     borderColor: palette.bone,
   },
-  avatarSmall: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: palette.acid,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarSmallText: {
-    fontFamily: fonts.displayBold,
-    fontSize: 16,
-    color: staticPalette.ink,
-  },
-
   tabBar: {
     flexDirection: 'row',
     paddingHorizontal: 20,

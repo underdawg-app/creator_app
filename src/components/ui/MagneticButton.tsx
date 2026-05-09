@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, ViewStyle, StyleProp } from 'react-native';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withSpring,
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
@@ -81,11 +81,11 @@ export function MagneticButton({
   // finger contact including the start of a scroll, which is why we keep
   // haptic strictly on the committed `onPress` below.
   const handleIn = () => {
-    progress.value = withSpring(1, { damping: 14, stiffness: 320 });
+    progress.value = withTiming(1, { duration: 110, easing: Easing.out(Easing.quad) });
     hover.value = withTiming(1, { duration: 320 });
   };
   const handleOut = () => {
-    progress.value = withSpring(0, { damping: 14, stiffness: 280 });
+    progress.value = withTiming(0, { duration: 160, easing: Easing.out(Easing.quad) });
     hover.value = withTiming(0, { duration: 420 });
   };
   const handlePress = () => {

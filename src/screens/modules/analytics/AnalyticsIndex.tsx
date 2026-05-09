@@ -19,7 +19,7 @@ export default function AnalyticsHome() {
   const t = analyticsSeed.totals;
 
   return (
-    <ScreenFrame header={<ModuleHeader eyebrow="MODULE · 06" title="ANALYTICS" />}>
+    <ScreenFrame header={<ModuleHeader title="ANALYTICS" />}>
       <RNText
         style={styles.title}
         numberOfLines={2}

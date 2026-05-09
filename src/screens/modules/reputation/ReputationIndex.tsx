@@ -24,7 +24,7 @@ export default function ReputationHome() {
     score >= 90 ? 'ELITE' : score >= 80 ? 'TRUSTED' : score >= 60 ? 'ESTABLISHED' : score >= 40 ? 'RISING' : 'NEW';
 
   return (
-    <ScreenFrame header={<ModuleHeader eyebrow="MODULE · 12" title="REPUTATION" />}>
+    <ScreenFrame header={<ModuleHeader title="REPUTATION" />}>
       <View style={styles.hero}>
         <RNText
           style={styles.score}

@@ -43,6 +43,11 @@ type Props = {
 };
 
 export function SkiaGrain({ width, height, intensity = 0.18, tint = [1, 1, 1, 0.7] }: Props) {
+  // Disabled app-wide — the slow vertical sweep in this shader read as a
+  // glitching scan-line on device. Keep the file/exports so call sites
+  // continue to compile without modification.
+  return null;
+  // eslint-disable-next-line no-unreachable
   const t = useSharedValue(0);
 
   useEffect(() => {

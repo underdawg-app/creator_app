@@ -160,6 +160,10 @@ type Props = {
 };
 
 export function SkiaFluidField({ width, height, phase, pulse }: Props) {
+  // Disabled app-wide — animated fluid backplate was reading as a glitch
+  // on device. Exports kept so call sites compile unchanged.
+  return null;
+  // eslint-disable-next-line no-unreachable
   const clock = useClock();
 
   // Recompute resolution when the viewport changes.

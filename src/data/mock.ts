@@ -1160,6 +1160,8 @@ export type Thread = {
   updatedAgo: string;
   accent: string;
   verified?: boolean;
+  typing?: boolean;
+  archived?: boolean;
   messages: { from: 'them' | 'me'; body: string; ts: string }[];
 };
 
@@ -1354,6 +1356,7 @@ export const contentTypes = [
   { key: 'audio', name: 'AUDIO', sub: 'track, clip, podcast', accent: '#FF6BB5', route: '/(modules)/studio/text-composer' },
   { key: 'text', name: 'TEXT', sub: 'essay, poem, note', accent: '#FF5A1F', route: '/(modules)/studio/text-composer' },
   { key: 'story', name: 'STORY', sub: '24h ephemeral', accent: '#D8FF3D', route: '/(modules)/studio/image-composer' },
+  { key: 'live', name: 'LIVE', sub: 'go live, in real time', accent: '#FF5A1F', route: '/(modules)/studio/video-composer' },
 ];
 
 /* -------------------------------------------------------------------------

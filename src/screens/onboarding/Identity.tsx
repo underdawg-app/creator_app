@@ -21,6 +21,7 @@ import { RevealText } from '@/components/ui/RevealText';
 import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
 import { Asterisk } from '@/components/svg/Marks';
 import { useStore } from '@/store';
+import { getAuth } from '@/lib/firebase';
 
 const { width, height } = Dimensions.get('window');
 
@@ -172,10 +173,13 @@ export default function Identity() {
               size="lg"
               disabled={!ready}
               onPress={() => {
+                const fbUser = getAuth().currentUser;
                 setProfile({
                   name: name || 'Sola Roux',
                   handle: handle.startsWith('@') ? handle : `@${handle || 'solaroux'}`,
                   bio: bio || 'new on underdawg. watch this space.',
+                  uid: fbUser?.uid ?? null,
+                  phone: fbUser?.phoneNumber ?? null,
                 });
                 router.push('/(onboarding)/complete');
               }}

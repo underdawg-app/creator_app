@@ -85,7 +85,7 @@ export default function Welcome() {
 
   const slide = welcomeSlides[index];
   const isLight = slide.fg === palette.ink;
-  const hair = isLight ? 'rgba(10,10,10,0.12)' : 'rgba(242,239,230,0.15)';
+  const hair = isLight ? 'rgba(10,10,10,0.28)' : 'rgba(242,239,230,0.32)';
 
   const goNext = () => {
     if (index < welcomeSlides.length - 1) {
@@ -102,20 +102,8 @@ export default function Welcome() {
 
   return (
     <View style={[styles.root, { backgroundColor: slide.bg }]}>
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <SkiaWaveField
-          width={width}
-          height={height}
-          color={
-            isLight ? 'rgba(10,10,10,0.05)' : 'rgba(242,239,230,0.05)'
-          }
-          lines={IS_ANDROID ? 10 : 18}
-          amplitude={12}
-          frequency={0.02}
-          speed={IS_ANDROID ? 0.18 : 0.3}
-          strokeWidth={1}
-        />
-      </View>
+      {/* SkiaWaveField removed — animated background lines were reading
+          as a screen glitch on device. Plain bg is calmer for onboarding. */}
 
       <SafeAreaView edges={['top']} style={styles.topSafe}>
         <View style={styles.topRow}>
@@ -202,32 +190,24 @@ export default function Welcome() {
         </View>
 
         <Marquee
-          items={['GET DISCOVERED', 'GET CONNECTED', 'GET PAID']}
-          speed={46}
-          separator="  ◆  "
+          items={['GET DISCOVERED', 'CONNECTED']}
+          speed={40}
+          separator="   ·   "
           textStyle={{
             fontFamily: fonts.displayBold,
             color: slide.fg,
-            opacity: 0.8,
-            fontSize: 28,
-            lineHeight: 34,
-            letterSpacing: -1,
+            opacity: 0.85,
+            fontSize: 18,
+            lineHeight: 22,
+            letterSpacing: -0.4,
+            includeFontPadding: false,
           }}
-          style={{ marginTop: 20, height: 40 }}
+          style={{ marginTop: 26, height: 26 }}
         />
       </SafeAreaView>
 
-      {/* Skip the full-screen procedural grain on Android — it runs a fragment
-          shader every frame, which is the dominant FPS hit on mid-range
-          devices. iOS keeps the texture for the editorial look. */}
-      {!IS_ANDROID && (
-        <SkiaGrain
-          width={width}
-          height={height}
-          intensity={0.08}
-          tint={[1, 1, 1, 0.12]}
-        />
-      )}
+      {/* SkiaGrain disabled on this screen — its shader includes a slow
+          vertical sweep that read as a glitching scan-line on device. */}
     </View>
   );
 }
@@ -331,7 +311,7 @@ function Slide({
       <Animated.View style={[styles.blobWrap, blobStyle]} pointerEvents="none">
         <Image
           source={slideObjects[i % slideObjects.length]}
-          style={{ width: width * 0.95, height: width * 0.95 }}
+          style={{ width: width * 0.78, height: width * 0.78 }}
           contentFit="contain"
         />
       </Animated.View>
@@ -355,36 +335,33 @@ function Slide({
             style={{ position: 'absolute', bottom: -8, right: -8 }}
           />
 
-          <View style={{ gap: 0 }}>
-            {titleLines.map((ln, li) => (
-              <RevealText
-                key={`${i}-${li}`}
-                text={ln}
-                trigger={active}
-                splitBy="char"
-                stagger={20}
-                delay={li * 140}
-                style={{
-                  fontFamily: fonts.displayBold,
-                  fontSize: 60,
-                  lineHeight: 60,
-                  letterSpacing: -2.6,
-                  color: item.fg,
-                }}
-              />
-            ))}
-          </View>
+          <RNText
+            numberOfLines={titleLines.length}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+            allowFontScaling={false}
+            style={{
+              fontFamily: fonts.displayBold,
+              fontSize: 40,
+              lineHeight: 42,
+              letterSpacing: -1.0,
+              color: item.fg,
+              includeFontPadding: false,
+            }}
+          >
+            {item.title}
+          </RNText>
         </View>
 
         <Animated.Text
           style={[
             {
               fontFamily: fonts.editorialItalic,
-              fontSize: 24,
+              fontSize: 22,
               lineHeight: 28,
               letterSpacing: -0.3,
               color: item.accent,
-              marginTop: 18,
+              marginTop: 40,
             },
             editorialStyle,
           ]}
@@ -395,10 +372,10 @@ function Slide({
           style={{
             fontFamily: fonts.body,
             fontSize: 14,
-            lineHeight: 21,
+            lineHeight: 22,
             color: item.fg,
-            opacity: 0.72,
-            marginTop: 10,
+            opacity: 0.75,
+            marginTop: 20,
             maxWidth: 360,
           }}
         >
@@ -441,8 +418,8 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   hairline: { height: 1 },
 
   slideHeader: {
-    marginTop: 20,
-    marginBottom: 10,
+    marginTop: 24,
+    marginBottom: 14,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -452,29 +429,30 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   blobWrap: {
     position: 'absolute',
     right: -width * 0.2,
-    top: 50,
+    top: 56,
     opacity: 0.94,
   },
   slideCopy: {
     marginTop: 'auto',
-    marginBottom: 16,
+    marginBottom: 36,
   },
   copyFrame: {
-    paddingVertical: 6,
-    paddingHorizontal: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
   },
 
   bottomSafe: {
     paddingHorizontal: 24,
-    paddingBottom: 6,
+    paddingBottom: 16,
     paddingTop: 0,
   },
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    paddingTop: 16,
+    paddingTop: 28,
+    paddingBottom: 14,
   },
-  dotsCol: { gap: 8 },
+  dotsCol: { gap: 12 },
   progress: { ...T.micro, opacity: 0.6 },
 });

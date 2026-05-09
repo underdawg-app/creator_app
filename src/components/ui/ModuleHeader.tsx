@@ -12,6 +12,7 @@ type Props = {
   title?: string;
   showBack?: boolean;
   onBack?: () => void;
+  left?: React.ReactNode;
   right?: React.ReactNode;
   inverse?: boolean;
 };
@@ -21,6 +22,7 @@ export function ModuleHeader({
   title,
   showBack = true,
   onBack,
+  left,
   right,
   inverse,
 }: Props) {
@@ -30,7 +32,9 @@ export function ModuleHeader({
 
   return (
     <View style={styles.row}>
-      {showBack ? (
+      {left !== undefined ? (
+        left
+      ) : showBack ? (
         <Tap
           onPress={() => (onBack ? onBack() : router.back())}
           style={[styles.back, { borderColor: border }]}
@@ -43,17 +47,17 @@ export function ModuleHeader({
       )}
 
       <View style={styles.center}>
-        <View style={styles.centerRow}>
-          <Asterisk size={9} color={fg} strokeWidth={1.2} />
-          {eyebrow ? (
+        {eyebrow ? (
+          <View style={styles.centerRow}>
+            <Asterisk size={9} color={fg} strokeWidth={1.2} />
             <RNText
               style={[styles.eyebrow, { color: fg }]}
               maxFontSizeMultiplier={1.1}
             >
               {eyebrow}
             </RNText>
-          ) : null}
-        </View>
+          </View>
+        ) : null}
         {title ? (
           <RNText
             style={[styles.title, { color: fg }]}

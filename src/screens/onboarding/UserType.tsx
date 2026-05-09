@@ -19,6 +19,7 @@ import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import { userTypes } from '@/data/mock';
+import { useStore } from '@/store';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { RevealText } from '@/components/ui/RevealText';
 import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
@@ -133,7 +134,13 @@ export default function UserTypeScreen() {
             background={palette.ink}
             foreground={palette.bone}
             size="lg"
-            onPress={() => router.push('/(onboarding)/creator-type')}
+            onPress={() => {
+              const picked = userTypes.find((t) => t.key === selected);
+              if (picked) {
+                useStore.getState().setProfile({ type: picked.label });
+              }
+              router.push('/(onboarding)/creator-type');
+            }}
           />
         </View>
       </SafeAreaView>

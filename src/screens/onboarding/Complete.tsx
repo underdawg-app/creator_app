@@ -10,6 +10,7 @@ import {
 const IS_ANDROID = Platform.OS === 'android';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
+import { useStore } from '@/store';
 import { Image } from '@/components/ui/Image';
 import * as Haptics from '@/haptics';
 import Animated, {
@@ -33,7 +34,7 @@ import { MagneticButton } from '@/components/ui/MagneticButton';
 import { RevealText } from '@/components/ui/RevealText';
 import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
 import { Marquee } from '@/components/ui/Marquee';
-import { RuleDot } from '@/components/svg/Marks';
+import { Asterisk, RuleDot } from '@/components/svg/Marks';
 
 const { width, height } = Dimensions.get('window');
 
@@ -76,6 +77,7 @@ export default function Complete() {
   }, []);
 
   const navToFeed = () => {
+    useStore.getState().setOnboarded(true);
     router.replace('/(tabs)');
   };
 
@@ -156,7 +158,10 @@ export default function Complete() {
       >
         <SafeAreaView style={{ flex: 1, paddingHorizontal: 24 }}>
           <View style={styles.top}>
-            <RNText style={styles.step}>STEP 05 / 05</RNText>
+            <View style={styles.stepRow}>
+              <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
+              <RNText style={styles.step}>STEP 05 / 05</RNText>
+            </View>
             <View style={styles.dot} />
           </View>
 
@@ -217,17 +222,18 @@ export default function Complete() {
 
             <Marquee
               items={['YOU ARE EARLY', 'YOU ARE WANTED', 'YOU ARE UNDERDAWG']}
-              speed={46}
-              separator="  ◆  "
+              speed={40}
+              separator="   ·   "
               textStyle={{
                 fontFamily: fonts.displayBold,
-                fontSize: 28,
-                lineHeight: 34,
-                letterSpacing: -1,
                 color: palette.ink,
                 opacity: 0.85,
+                fontSize: 18,
+                lineHeight: 22,
+                letterSpacing: -0.4,
+                includeFontPadding: false,
               }}
-              style={{ height: 40 }}
+              style={{ height: 26 }}
             />
 
             <View style={styles.hairline} />
@@ -586,6 +592,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     alignItems: 'center',
     paddingTop: 6,
   },
+  stepRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   step: { ...T.label, color: palette.ink, opacity: 0.7 },
   dot: { width: 10, height: 10, borderRadius: 5, backgroundColor: palette.bone },
   center: { marginTop: 'auto', marginBottom: 40 },

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   Text as RNText,
   Dimensions,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
@@ -25,21 +26,59 @@ import { RevealText } from '@/components/ui/RevealText';
 import { TapBurst } from '@/components/ui/TapBurst';
 import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
 import { ArrowMark, Asterisk, RuleDot } from '@/components/svg/Marks';
+import { sendPhoneCode } from '@/lib/firebase';
+import { signInWithGoogle, GoogleSignInCancelled } from '@/lib/googleSignIn';
+import { useAuth } from '@/auth/AuthContext';
+import { useStore } from '@/store';
 
 const authObject = require('@/objects/obj-4.png');
 
 const { width, height } = Dimensions.get('window');
 
-const methods = [
-  { key: 'apple', label: 'CONTINUE WITH APPLE', icon: 'logo-apple' as const },
-  { key: 'google', label: 'CONTINUE WITH GOOGLE', icon: 'logo-google' as const },
-  { key: 'email', label: 'CONTINUE WITH EMAIL', icon: 'mail-outline' as const },
-  { key: 'phone', label: 'CONTINUE WITH PHONE', icon: 'call-outline' as const },
-];
-
 export default function Auth() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
+  const [phone, setPhone] = useState('');
+  const [busy, setBusy] = useState(false);
+  const phoneValid = phone.replace(/\D/g, '').length === 10;
+  const { setPendingOtp } = useAuth();
+  const toast = useStore((s) => s.toast);
+
+  const submitPhone = async () => {
+    if (!phoneValid || busy) return;
+    setBusy(true);
+    try {
+      const e164 = '+91' + phone.replace(/\D/g, '');
+      const confirmation = await sendPhoneCode(e164);
+      setPendingOtp(confirmation);
+      router.push('/(onboarding)/otp');
+    } catch (err: any) {
+      toast(
+        err?.message?.toLowerCase?.().includes('network')
+          ? "Couldn't send code, check connection."
+          : 'Failed to send code. Try again.',
+        'warn',
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submitGoogle = async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await signInWithGoogle();
+      // onAuthStateChanged fires; user is signed in. Continue onboarding.
+      router.push('/(onboarding)/user-type');
+    } catch (err: any) {
+      if (err instanceof GoogleSignInCancelled) return;
+      toast('Google sign-in failed. Try again.', 'warn');
+    } finally {
+      setBusy(false);
+    }
+  };
+
   // Idle float — mirrors the welcome carousel so the motion language is shared.
   const idleA = useSharedValue(0);
   const idleB = useSharedValue(0);
@@ -156,28 +195,54 @@ export default function Auth() {
           <RuleDot width={width - 48} color={palette.lineDark} dotColor={palette.acid} />
         </View>
 
-        <View style={styles.methods}>
-          {methods.map((m, i) => (
-            <TapBurst
-              key={m.key}
-              style={styles.method}
-              burstColor={palette.acid}
-              onPress={() => router.push('/(onboarding)/user-type')}
-              haptic="light"
-            >
-              <View style={styles.methodNum}>
-                <RNText style={styles.methodNumText}>
-                  {String(i + 1).padStart(2, '0')}
-                </RNText>
-              </View>
-              <View style={styles.methodIcon}>
-                <Ionicons name={m.icon} size={18} color={palette.ink} />
-              </View>
-              <RNText style={styles.methodLabel}>{m.label}</RNText>
-              <ArrowMark size={16} color={palette.ink} strokeWidth={1.5} />
-            </TapBurst>
-          ))}
+        <View style={styles.phoneBlock}>
+          <RNText style={styles.fieldLabel}>PHONE NUMBER</RNText>
+          <View style={styles.phoneRow}>
+            <View style={styles.dial}>
+              <RNText style={styles.dialText}>+91</RNText>
+            </View>
+            <TextInput
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="98765 43210"
+              placeholderTextColor={palette.mute}
+              keyboardType="phone-pad"
+              autoComplete="tel"
+              textContentType="telephoneNumber"
+              style={styles.phoneInput}
+              maxLength={20}
+            />
+          </View>
+
+          <TapBurst
+            style={[styles.primaryBtn, !phoneValid && styles.primaryBtnDisabled]}
+            burstColor={palette.acid}
+            onPress={submitPhone}
+            haptic="light"
+            disabled={!phoneValid}
+          >
+            <Ionicons name="call-outline" size={16} color={palette.bone} />
+            <RNText style={styles.primaryBtnText}>CONTINUE WITH PHONE</RNText>
+            <ArrowMark size={16} color={palette.bone} strokeWidth={1.6} />
+          </TapBurst>
         </View>
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <RNText style={styles.dividerText}>OR CONTINUE WITH GOOGLE</RNText>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <TapBurst
+          style={styles.googleBtn}
+          burstColor={palette.acid}
+          onPress={submitGoogle}
+          haptic="light"
+        >
+          <Ionicons name="logo-google" size={18} color={palette.ink} />
+          <RNText style={styles.googleBtnText}>SIGN IN WITH GOOGLE</RNText>
+          <ArrowMark size={16} color={palette.ink} strokeWidth={1.5} />
+        </TapBurst>
 
         <View style={styles.legal}>
           <Asterisk size={12} color={palette.mute} strokeWidth={1.2} />
@@ -234,38 +299,97 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     maxWidth: 340,
   },
   rule: { marginTop: 28, alignItems: 'center' },
-  methods: {
-    marginTop: 14,
+  phoneBlock: {
+    marginTop: 22,
+    gap: 12,
   },
-  method: {
-    height: 68,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    paddingHorizontal: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.lineDark,
-  },
-  methodNum: {
-    width: 28,
-  },
-  methodNumText: {
+  fieldLabel: {
     ...T.label,
     color: palette.mute,
+    letterSpacing: 1.4,
   },
-  methodIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+  phoneRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: palette.lineDark,
+    paddingBottom: 4,
+  },
+  dial: {
+    height: 48,
+    paddingHorizontal: 14,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: palette.line,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  methodLabel: {
+  dialText: {
     ...T.label,
     color: palette.ink,
+  },
+  phoneInput: {
     flex: 1,
+    height: 48,
+    fontFamily: fonts.displayBold,
+    fontSize: 22,
+    letterSpacing: -0.4,
+    color: palette.ink,
+    paddingVertical: 0,
+  },
+  primaryBtn: {
+    marginTop: 6,
+    height: 56,
+    borderRadius: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingHorizontal: 22,
+    backgroundColor: palette.ink,
+  },
+  primaryBtnDisabled: {
+    opacity: 0.4,
+  },
+  primaryBtnText: {
+    ...T.label,
+    color: palette.bone,
+    flex: 0,
+  },
+  divider: {
+    marginTop: 26,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: palette.lineDark,
+  },
+  dividerText: {
+    ...T.small,
+    color: palette.mute,
+    letterSpacing: 1.6,
+  },
+  googleBtn: {
+    marginTop: 16,
+    height: 56,
+    borderRadius: 28,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingHorizontal: 22,
+    borderWidth: 1,
+    borderColor: palette.lineDark,
+    backgroundColor: 'transparent',
+  },
+  googleBtnText: {
+    ...T.label,
+    color: palette.ink,
+    flex: 0,
   },
   legal: {
     marginTop: 28,

@@ -13,6 +13,21 @@ import { AcidSplashHost } from '@/components/fx/AcidSplash';
 import RootNavigator from '@/navigation/RootNavigator';
 import { navigationRef } from '@/navigation/router';
 import { linking } from '@/navigation/linking';
+import { AuthProvider } from '@/auth/AuthContext';
+import { configureGoogleSignIn } from '@/lib/googleSignIn';
+
+// OAuth web client ID from Firebase Console → Authentication → Sign-in
+// method → Google → Web SDK config. Replace this constant before the
+// first build, or read it from app.json `extra` if you prefer.
+// (See google-services.json `oauth_client[client_type=3].client_id`.)
+const GOOGLE_WEB_CLIENT_ID = 'REPLACE_WITH_GOOGLE_WEB_CLIENT_ID';
+
+// Configure Google Sign-In once at module load. Idempotent.
+try {
+  configureGoogleSignIn(GOOGLE_WEB_CLIENT_ID);
+} catch {
+  // Native module may be missing in tests / Storybook — silent.
+}
 
 class AppErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -43,7 +58,9 @@ export default function App() {
   return (
     <AppErrorBoundary>
       <ThemeProvider>
-        <RootShell />
+        <AuthProvider>
+          <RootShell />
+        </AuthProvider>
       </ThemeProvider>
     </AppErrorBoundary>
   );

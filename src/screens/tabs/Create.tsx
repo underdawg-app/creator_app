@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Text as RNText, Dimensions, ScrollView, Platform } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text as RNText,
+  ScrollView,
+  Platform,
+} from 'react-native';
 
 const IS_ANDROID = Platform.OS === 'android';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,15 +15,41 @@ import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import { contentTypes } from '@/data/mock';
 import { useStore } from '@/store';
-import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
 import { Tap } from '@/components/ui/Tap';
-import { RevealText } from '@/components/ui/RevealText';
-import { MetricCard } from '@/components/ui/MetricCard';
-import { ListCell } from '@/components/ui/ListCell';
 import { Asterisk, ArrowMark } from '@/components/svg/Marks';
-import { MediaThumb } from '@/components/svg/MediaThumb';
+import { Ionicons } from '@/icons';
 
-const { width, height } = Dimensions.get('window');
+function readableOn(hex: string) {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+  const isDark = luma < 145;
+  return {
+    fg: isDark ? staticPalette.bone : staticPalette.ink,
+    mute: isDark ? 'rgba(242,239,230,0.7)' : 'rgba(10,10,10,0.7)',
+    line: isDark ? 'rgba(242,239,230,0.18)' : 'rgba(10,10,10,0.14)',
+    isDark,
+  };
+}
+
+const ICON_FOR_KEY: Record<string, keyof typeof Ionicons.glyphMap> = {
+  image: 'image-outline',
+  video: 'videocam-outline',
+  audio: 'mic-outline',
+  text: 'document-text-outline',
+  story: 'flash-outline',
+  live: 'radio-outline',
+};
+
+function chunkPairs<T>(arr: T[]): [T, T | undefined][] {
+  const out: [T, T | undefined][] = [];
+  for (let i = 0; i < arr.length; i += 2) {
+    out.push([arr[i], arr[i + 1]]);
+  }
+  return out;
+}
 
 export default function Create() {
   const palette = useThemedPalette();
@@ -28,31 +60,9 @@ export default function Create() {
 
   return (
     <View style={styles.root}>
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <SkiaWaveField
-          width={width}
-          height={height}
-          color="rgba(242,239,230,0.06)"
-          lines={18}
-          amplitude={14}
-          frequency={0.02}
-          speed={0.25}
-          strokeWidth={1}
-        />
-      </View>
-
-      <View style={styles.heroMark} pointerEvents="none">
-        <MediaThumb
-          size={width * 0.7}
-          color={palette.acid}
-          ink={palette.acid}
-          variant="lens"
-        />
-      </View>
-
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
         <View style={styles.topRow}>
-          <Asterisk size={10} color={palette.bone} strokeWidth={1.2} />
+          <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
           <RNText style={styles.kicker} maxFontSizeMultiplier={1.15}>
             COMPOSE · STUDIO
           </RNText>
@@ -64,127 +74,81 @@ export default function Create() {
           removeClippedSubviews={IS_ANDROID}
           overScrollMode={IS_ANDROID ? 'never' : 'auto'}
         >
-          {/* Hero */}
-          <View style={styles.hero}>
-            <RevealText
-              text="what"
-              splitBy="char"
-              style={{
-                fontFamily: fonts.editorialItalic,
-                fontSize: 56,
-                lineHeight: 54,
-                color: palette.ink,
-                letterSpacing: -0.8,
-              }}
-            />
-            <RevealText
-              text="ARE YOU"
-              delay={140}
-              style={{
-                fontFamily: fonts.displayBold,
-                fontSize: 74,
-                lineHeight: 68,
-                color: palette.ink,
-                letterSpacing: -3.2,
-              }}
-            />
-            <RevealText
-              text="MAKING?"
-              delay={260}
-              style={{
-                fontFamily: fonts.displayBold,
-                fontSize: 74,
-                lineHeight: 68,
-                color: palette.acid,
-                letterSpacing: -3.2,
-              }}
-            />
-            <RNText style={styles.sub} maxFontSizeMultiplier={1.2}>
-              write it. film it. post it. — one composer, every format.
+          <View style={styles.heading}>
+            <RNText style={styles.headingItalic} maxFontSizeMultiplier={1.1}>
+              what
+            </RNText>
+            <RNText style={styles.headingLine1} maxFontSizeMultiplier={1.1}>
+              ARE YOU
+            </RNText>
+            <RNText style={styles.headingAccent} maxFontSizeMultiplier={1.1}>
+              MAKING?
             </RNText>
           </View>
 
-          {/* Studio metrics */}
           <View style={styles.metricsRow}>
-            <View style={{ flex: 1 }}>
-              <MetricCard label="DRAFTS" value={drafts.length} size="md" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <MetricCard label="SCHEDULED" value={scheduled.length} size="md" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <MetricCard label="PUBLISHED" value={published.length} size="md" />
-            </View>
+            <Metric
+              label="DRAFTS"
+              value={String(drafts.length).padStart(2, '0')}
+              accent={palette.acid}
+            />
+            <View style={styles.metricSep} />
+            <Metric
+              label="SCHEDULED"
+              value={String(scheduled.length).padStart(2, '0')}
+              accent={palette.electric}
+            />
+            <View style={styles.metricSep} />
+            <Metric
+              label="LIVE"
+              value={String(published.length).padStart(2, '0')}
+              accent={palette.blush}
+            />
           </View>
 
-          {/* Compose — content type list */}
           <View style={styles.sectionHead}>
-            <RNText style={styles.sectionEyebrow} maxFontSizeMultiplier={1.1}>
-              COMPOSE
-            </RNText>
-            <RNText style={styles.sectionTitle} maxFontSizeMultiplier={1.1}>
-              start something.
-            </RNText>
+            <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
+            <RNText style={styles.sectionEyebrow}>COMPOSE</RNText>
           </View>
+          <RNText style={styles.sectionTitle} maxFontSizeMultiplier={1.1}>
+            start <RNText style={styles.sectionTitleItalic}>something.</RNText>
+          </RNText>
 
-          <View style={styles.list}>
-            {contentTypes.map((c, i) => (
-              <Tap
-                key={c.key}
-                onPress={() => router.push(c.route as any)}
-                burstColor={c.accent}
-                variant="heavy"
-                style={styles.cell}
-              >
-                <View style={styles.cellLeft}>
-                  <RNText style={styles.cellIndex} maxFontSizeMultiplier={1.1}>
-                    {String(i + 1).padStart(2, '0')}
-                  </RNText>
-                  <View style={{ flex: 1 }}>
-                    <RNText
-                      style={styles.cellLabel}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.85}
-                      maxFontSizeMultiplier={1.1}
-                    >
-                      {c.name}
-                    </RNText>
-                    <RNText style={styles.cellSub} maxFontSizeMultiplier={1.15}>
-                      {c.sub}
-                    </RNText>
-                  </View>
+          <View style={styles.composeGrid}>
+            {chunkPairs(contentTypes).map(([a, b], i) => (
+              <View key={`row-${i}`} style={styles.composeRow}>
+                <View style={{ flex: 1 }}>
+                  <ComposeCard item={a} />
                 </View>
-                <View style={[styles.cellDot, { backgroundColor: c.accent }]} />
-                <ArrowMark size={16} color={palette.bone} strokeWidth={1.6} />
-              </Tap>
+                <View style={{ flex: 1 }}>
+                  {b ? <ComposeCard item={b} /> : null}
+                </View>
+              </View>
             ))}
           </View>
 
-          {/* Manage — studio queue links */}
           <View style={styles.sectionHead}>
-            <RNText style={styles.sectionEyebrow} maxFontSizeMultiplier={1.1}>
-              MANAGE
-            </RNText>
+            <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
+            <RNText style={styles.sectionEyebrow}>MANAGE</RNText>
           </View>
 
           <View style={styles.manageList}>
-            <ListCell
+            <ManageRow
               icon="document-outline"
-              title="Drafts"
-              subtitle={`${drafts.length} in progress`}
+              label="Drafts"
+              meta={`${drafts.length} in progress`}
               onPress={() => router.push('/(modules)/studio/drafts')}
             />
-            <ListCell
+            <ManageRow
               icon="time-outline"
-              title="Scheduled queue"
-              subtitle={`${scheduled.length} posts lined up`}
+              label="Scheduled"
+              meta={`${scheduled.length} lined up`}
               onPress={() => router.push('/(modules)/studio/schedule')}
             />
-            <ListCell
+            <ManageRow
               icon="checkmark-done-outline"
-              title="Published"
-              subtitle={`${published.length} live on your feed`}
+              label="Published"
+              meta={`${published.length} live`}
               onPress={() => router.push('/(modules)/studio/drafts')}
             />
           </View>
@@ -194,103 +158,264 @@ export default function Create() {
   );
 }
 
-const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
-  root: { flex: 1, backgroundColor: palette.bone, overflow: 'hidden' },
-  heroMark: {
-    position: 'absolute',
-    right: -width * 0.22,
-    top: -width * 0.18,
-    opacity: 0.32,
-  },
+function Metric({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent: string;
+}) {
+  const styles = useThemedPaletteStyles(makeStyles);
+  return (
+    <View style={styles.metric}>
+      <RNText style={styles.metricLabel}>{label}</RNText>
+      <RNText style={[styles.metricValue, { color: accent }]} maxFontSizeMultiplier={1.1}>
+        {value}
+      </RNText>
+    </View>
+  );
+}
 
-  topRow: {
-    paddingHorizontal: 24,
-    paddingTop: 6,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  kicker: {
-    ...T.label,
-    color: palette.ink,
-    opacity: 0.7,
-  },
+function ComposeCard({
+  item,
+}: {
+  item: { key: string; name: string; sub: string; accent: string; route: string };
+}) {
+  const styles = useThemedPaletteStyles(makeStyles);
+  const c = readableOn(item.accent);
+  const icon = ICON_FOR_KEY[item.key] ?? 'add-outline';
 
-  scroll: {
-    paddingHorizontal: 24,
-    paddingBottom: 120,
-  },
+  return (
+    <Tap
+      onPress={() => router.push(item.route as any)}
+      burstColor={c.isDark ? staticPalette.bone : staticPalette.ink}
+      variant="heavy"
+      style={[styles.composeCard, { backgroundColor: item.accent }]}
+    >
+      <View style={[styles.composeIconWrap, { borderColor: c.fg }]}>
+        <Ionicons name={icon} size={20} color={c.fg} />
+      </View>
+      <View style={styles.composeBody}>
+        <RNText
+          style={[styles.composeName, { color: c.fg }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.7}
+        >
+          {item.name}
+        </RNText>
+        <RNText
+          style={[styles.composeSub, { color: c.mute }]}
+          numberOfLines={1}
+          maxFontSizeMultiplier={1.15}
+        >
+          {item.sub}
+        </RNText>
+      </View>
+      <ArrowMark size={14} color={c.fg} strokeWidth={1.6} />
+    </Tap>
+  );
+}
 
-  hero: { marginTop: 24 },
-  sub: {
-    ...T.body,
-    color: palette.ink,
-    opacity: 0.78,
-    marginTop: 18,
-    maxWidth: 360,
-  },
+function ManageRow({
+  icon,
+  label,
+  meta,
+  onPress,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  meta: string;
+  onPress: () => void;
+}) {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  return (
+    <Tap onPress={onPress} burstColor={palette.acid} style={styles.manageRow}>
+      <View style={styles.manageIconWrap}>
+        <Ionicons name={icon} size={18} color={palette.ink} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <RNText style={styles.manageLabel} maxFontSizeMultiplier={1.1}>
+          {label}
+        </RNText>
+        <RNText style={styles.manageMeta} maxFontSizeMultiplier={1.15}>
+          {meta}
+        </RNText>
+      </View>
+      <ArrowMark size={14} color={palette.ink} strokeWidth={1.6} />
+    </Tap>
+  );
+}
 
-  /* Metrics */
-  metricsRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 28,
-  },
+const makeStyles = (palette: typeof staticPalette) =>
+  StyleSheet.create({
+    root: { flex: 1, backgroundColor: palette.bone },
 
-  /* Section headers */
-  sectionHead: {
-    marginTop: 32,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.lineDark,
-  },
-  sectionEyebrow: {
-    ...T.label,
-    color: palette.ink,
-    opacity: 0.55,
-  },
-  sectionTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 28,
-    lineHeight: 28,
-    letterSpacing: -1,
-    color: palette.ink,
-    marginTop: 6,
-  },
+    topRow: {
+      paddingHorizontal: 16,
+      paddingTop: 6,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    kicker: {
+      ...T.label,
+      color: palette.ink,
+      opacity: 0.7,
+    },
 
-  /* Content type list */
-  list: { marginTop: 4 },
-  cell: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    paddingVertical: 18,
-    borderTopWidth: 1,
-    borderTopColor: palette.lineDark,
-  },
-  cellLeft: { flexDirection: 'row', alignItems: 'center', gap: 14, flex: 1 },
-  cellIndex: {
-    fontFamily: fonts.displayBold,
-    fontSize: 18,
-    color: palette.ink,
-    opacity: 0.4,
-    width: 28,
-  },
-  cellLabel: {
-    fontFamily: fonts.displayBold,
-    fontSize: 30,
-    lineHeight: 32,
-    color: palette.ink,
-    letterSpacing: -0.8,
-  },
-  cellSub: {
-    ...T.micro,
-    color: palette.ink,
-    opacity: 0.6,
-    marginTop: 4,
-  },
-  cellDot: { width: 8, height: 8, borderRadius: 4 },
+    scroll: {
+      paddingHorizontal: 16,
+      paddingBottom: 140,
+    },
 
-  /* Manage list */
-  manageList: { marginTop: 8 },
-});
+    heading: { marginTop: 18, gap: 0 },
+    headingItalic: {
+      fontFamily: fonts.editorialItalic,
+      fontSize: 56,
+      lineHeight: 56,
+      color: palette.ink,
+      letterSpacing: -1.2,
+    },
+    headingLine1: {
+      fontFamily: fonts.displayBold,
+      fontSize: 64,
+      lineHeight: 60,
+      letterSpacing: -3,
+      color: palette.ink,
+    },
+    headingAccent: {
+      fontFamily: fonts.displayBold,
+      fontSize: 64,
+      lineHeight: 60,
+      letterSpacing: -3,
+      color: palette.acid,
+    },
+
+    metricsRow: {
+      marginTop: 28,
+      flexDirection: 'row',
+      alignItems: 'stretch',
+      borderTopWidth: 1,
+      borderBottomWidth: 1,
+      borderColor: palette.lineDark,
+      paddingVertical: 14,
+    },
+    metric: { flex: 1, gap: 6, alignItems: 'center' },
+    metricSep: { width: 1, backgroundColor: palette.line, marginHorizontal: 4 },
+    metricLabel: {
+      ...T.label,
+      color: palette.ink,
+      opacity: 0.55,
+      letterSpacing: 1.6,
+    },
+    metricValue: {
+      fontFamily: fonts.displayBold,
+      fontSize: 28,
+      lineHeight: 30,
+      letterSpacing: -0.8,
+    },
+
+    sectionHead: {
+      marginTop: 32,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      borderTopWidth: 1,
+      borderColor: palette.lineDark,
+      paddingTop: 14,
+    },
+    sectionEyebrow: {
+      ...T.label,
+      color: palette.ink,
+      opacity: 0.55,
+      letterSpacing: 1.6,
+    },
+    sectionTitle: {
+      fontFamily: fonts.displayBold,
+      fontSize: 36,
+      lineHeight: 38,
+      letterSpacing: -1.2,
+      color: palette.ink,
+      marginTop: 8,
+      marginBottom: 14,
+    },
+    sectionTitleItalic: {
+      fontFamily: fonts.editorialItalic,
+      color: palette.ember,
+    },
+
+    composeGrid: { gap: 12 },
+    composeRow: { flexDirection: 'row', gap: 12 },
+    composeCard: {
+      borderRadius: 22,
+      padding: 16,
+      gap: 8,
+      minHeight: 130,
+      shadowColor: '#000',
+      shadowOpacity: 0.1,
+      shadowRadius: 14,
+      shadowOffset: { width: 0, height: 6 },
+      elevation: 3,
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+    },
+    composeIconWrap: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      borderWidth: 1.5,
+      alignItems: 'center',
+      justifyContent: 'center',
+      alignSelf: 'flex-start',
+    },
+    composeBody: { gap: 2 },
+    composeName: {
+      fontFamily: fonts.displayBold,
+      fontSize: 22,
+      lineHeight: 24,
+      letterSpacing: -0.6,
+    },
+    composeSub: {
+      ...T.label,
+      letterSpacing: 1.4,
+      fontSize: 10,
+    },
+
+    manageList: { marginTop: 14, gap: 8 },
+    manageRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      paddingVertical: 14,
+      paddingHorizontal: 14,
+      borderRadius: 16,
+      backgroundColor: palette.paper,
+      borderWidth: 1,
+      borderColor: palette.line,
+    },
+    manageIconWrap: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      borderWidth: 1,
+      borderColor: palette.lineDark,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    manageLabel: {
+      fontFamily: fonts.displayBold,
+      fontSize: 17,
+      letterSpacing: -0.4,
+      color: palette.ink,
+    },
+    manageMeta: {
+      ...T.small,
+      color: palette.ink,
+      opacity: 0.55,
+      marginTop: 2,
+    },
+  });

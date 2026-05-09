@@ -18,4 +18,4 @@ if (!__DEV__) {
   LogBox.ignoreAllLogs(true);
 }
 
-AppRegistry.registerComponent('main', () => App);
+AppRegistry.registerComponent('Underdawgs', () => App);

@@ -9,6 +9,7 @@ export const linking: LinkingOptions<any> = {
         screens: {
           Welcome: 'welcome',
           Auth: 'auth',
+          Otp: 'otp',
           UserType: 'user-type',
           CreatorType: 'creator-type',
           Identity: 'identity',
@@ -26,6 +27,7 @@ export const linking: LinkingOptions<any> = {
       },
       Modules: {
         screens: {
+          Camera: 'camera',
           SettingsIndex: 'settings',
           SettingsAccount: 'settings/account',
           SettingsNotifications: 'settings/notifications',

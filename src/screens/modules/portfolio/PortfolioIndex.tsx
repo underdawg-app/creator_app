@@ -23,7 +23,7 @@ export default function PortfolioHome() {
   const toast = useStore((s) => s.toast);
 
   return (
-    <ScreenFrame header={<ModuleHeader eyebrow="MODULE · 02" title="PORTFOLIO" />}>
+    <ScreenFrame header={<ModuleHeader title="PORTFOLIO" />}>
       <RNText
         style={styles.title}
         numberOfLines={2}

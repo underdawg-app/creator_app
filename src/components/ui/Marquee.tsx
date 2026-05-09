@@ -34,7 +34,7 @@ export function Marquee({
   speed = 60,
   direction = 'left',
   textStyle,
-  separator = '  ◆  ',
+  separator = '  /  ',
   style,
 }: Props) {
   const x = useSharedValue(0);
@@ -84,7 +84,8 @@ export function Marquee({
         {Array.from({ length: copyCount }).map((_, i) => (
           <RNText
             key={i}
-            style={textStyle}
+            style={[textStyle, { flexShrink: 0 }]}
+            allowFontScaling={false}
             onLayout={i === 0 ? (e) => setCopyW(e.nativeEvent.layout.width) : undefined}
           >
             {content}

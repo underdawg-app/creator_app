@@ -283,48 +283,60 @@ export default function Explore() {
           </ScrollView>
         </View>
 
+        {/* Category grid — BROWSE BY CRAFT */}
+        <View style={styles.section}>
+          <View style={styles.sectionHead}>
+            <RNText style={styles.sectionKicker} maxFontSizeMultiplier={1.15}>
+              — BROWSE BY CRAFT
+            </RNText>
+            <RNText style={styles.sectionCount} maxFontSizeMultiplier={1.15}>
+              {categoriesGrid.length} CRAFTS
+            </RNText>
+          </View>
+          <View style={styles.catGrid}>
+            {categoriesGrid.map((c, i) => (
+              <Tap
+                key={c.key}
+                onPress={() => setQ(c.label.toLowerCase())}
+                burstColor={c.accent}
+                style={{ width: CARD_WIDTH }}
+              >
+                <TiltCard
+                  style={[styles.catCard, { backgroundColor: c.accent }] as any}
+                  maxTilt={4}
+                >
+                  {CATEGORY_IMAGES[c.key] ? (
+                    <CatCardImage source={CATEGORY_IMAGES[c.key]} scrollY={scrollY} index={i} />
+                  ) : null}
+                  <View style={styles.catFoot}>
+                    <RNText
+                      style={styles.catLabel}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.75}
+                      maxFontSizeMultiplier={1.1}
+                    >
+                      {c.label}
+                    </RNText>
+                    <ArrowMark size={14} color={staticPalette.ink} strokeWidth={1.8} />
+                  </View>
+                </TiltCard>
+              </Tap>
+            ))}
+          </View>
+        </View>
+
         {/* ===== PLATFORM MODULES ===== */}
         <View style={styles.section}>
           <View style={styles.sectionHead}>
             <RNText style={styles.sectionKicker} maxFontSizeMultiplier={1.15}>
-              — YOUR WORLD · 4 MODULES
+              — YOUR WORLD · 2 MODULES
             </RNText>
           </View>
           <RNText style={styles.sectionTitle} maxFontSizeMultiplier={1.1}>
             go{' '}
             <RNText style={styles.heroItalic}>further.</RNText>
           </RNText>
-
-          {/* JOB BOARD — full-width dark editorial card */}
-          <Tap
-            style={styles.moduleJobs}
-            onPress={() => router.push('/(modules)/jobs' as any)}
-            burstColor="#FF5A1F"
-            variant="heavy"
-          >
-            <View style={styles.moduleJobsInner}>
-              <View>
-                <RNText style={styles.moduleEyebrow} maxFontSizeMultiplier={1.1}>
-                  MODULE · 07
-                </RNText>
-                <RNText style={styles.moduleJobsTitle} maxFontSizeMultiplier={1.1}>
-                  JOB{'\n'}BOARD.
-                </RNText>
-              </View>
-              <View style={styles.moduleJobsRight}>
-                <RNText style={styles.moduleJobsBig} maxFontSizeMultiplier={1.0}>
-                  47
-                </RNText>
-                <RNText style={styles.moduleJobsSub} maxFontSizeMultiplier={1.1}>
-                  OPEN ROLES
-                </RNText>
-                <View style={styles.moduleJobsArrow}>
-                  <ArrowMark size={18} color={staticPalette.bone} strokeWidth={1.6} />
-                </View>
-              </View>
-            </View>
-            <View style={styles.moduleJobsAccent} />
-          </Tap>
 
           {/* COMMUNITY + LEARNING — side by side */}
           <View style={styles.modulePairRow}>
@@ -335,9 +347,6 @@ export default function Explore() {
               burstColor="#2E5BFF"
               variant="heavy"
             >
-              <RNText style={styles.moduleEyebrowCenter} maxFontSizeMultiplier={1.1}>
-                MODULE · 13
-              </RNText>
               <View style={styles.moduleCommunityIconRow}>
                 {['#4A7DFF', '#2E5BFF', '#1A3FCC'].map((c, i) => (
                   <View key={i} style={[styles.moduleCommunityDot, { backgroundColor: c, marginLeft: i > 0 ? -8 : 0 }]} />
@@ -362,9 +371,6 @@ export default function Explore() {
               burstColor="#D8FF3D"
               variant="heavy"
             >
-              <RNText style={styles.moduleLearningEyebrow} maxFontSizeMultiplier={1.1}>
-                MODULE · 14
-              </RNText>
               <View style={styles.moduleLearningIconWrap}>
                 <Ionicons name="play" size={22} color={staticPalette.acid} />
               </View>
@@ -381,31 +387,6 @@ export default function Explore() {
             </View>
           </View>
 
-          {/* ART MARKET — full-width light gallery card */}
-          <Tap
-            style={styles.moduleArt}
-            onPress={() => router.push('/(modules)/art' as any)}
-            burstColor="#2E5BFF"
-            variant="heavy"
-          >
-            <View style={styles.moduleArtLeft}>
-              <RNText style={styles.moduleArtEyebrow} maxFontSizeMultiplier={1.1}>
-                MODULE · 09
-              </RNText>
-              <RNText style={styles.moduleArtTitle} maxFontSizeMultiplier={1.1}>
-                ART{'\n'}MARKET.
-              </RNText>
-              <RNText style={styles.moduleArtSub} maxFontSizeMultiplier={1.15}>
-                Sell your work. Set your price.{'\n'}Keep what you earn.
-              </RNText>
-            </View>
-            <View style={styles.moduleArtRight}>
-              <View style={styles.moduleArtBadge}>
-                <RNText style={styles.moduleArtBadgeLabel}>SELL</RNText>
-              </View>
-              <ArrowMark size={16} color={staticPalette.ink} strokeWidth={1.6} />
-            </View>
-          </Tap>
         </View>
 
         {/* Challenges row */}
@@ -477,49 +458,6 @@ export default function Explore() {
           </ScrollView>
         </View>
 
-        {/* Category grid */}
-        <View style={styles.section}>
-          <View style={styles.sectionHead}>
-            <RNText style={styles.sectionKicker} maxFontSizeMultiplier={1.15}>
-              — BROWSE BY CRAFT
-            </RNText>
-            <RNText style={styles.sectionCount} maxFontSizeMultiplier={1.15}>
-              {categoriesGrid.length} CRAFTS
-            </RNText>
-          </View>
-          <View style={styles.catGrid}>
-            {categoriesGrid.map((c, i) => (
-              <Tap
-                key={c.key}
-                onPress={() => setQ(c.label.toLowerCase())}
-                burstColor={c.accent}
-                style={{ width: CARD_WIDTH }}
-              >
-                <TiltCard
-                  style={[styles.catCard, { backgroundColor: c.accent }] as any}
-                  maxTilt={4}
-                >
-                  {CATEGORY_IMAGES[c.key] ? (
-                    <CatCardImage source={CATEGORY_IMAGES[c.key]} scrollY={scrollY} index={i} />
-                  ) : null}
-                  <View style={styles.catFoot}>
-                    <RNText
-                      style={styles.catLabel}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.75}
-                      maxFontSizeMultiplier={1.1}
-                    >
-                      {c.label}
-                    </RNText>
-                    <ArrowMark size={14} color={staticPalette.ink} strokeWidth={1.8} />
-                  </View>
-                </TiltCard>
-              </Tap>
-            ))}
-          </View>
-        </View>
-
         <View style={styles.strip}>
           <View style={styles.hairline} />
           <Marquee
@@ -534,76 +472,6 @@ export default function Explore() {
             speed={32}
           />
           <View style={styles.hairline} />
-        </View>
-
-        {/* Rising list */}
-        <View style={styles.section}>
-          <View style={styles.sectionHead}>
-            <RNText style={styles.sectionKicker} maxFontSizeMultiplier={1.15}>
-              — RISING CREATORS
-            </RNText>
-            <RNText style={styles.sectionCount} maxFontSizeMultiplier={1.15}>
-              {filtered.length} {filtered.length === 1 ? 'MATCH' : 'MATCHES'}
-            </RNText>
-          </View>
-          <RNText
-            style={styles.sectionTitle}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.7}
-            maxFontSizeMultiplier={1.1}
-          >
-            the ones
-            <RNText style={styles.heroItalic}> nobody signed.</RNText>
-          </RNText>
-
-          <View style={styles.risingList}>
-            {filtered.length === 0 ? (
-              <View style={styles.empty}>
-                <RNText style={styles.emptyText} maxFontSizeMultiplier={1.2}>
-                  nothing matches {q ? `“${q}”` : 'this filter'}. try a
-                  different query.
-                </RNText>
-              </View>
-            ) : (
-              filtered.map((r, i) => (
-                <Tap
-                  key={r.handle}
-                  style={styles.risingRow}
-                  burstColor={palette.acid}
-                  onPress={() =>
-                    router.push(
-                      `/(modules)/portfolio/public-preview?handle=${r.handle}` as any
-                    )
-                  }
-                >
-                  <RNText style={styles.risingIdx} maxFontSizeMultiplier={1.1}>
-                    {String(i + 1).padStart(2, '0')}
-                  </RNText>
-                  <View style={styles.risingBody}>
-                    <RNText
-                      style={styles.risingName}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.8}
-                      maxFontSizeMultiplier={1.1}
-                    >
-                      {r.name}
-                    </RNText>
-                    <RNText
-                      style={styles.risingMeta}
-                      numberOfLines={1}
-                      maxFontSizeMultiplier={1.15}
-                    >
-                      {r.handle} · {r.type} · {r.city}
-                    </RNText>
-                  </View>
-                  <BadgePill label={String(r.rep)} accent={palette.acid} />
-                  <ArrowMark size={16} color={palette.ink} strokeWidth={1.6} />
-                </Tap>
-              ))
-            )}
-          </View>
         </View>
 
         {/* Discovery grid — Instagram-style infinite feed */}
@@ -680,7 +548,7 @@ export default function Explore() {
                 <View style={styles.kickerRow}>
                   <Asterisk size={11} color={palette.ink} strokeWidth={1.4} />
                   <RNText style={styles.kicker} maxFontSizeMultiplier={1.15}>
-                    EXPLORE · MODULE 02
+                    BROWSE · CRAFT
                   </RNText>
                 </View>
                 <Tap
@@ -1007,9 +875,9 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     gap: GUTTER,
   },
   catCard: {
-    height: 150,
-    borderRadius: 20,
-    padding: 14,
+    height: 80,
+    borderRadius: 14,
+    padding: 10,
     overflow: 'hidden',
     position: 'relative',
     justifyContent: 'flex-end',
@@ -1022,9 +890,9 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   catLabel: {
     fontFamily: fonts.displayBold,
-    fontSize: 22,
-    letterSpacing: -0.9,
-    lineHeight: 24,
+    fontSize: 16,
+    letterSpacing: -0.5,
+    lineHeight: 18,
     color: staticPalette.ink,
     flexShrink: 1,
   },
@@ -1153,51 +1021,6 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     letterSpacing: 1,
   },
 
-  /* Job Board */
-  moduleJobs: {
-    marginTop: 20,
-    backgroundColor: staticPalette.ink,
-    borderRadius: 22,
-    padding: 20,
-    overflow: 'hidden',
-  },
-  moduleJobsInner: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-  },
-  moduleJobsTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 52,
-    lineHeight: 48,
-    letterSpacing: -2.4,
-    color: staticPalette.bone,
-    marginTop: 10,
-  },
-  moduleJobsRight: { alignItems: 'flex-end', gap: 2 },
-  moduleJobsBig: {
-    fontFamily: fonts.displayBold,
-    fontSize: 64,
-    lineHeight: 60,
-    letterSpacing: -3,
-    color: '#FF5A1F',
-  },
-  moduleJobsSub: {
-    ...T.micro,
-    color: staticPalette.bone,
-    opacity: 0.55,
-    textAlign: 'right',
-  },
-  moduleJobsArrow: { marginTop: 14 },
-  moduleJobsAccent: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 3,
-    backgroundColor: '#FF5A1F',
-  },
-
   /* Community + Learning pair */
   modulePairRow: {
     flexDirection: 'row',
@@ -1299,53 +1122,4 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     marginTop: 8,
   },
 
-  /* Art Market */
-  moduleArt: {
-    marginTop: GUTTER,
-    backgroundColor: palette.paper,
-    borderRadius: 22,
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: palette.line,
-  },
-  moduleArtLeft: { flex: 1 },
-  moduleArtEyebrow: {
-    ...T.micro,
-    color: palette.ink,
-    opacity: 0.5,
-    letterSpacing: 1,
-  },
-  moduleArtTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 44,
-    lineHeight: 42,
-    letterSpacing: -2,
-    color: palette.ink,
-    marginTop: 8,
-  },
-  moduleArtSub: {
-    ...T.body,
-    color: palette.ink,
-    opacity: 0.62,
-    marginTop: 10,
-    maxWidth: 200,
-  },
-  moduleArtRight: { alignItems: 'center', gap: 14, paddingLeft: 12 },
-  moduleArtBadge: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#2E5BFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  moduleArtBadgeLabel: {
-    fontFamily: fonts.displayBold,
-    fontSize: 10,
-    letterSpacing: 1.4,
-    color: staticPalette.bone,
-  },
 });

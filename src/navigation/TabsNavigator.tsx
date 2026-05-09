@@ -4,9 +4,10 @@ import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/b
 import { Ionicons } from '@/icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import * as Haptics from '@/haptics';
 import { palette as staticPalette } from '@/theme/colors';
@@ -17,16 +18,16 @@ import Explore from '@/screens/tabs/Explore';
 import Create from '@/screens/tabs/Create';
 import Inbox from '@/screens/tabs/Inbox';
 import Profile from '@/screens/tabs/Profile';
+import JobsIndex from '@/screens/modules/jobs/JobsIndex';
 
 const Tab = createBottomTabNavigator();
 
-type ItemKey = 'Feed' | 'Explore' | 'Create' | 'Inbox' | 'Profile';
+type ItemKey = 'Feed' | 'Explore' | 'Jobs' | 'Profile';
 
 const items: { key: ItemKey; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
   { key: 'Feed', label: 'FEED', icon: 'home' },
   { key: 'Explore', label: 'EXPLORE', icon: 'search' },
-  { key: 'Create', label: 'CREATE', icon: 'add' },
-  { key: 'Inbox', label: 'INBOX', icon: 'mail' },
+  { key: 'Jobs', label: 'JOBS', icon: 'briefcase' },
   { key: 'Profile', label: 'YOU', icon: 'person' },
 ];
 
@@ -35,6 +36,7 @@ const renderTabBar = (props: BottomTabBarProps) => <CustomTabBar {...props} />;
 export default function TabsNavigator() {
   return (
     <Tab.Navigator
+      initialRouteName="Jobs"
       screenOptions={{
         headerShown: false,
         // Don't mount a tab's screen until the user taps it for the first
@@ -50,9 +52,12 @@ export default function TabsNavigator() {
     >
       <Tab.Screen name="Feed" component={Feed} />
       <Tab.Screen name="Explore" component={Explore} />
-      <Tab.Screen name="Create" component={Create} />
-      <Tab.Screen name="Inbox" component={Inbox} />
+      <Tab.Screen name="Jobs" component={JobsIndex} />
       <Tab.Screen name="Profile" component={Profile} />
+      {/* Create is reachable from the Feed header. Hidden tab. */}
+      <Tab.Screen name="Create" component={Create} options={{ tabBarButton: () => null }} />
+      {/* Inbox is reachable from the Feed header but no longer shown as a tab. */}
+      <Tab.Screen name="Inbox" component={Inbox} options={{ tabBarButton: () => null }} />
     </Tab.Navigator>
   );
 }
@@ -88,14 +93,12 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
             const item = items.find((it) => it.key === (route.name as ItemKey));
             if (!item) return null;
             const focused = state.index === i;
-            const isCreate = item.key === 'Create';
             return (
               <TabButton
                 key={route.key}
                 label={item.label}
                 icon={item.icon}
                 focused={focused}
-                emphasized={isCreate}
                 onPress={handlers[route.key]}
               />
             );
@@ -123,7 +126,7 @@ const TabButton = React.memo(function TabButton({
   const styles = useThemedPaletteStyles(makeStyles);
   const f = useSharedValue(focused ? 1 : 0);
   React.useEffect(() => {
-    f.value = withSpring(focused ? 1 : 0, { damping: 14, stiffness: 260 });
+    f.value = withTiming(focused ? 1 : 0, { duration: 180, easing: Easing.out(Easing.quad) });
   }, [focused]);
 
   const wrap = useAnimatedStyle(() => ({

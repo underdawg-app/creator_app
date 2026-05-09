@@ -3,7 +3,6 @@ import { StyleSheet, Text as RNText, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
   Easing,
 } from 'react-native-reanimated';
@@ -50,7 +49,7 @@ function ToastItem({
   const p = useSharedValue(0);
 
   useEffect(() => {
-    p.value = withSpring(1, { damping: 16, stiffness: 220 });
+    p.value = withTiming(1, { duration: 220, easing: Easing.out(Easing.cubic) });
     const out = setTimeout(() => {
       p.value = withTiming(0, { duration: 260, easing: Easing.out(Easing.cubic) }, (done) => {
         if (done) {

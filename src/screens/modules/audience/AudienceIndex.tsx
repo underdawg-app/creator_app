@@ -23,7 +23,7 @@ export default function AudienceHome() {
   const owned = subscribers.length;
 
   return (
-    <ScreenFrame header={<ModuleHeader eyebrow="MODULE · 05" title="AUDIENCE" />}>
+    <ScreenFrame header={<ModuleHeader title="AUDIENCE" />}>
       <RNText
         style={styles.title}
         numberOfLines={2}

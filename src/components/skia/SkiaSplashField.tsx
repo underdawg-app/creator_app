@@ -109,6 +109,10 @@ function easeOutCubic(t: number) {
 }
 
 export function SkiaSplashField({ width, height, phase, pulse }: Props) {
+  // Disabled app-wide — animated splash backplate was reading as a glitch
+  // on device. Exports kept so call sites compile unchanged.
+  return null;
+  // eslint-disable-next-line no-unreachable
   const cx = width / 2;
   const cy = height / 2;
   const base = Math.min(width, height);

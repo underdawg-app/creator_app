@@ -8,18 +8,18 @@ import { ScreenFrame } from '@/components/ui/ScreenFrame';
 import { ModuleHeader } from '@/components/ui/ModuleHeader';
 import { Section } from '@/components/ui/Section';
 import { ListCell } from '@/components/ui/ListCell';
-import { MagneticButton } from '@/components/ui/MagneticButton';
-import { useStore, type ThemePreference } from '@/store';
+import { useStore } from '@/store';
 
 export default function SettingsHome() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
   const { preference, setPreference } = useTheme();
   const resetDemo = useStore((s) => s.resetDemo);
+  const logout = useStore((s) => s.logout);
   const toast = useStore((s) => s.toast);
 
   return (
-    <ScreenFrame header={<ModuleHeader eyebrow="MODULE · 15" title="SETTINGS" />}>
+    <ScreenFrame header={<ModuleHeader title="SETTINGS" />}>
       <RNText
         style={styles.title}
         numberOfLines={2}
@@ -127,17 +127,27 @@ export default function SettingsHome() {
         />
       </Section>
 
-      <View style={{ marginTop: 30, alignItems: 'flex-start' }}>
-        <MagneticButton
-          label="RESET DEMO"
-          background={palette.ember}
-          foreground={staticPalette.ink}
+      <Section eyebrow="ACCOUNT ACTIONS">
+        <ListCell
+          icon="log-out-outline"
+          title="Log out"
+          subtitle="Sign back in any time"
+          onPress={() => {
+            logout();
+            toast('Logged out.', 'default');
+            router.replace('/(onboarding)/welcome');
+          }}
+        />
+        <ListCell
+          icon="refresh-outline"
+          title="Reset demo data"
+          subtitle="Clear local content & settings"
           onPress={() => {
             resetDemo();
             toast('Demo reset to factory state.', 'success');
           }}
         />
-      </View>
+      </Section>
     </ScreenFrame>
   );
 }

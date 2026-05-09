@@ -23,7 +23,7 @@ export default function CommunityHome() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
   return (
-    <ScreenFrame header={<ModuleHeader eyebrow="MODULE · 13" title="COMMUNITY" />}>
+    <ScreenFrame header={<ModuleHeader title="COMMUNITY" />}>
       <RNText
         style={styles.title}
         numberOfLines={2}

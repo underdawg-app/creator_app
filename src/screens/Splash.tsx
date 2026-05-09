@@ -19,6 +19,8 @@ import { AnimatedSignet } from '@/components/svg/AnimatedSignet';
 import { RuleDot, Asterisk } from '@/components/svg/Marks';
 import { prefetchImages } from '@/components/ui/Image';
 import { feedPosts, profileMock, userFeed } from '@/data/mock';
+import { useStore } from '@/store';
+import { getAuth } from '@/lib/firebase';
 
 const { width, height } = Dimensions.get('window');
 
@@ -82,7 +84,40 @@ export default function Splash() {
     // already on disk, so the first scroll has zero network wait.
     prewarmImageCache();
 
-    const t = setTimeout(() => router.replace('/(onboarding)/welcome'), SPLASH_MS);
+    // Route based on:
+    //   1. Persisted Zustand state (hydrated + onboarded flags)
+    //   2. Firebase auth currentUser (signed-in / signed-out)
+    //
+    // Truth table:
+    //   - !signedIn        → Welcome (run full onboarding incl. auth)
+    //   - signedIn + !onboarded → Auth screen (pick up where they left off)
+    //   - signedIn + onboarded → Tabs
+    //
+    // Wait for AsyncStorage hydration before reading; Firebase native SDK
+    // hydrates synchronously from disk so currentUser is reliable here.
+    const route = () => {
+      const { hydrated, onboarded } = useStore.getState();
+      if (!hydrated) {
+        setTimeout(route, 80);
+        return;
+      }
+      let signedIn = false;
+      try {
+        signedIn = !!getAuth().currentUser;
+      } catch {
+        // Firebase native module unavailable (e.g. during dev without
+        // GoogleService-Info.plist). Fall back to onboarded flag alone.
+        signedIn = false;
+      }
+      if (!signedIn) {
+        router.replace('/(onboarding)/welcome');
+      } else if (!onboarded) {
+        router.replace('/(onboarding)/user-type');
+      } else {
+        router.replace('/(tabs)');
+      }
+    };
+    const t = setTimeout(route, SPLASH_MS);
     return () => clearTimeout(t);
   }, []);
 

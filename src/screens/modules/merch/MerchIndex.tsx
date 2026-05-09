@@ -23,7 +23,7 @@ export default function MerchHome() {
   const revenue = products.reduce((a, p) => a + p.sold * (p.baseCost + p.margin), 0);
 
   return (
-    <ScreenFrame header={<ModuleHeader eyebrow="MODULE · 08" title="MERCH STUDIO" />}>
+    <ScreenFrame header={<ModuleHeader title="MERCH STUDIO" />}>
       <RNText
         style={styles.title}
         numberOfLines={2}

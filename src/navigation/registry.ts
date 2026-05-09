@@ -26,14 +26,18 @@ const STATIC: Record<string, ParseResult> = {
   '/(tabs)/explore': { stack: 'Root', screen: 'Tabs', params: { screen: 'Explore' } as never, crossStack: true },
   '/(tabs)/create': { stack: 'Root', screen: 'Tabs', params: { screen: 'Create' } as never, crossStack: true },
   '/(tabs)/inbox': { stack: 'Root', screen: 'Tabs', params: { screen: 'Inbox' } as never, crossStack: true },
+  '/(tabs)/jobs': { stack: 'Root', screen: 'Tabs', params: { screen: 'Jobs' } as never, crossStack: true },
   '/(tabs)/profile': { stack: 'Root', screen: 'Tabs', params: { screen: 'Profile' } as never, crossStack: true },
 
   '/(onboarding)/welcome': { stack: 'Onboarding', screen: 'Welcome' },
   '/(onboarding)/auth': { stack: 'Onboarding', screen: 'Auth' },
+  '/(onboarding)/otp': { stack: 'Onboarding', screen: 'Otp' },
   '/(onboarding)/user-type': { stack: 'Onboarding', screen: 'UserType' },
   '/(onboarding)/creator-type': { stack: 'Onboarding', screen: 'CreatorType' },
   '/(onboarding)/identity': { stack: 'Onboarding', screen: 'Identity' },
   '/(onboarding)/complete': { stack: 'Onboarding', screen: 'Complete' },
+
+  '/(modules)/camera': { stack: 'Modules', screen: 'Camera' },
 
   '/(modules)/settings': { stack: 'Modules', screen: 'SettingsIndex' },
   '/(modules)/settings/account': { stack: 'Modules', screen: 'SettingsAccount' },

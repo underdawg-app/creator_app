@@ -38,6 +38,8 @@ type Profile = {
   niches: string[];
   openTo: string[];
   reputation: number;
+  uid: string | null;
+  phone: string | null;
 };
 
 type ContentPost = {
@@ -133,6 +135,12 @@ type StoreState = {
   // messages
   threads: Thread[];
   sendMessage: (threadId: string, body: string) => void;
+  markThreadRead: (threadId: string) => void;
+  setTyping: (threadId: string, on: boolean) => void;
+  receiveMessage: (threadId: string, body: string) => void;
+  archiveThread: (threadId: string) => void;
+  unarchiveThread: (threadId: string) => void;
+  deleteThread: (threadId: string) => void;
 
   // community
   groups: typeof groupsSeed;
@@ -167,6 +175,9 @@ type StoreState = {
 
   hydrated: boolean;
   markHydrated: () => void;
+  onboarded: boolean;
+  setOnboarded: (v: boolean) => void;
+  logout: () => void;
   resetDemo: () => void;
 };
 
@@ -183,6 +194,8 @@ const initialProfile: Profile = {
   niches: [...profileMock.niches],
   openTo: ['BRAND DEALS', 'COMMISSIONS', 'COLLABS'],
   reputation: profileMock.stats.reputation,
+  uid: null,
+  phone: null,
 };
 
 const initialLikes: Record<string, boolean> = {};
@@ -380,6 +393,48 @@ export const useStore = create<StoreState>()(
               : t
           ),
         })),
+      markThreadRead: (threadId) =>
+        set((s) => ({
+          threads: s.threads.map((t) =>
+            t.id === threadId ? { ...t, unread: 0 } : t,
+          ),
+        })),
+      setTyping: (threadId, on) =>
+        set((s) => ({
+          threads: s.threads.map((t) =>
+            t.id === threadId ? { ...t, typing: on } : t,
+          ),
+        })),
+      receiveMessage: (threadId, body) =>
+        set((s) => ({
+          threads: s.threads.map((t) =>
+            t.id === threadId
+              ? {
+                  ...t,
+                  preview: body,
+                  updatedAgo: 'now',
+                  typing: false,
+                  messages: [...t.messages, { from: 'them', body, ts: 'now' }],
+                }
+              : t,
+          ),
+        })),
+      archiveThread: (threadId) =>
+        set((s) => ({
+          threads: s.threads.map((t) =>
+            t.id === threadId ? { ...t, archived: true } : t,
+          ),
+        })),
+      unarchiveThread: (threadId) =>
+        set((s) => ({
+          threads: s.threads.map((t) =>
+            t.id === threadId ? { ...t, archived: false } : t,
+          ),
+        })),
+      deleteThread: (threadId) =>
+        set((s) => ({
+          threads: s.threads.filter((t) => t.id !== threadId),
+        })),
 
       groups: groupsSeed.map((g) => ({ ...g })),
       toggleGroup: (id) =>
@@ -438,6 +493,21 @@ export const useStore = create<StoreState>()(
 
       hydrated: false,
       markHydrated: () => set({ hydrated: true }),
+      onboarded: false,
+      setOnboarded: (v) => set({ onboarded: v }),
+      logout: () => {
+        // Fire-and-forget Firebase sign-out so the next launch lands on
+        // Welcome. Wrapped in a require()/try so the store still works in
+        // tests / environments where Firebase isn't installed.
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          const auth = require('@react-native-firebase/auth').default;
+          auth().signOut().catch(() => {});
+        } catch {
+          // No-op: Firebase not available in this environment.
+        }
+        set({ onboarded: false, profile: initialProfile });
+      },
       resetDemo: () => {
         set({
           profile: initialProfile,
@@ -493,6 +563,7 @@ export const useStore = create<StoreState>()(
         lessonProgress: s.lessonProgress,
         settings: s.settings,
         themePreference: s.themePreference,
+        onboarded: s.onboarded,
       }),
       onRehydrateStorage: () => (state) => {
         state?.markHydrated();

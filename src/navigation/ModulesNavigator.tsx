@@ -39,6 +39,7 @@ import ChallengesIndex from '@/screens/modules/community/challenges/ChallengesIn
 import ChallengeDetail from '@/screens/modules/community/challenges/ChallengeDetail';
 
 import InboxThread from '@/screens/modules/inbox/InboxThread';
+import CameraScreen from '@/screens/modules/camera/Camera';
 
 import PortfolioIndex from '@/screens/modules/portfolio/PortfolioIndex';
 import PortfolioEdit from '@/screens/modules/portfolio/PortfolioEdit';
@@ -121,7 +122,25 @@ export default function ModulesNavigator() {
       <Stack.Screen name="ChallengesIndex" component={ChallengesIndex} />
       <Stack.Screen name="ChallengeDetail" component={ChallengeDetail} />
 
-      <Stack.Screen name="InboxThread" component={InboxThread} />
+      <Stack.Screen
+        name="InboxThread"
+        component={InboxThread}
+        options={{
+          animation: 'slide_from_right',
+          animationDuration: IS_ANDROID ? 220 : 300,
+          contentStyle: { backgroundColor: '#0A0A0A' },
+        }}
+      />
+
+      <Stack.Screen
+        name="Camera"
+        component={CameraScreen}
+        options={{
+          animation: 'slide_from_bottom',
+          animationDuration: IS_ANDROID ? 220 : 320,
+          contentStyle: { backgroundColor: '#0A0A0A' },
+        }}
+      />
 
       <Stack.Screen name="PortfolioIndex" component={PortfolioIndex} />
       <Stack.Screen name="PortfolioEdit" component={PortfolioEdit} />

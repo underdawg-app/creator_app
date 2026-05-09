@@ -32,7 +32,14 @@ export default function RootNavigator() {
       <Stack.Screen name="Splash" component={Splash} />
       <Stack.Screen name="Onboarding" component={OnboardingNavigator} />
       <Stack.Screen name="Tabs" component={TabsNavigator} />
-      <Stack.Screen name="Modules" component={ModulesNavigator} />
+      <Stack.Screen
+        name="Modules"
+        component={ModulesNavigator}
+        options={{
+          animation: 'slide_from_right',
+          animationDuration: IS_ANDROID ? 220 : 300,
+        }}
+      />
     </Stack.Navigator>
   );
 }

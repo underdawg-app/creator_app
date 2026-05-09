@@ -18,7 +18,7 @@ export default function LearningHome() {
   const progress = useStore((s) => s.lessonProgress);
 
   return (
-    <ScreenFrame header={<ModuleHeader eyebrow="MODULE · 14" title="LEARNING" />}>
+    <ScreenFrame header={<ModuleHeader title="LEARNING" />}>
       <RNText
         style={styles.title}
         numberOfLines={2}

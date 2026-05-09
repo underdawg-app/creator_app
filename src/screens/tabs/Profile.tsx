@@ -5,6 +5,7 @@ import {
   Text as RNText,
   Dimensions,
   Platform,
+  ScrollView,
 } from 'react-native';
 
 const IS_ANDROID = Platform.OS === 'android';
@@ -143,19 +144,10 @@ export default function Profile() {
                   style={styles.bigName}
                   numberOfLines={1}
                   adjustsFontSizeToFit
-                  minimumFontScale={0.7}
+                  minimumFontScale={0.65}
                   maxFontSizeMultiplier={1.1}
                 >
-                  {firstName}.
-                </RNText>
-                <RNText
-                  style={styles.bigNameAccent}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.7}
-                  maxFontSizeMultiplier={1.1}
-                >
-                  {lastName}.
+                  {firstName} <RNText style={styles.bigNameAccent}>{lastName}</RNText>
                 </RNText>
                 <RNText style={styles.handleText} maxFontSizeMultiplier={1.1}>
                   {profile.handle}
@@ -272,6 +264,9 @@ export default function Profile() {
           <SkiaGrain width={width} height={620} intensity={0.08} tint={[1, 1, 1, 0.16]} />
         </View>
 
+        {/* ===== PROFILE SETUP STRIP ===== */}
+        <ProfileSetupStrip />
+
         {/* ===== Continuous moving marquee (single strip) ===== */}
         <View style={styles.loopStrip}>
           <Marquee
@@ -287,7 +282,7 @@ export default function Profile() {
             direction="left"
             separator="   ·   "
             textStyle={loopTextStyle}
-            style={{ height: LOOP_HEIGHT, width: width, backgroundColor: palette.ink }}
+            style={{ height: LOOP_HEIGHT, width: width, backgroundColor: staticPalette.ink }}
           />
         </View>
 
@@ -601,6 +596,197 @@ function StatDivider() {
   return <View style={styles.statDivider} />;
 }
 
+/* -----------------------------------------------------------------------
+ * Profile setup — Instagram-style stepped completion strip
+ * --------------------------------------------------------------------- */
+
+type SetupStep = {
+  key: string;
+  title: string;
+  sub: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  accent: string;
+  route: string;
+  done: boolean;
+};
+
+function ProfileSetupStrip() {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  const profile = useStore((s) => s.profile);
+  const following = useStore((s) => s.following);
+  const followingCount = Object.values(following).filter(Boolean).length;
+
+  const steps: SetupStep[] = [
+    {
+      key: 'photo',
+      title: 'ADD PHOTO',
+      sub: 'show your face',
+      icon: 'camera-outline',
+      accent: palette.acid,
+      route: '/(modules)/portfolio/edit',
+      done: !!profileMock.avatar,
+    },
+    {
+      key: 'bio',
+      title: 'WRITE BIO',
+      sub: 'one line on you',
+      icon: 'create-outline',
+      accent: palette.electric,
+      route: '/(modules)/portfolio/edit',
+      done: !!profile.bio && profile.bio.trim().length > 0,
+    },
+    {
+      key: 'craft',
+      title: 'PICK CRAFT',
+      sub: 'what you make',
+      icon: 'sparkles-outline',
+      accent: palette.blush,
+      route: '/(onboarding)/creator-type',
+      done: !!profile.type && profile.type.trim().length > 0,
+    },
+    {
+      key: 'location',
+      title: 'LOCATION',
+      sub: 'where you are',
+      icon: 'location-outline',
+      accent: palette.ember,
+      route: '/(modules)/portfolio/edit',
+      done: !!profile.location && profile.location.trim().length > 0,
+    },
+    {
+      key: 'follow',
+      title: 'FOLLOW 5',
+      sub: `${followingCount} so far`,
+      icon: 'person-add-outline',
+      accent: palette.acid,
+      route: '/(tabs)/explore',
+      done: followingCount >= 5,
+    },
+    {
+      key: 'socials',
+      title: 'CONNECT',
+      sub: 'IG · TT · SP',
+      icon: 'link-outline',
+      accent: palette.electric,
+      route: '/(modules)/audience',
+      done: false,
+    },
+    {
+      key: 'verified',
+      title: 'GET VERIFIED',
+      sub: 'claim the tick',
+      icon: 'checkmark-circle-outline',
+      accent: palette.electric,
+      route: '/(modules)/reputation/verification',
+      done: false,
+    },
+  ];
+
+  const doneCount = steps.filter((s) => s.done).length;
+  const total = steps.length;
+  const pct = Math.round((doneCount / total) * 100);
+
+  if (doneCount === total) return null;
+
+  return (
+    <View style={styles.setupWrap}>
+      <View style={styles.setupHead}>
+        <View style={{ flex: 1 }}>
+          <RNText style={styles.setupKicker} maxFontSizeMultiplier={1.15}>
+            COMPLETE YOUR PROFILE
+          </RNText>
+          <RNText style={styles.setupTitle} maxFontSizeMultiplier={1.1}>
+            <RNText style={styles.setupTitleAccent}>{doneCount}</RNText>
+            <RNText> of {total} done.</RNText>
+          </RNText>
+        </View>
+        <View style={styles.setupPctBadge}>
+          <RNText style={styles.setupPctText}>{pct}%</RNText>
+        </View>
+      </View>
+
+      <View style={styles.setupBar}>
+        <View
+          style={[
+            styles.setupBarFill,
+            { width: `${pct}%`, backgroundColor: palette.acid },
+          ]}
+        />
+      </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.setupScrollContent}
+        style={styles.setupScroll}
+      >
+        {steps.map((s) => (
+          <SetupCard key={s.key} step={s} />
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
+function SetupCard({ step }: { step: SetupStep }) {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  const c = step.done ? null : step;
+
+  return (
+    <Tap
+      onPress={() => router.push(step.route as any)}
+      burstColor={step.accent}
+      style={[
+        styles.setupCard,
+        step.done
+          ? { backgroundColor: palette.paper, borderColor: palette.line }
+          : { backgroundColor: step.accent, borderColor: step.accent },
+      ]}
+    >
+      <View
+        style={[
+          styles.setupIcon,
+          step.done
+            ? { backgroundColor: palette.acid }
+            : { backgroundColor: 'rgba(10,10,10,0.12)' },
+        ]}
+      >
+        <Ionicons
+          name={step.done ? 'checkmark' : step.icon}
+          size={18}
+          color={staticPalette.ink}
+        />
+      </View>
+      <RNText
+        style={[
+          styles.setupCardTitle,
+          { color: step.done ? palette.ink : staticPalette.ink },
+        ]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.8}
+      >
+        {step.title}
+      </RNText>
+      <RNText
+        style={[
+          styles.setupCardSub,
+          {
+            color: step.done
+              ? palette.mute
+              : 'rgba(10,10,10,0.65)',
+          },
+        ]}
+        numberOfLines={1}
+      >
+        {step.done ? 'done' : step.sub}
+      </RNText>
+    </Tap>
+  );
+}
+
 /* Tiny inline bar-spark used inside the Analytics wide card */
 function MiniSpark() {
   const heights = [8, 14, 10, 18, 12, 22, 16];
@@ -682,10 +868,12 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     borderColor: staticPalette.acid,
     padding: 3,
     backgroundColor: staticPalette.ink,
+    overflow: 'hidden',
   },
   avatar: {
     flex: 1,
     borderRadius: 44,
+    overflow: 'hidden',
     backgroundColor: 'rgba(242,239,230,0.12)',
   },
   avatarStatusDot: {
@@ -727,21 +915,30 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   bigName: {
     fontFamily: fonts.displayBold,
-    fontSize: 52,
-    lineHeight: 52,
+    fontSize: 32,
+    lineHeight: 34,
     color: staticPalette.bone,
-    letterSpacing: -2.2,
+    letterSpacing: -1.2,
+    textAlign: 'center',
   },
   bigNameAccent: {
     fontFamily: fonts.displayBold,
-    fontSize: 52,
-    lineHeight: 52,
+    fontSize: 32,
+    lineHeight: 34,
     color: staticPalette.acid,
-    letterSpacing: -2.2,
+    letterSpacing: -1.2,
   },
 
-  metaRow: { marginTop: 16, alignItems: 'center' },
-  metaText: { ...T.label, color: staticPalette.bone, opacity: 0.8, textAlign: 'center' },
+  metaRow: { marginTop: 14, alignItems: 'center' },
+  metaText: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 14,
+    lineHeight: 18,
+    letterSpacing: 1.2,
+    color: staticPalette.bone,
+    opacity: 0.88,
+    textAlign: 'center',
+  },
 
   pillRow: {
     flexDirection: 'row',
@@ -870,11 +1067,97 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   ctaGhostLabel: { ...T.button, fontSize: 12, color: staticPalette.bone },
 
+  /* ---------- Profile setup strip ---------- */
+  setupWrap: {
+    paddingHorizontal: SCREEN_PADDING,
+    paddingTop: 10,
+    paddingBottom: 14,
+    marginTop: -6,
+    backgroundColor: palette.bone,
+  },
+  setupHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  setupKicker: {
+    ...T.label,
+    color: palette.ink,
+    opacity: 0.55,
+    letterSpacing: 1.6,
+  },
+  setupTitle: {
+    fontFamily: fonts.displayBold,
+    fontSize: 22,
+    lineHeight: 24,
+    letterSpacing: -0.6,
+    color: palette.ink,
+    marginTop: 4,
+  },
+  setupTitleAccent: {
+    fontFamily: fonts.editorialItalic,
+    color: palette.ember,
+  },
+  setupPctBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: palette.acid,
+  },
+  setupPctText: {
+    fontFamily: fonts.displayBold,
+    fontSize: 12,
+    color: staticPalette.ink,
+    letterSpacing: -0.2,
+  },
+  setupBar: {
+    marginTop: 12,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: palette.line,
+    overflow: 'hidden',
+  },
+  setupBarFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  setupScroll: { marginTop: 14, marginHorizontal: -SCREEN_PADDING },
+  setupScrollContent: {
+    paddingHorizontal: SCREEN_PADDING,
+    gap: 10,
+  },
+  setupCard: {
+    width: 132,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    gap: 8,
+  },
+  setupIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  setupCardTitle: {
+    fontFamily: fonts.displayBold,
+    fontSize: 14,
+    lineHeight: 16,
+    letterSpacing: -0.3,
+  },
+  setupCardSub: {
+    ...T.label,
+    fontSize: 10,
+    letterSpacing: 1.2,
+  },
+
   /* ---------- Continuous marquee strip ---------- */
   loopStrip: {
     height: LOOP_HEIGHT,
     overflow: 'hidden',
-    backgroundColor: palette.ink,
+    backgroundColor: staticPalette.ink,
   },
 
   /* ---------- Personal feed section ---------- */

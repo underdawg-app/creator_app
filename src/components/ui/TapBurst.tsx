@@ -4,7 +4,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  withSpring,
   Easing,
 } from 'react-native-reanimated';
 import { palette as staticPalette } from '@/theme/colors';
@@ -121,7 +120,7 @@ function TapBurstAnimated({
       burstY.value = locationY;
       burstP.value = 0;
       burstP.value = withTiming(1, { duration: 520, easing: Easing.out(Easing.cubic) });
-      s.value = withSpring(scale, { damping: 14, stiffness: 320 });
+      s.value = withTiming(scale, { duration: 90, easing: Easing.out(Easing.quad) });
       onPressIn?.(e);
     },
     [scale, onPressIn]
@@ -129,7 +128,7 @@ function TapBurstAnimated({
 
   const handleOut = useCallback(
     (e: any) => {
-      s.value = withSpring(1, { damping: 12, stiffness: 240 });
+      s.value = withTiming(1, { duration: 140, easing: Easing.out(Easing.quad) });
       onPressOut?.(e);
     },
     [onPressOut]

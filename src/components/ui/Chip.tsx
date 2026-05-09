@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, Text as RNText } from 'react-native';
 import Animated, {
+  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from 'react-native-reanimated';
 import { palette as staticPalette } from '@/theme/colors';
 import {
@@ -30,7 +31,7 @@ export function Chip({ label, active, onPress, accent = staticPalette.acid, inve
   const p = useSharedValue(active ? 1 : 0);
 
   useEffect(() => {
-    p.value = withSpring(active ? 1 : 0, { damping: 16, stiffness: 240 });
+    p.value = withTiming(active ? 1 : 0, { duration: 160, easing: Easing.out(Easing.quad) });
   }, [active]);
 
   // Inactive chips keep a transparent fill so they don't collide with the

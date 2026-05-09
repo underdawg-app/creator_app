@@ -45,6 +45,10 @@ type Props = {
  * Android gives back that frame budget for actual UI.
  */
 export function SkiaWaveField(props: Props) {
+  // Disabled app-wide — animated wave lines were reading as a glitching
+  // background on device. Exports kept so call sites compile unchanged.
+  return null;
+  // eslint-disable-next-line no-unreachable
   if (IS_ANDROID) {
     return <View pointerEvents="none" style={{ width: props.width, height: props.height }} />;
   }

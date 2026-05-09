@@ -1,17 +1,21 @@
-// Fonts are bundled at build time via react-native.config.js + react-native-asset.
-// On Android the fontFamily string resolves to the .ttf filename (minus extension)
-// in android/app/src/main/assets/fonts/. On iOS the .ttf files are added to the
-// Xcode project and listed in Info.plist UIAppFonts.
+import { Platform } from 'react-native';
+
+// Android resolves fontFamily to the .ttf filename (minus extension) in
+// android/app/src/main/assets/fonts/. iOS resolves it to the font's
+// embedded PostScript name. Google Fonts ships the two using different
+// conventions, so we branch.
+const f = (ios: string, android: string) => (Platform.OS === 'ios' ? ios : android);
+
 export const fonts = {
-  display: 'Anton_400Regular',
-  displayBold: 'Archivo_900Black',
-  displayBoldItalic: 'Archivo_900Black_Italic',
-  displayHeavy: 'Archivo_800ExtraBold',
-  editorial: 'InstrumentSerif_400Regular',
-  editorialItalic: 'InstrumentSerif_400Regular_Italic',
-  body: 'SpaceGrotesk_400Regular',
-  bodyMedium: 'SpaceGrotesk_500Medium',
-  bodyBold: 'SpaceGrotesk_700Bold',
+  display: f('Anton-Regular', 'Anton_400Regular'),
+  displayBold: f('Archivo-Black', 'Archivo_900Black'),
+  displayBoldItalic: f('Archivo-BlackItalic', 'Archivo_900Black_Italic'),
+  displayHeavy: f('Archivo-ExtraBold', 'Archivo_800ExtraBold'),
+  editorial: f('InstrumentSerif-Regular', 'InstrumentSerif_400Regular'),
+  editorialItalic: f('InstrumentSerif-Italic', 'InstrumentSerif_400Regular_Italic'),
+  body: f('SpaceGrotesk-Regular', 'SpaceGrotesk_400Regular'),
+  bodyMedium: f('SpaceGrotesk-Medium', 'SpaceGrotesk_500Medium'),
+  bodyBold: f('SpaceGrotesk-Bold', 'SpaceGrotesk_700Bold'),
 } as const;
 
 /**

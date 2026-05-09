@@ -26,6 +26,7 @@ import { typeIconMap } from '@/components/svg/TypeIcons';
 import { Asterisk } from '@/components/svg/Marks';
 import { type TransitionKey } from '@/components/transitions/CategoryTransition';
 import { useTransition } from '@/components/transitions/TransitionProvider';
+import { useStore } from '@/store';
 
 const { width, height } = Dimensions.get('window');
 
@@ -43,6 +44,11 @@ export default function CreatorType() {
 
   const handleNext = () => {
     if (isPlaying) return;
+    if (selectedMeta) {
+      useStore.getState().setProfile({
+        niches: [selectedMeta.title],
+      });
+    }
     play({
       category: selected as TransitionKey,
       color: transitionColor,

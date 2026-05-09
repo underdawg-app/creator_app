@@ -22,7 +22,7 @@ export default function FinanceHome() {
   const available = totalIn - paid;
 
   return (
-    <ScreenFrame header={<ModuleHeader eyebrow="MODULE · 10" title="FINANCE" inverse />} bg="ink">
+    <ScreenFrame header={<ModuleHeader title="FINANCE" inverse />} bg="ink">
       <RNText
         style={styles.title}
         numberOfLines={2}

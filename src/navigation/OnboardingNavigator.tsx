@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Welcome from '@/screens/onboarding/Welcome';
 import Auth from '@/screens/onboarding/Auth';
+import Otp from '@/screens/onboarding/Otp';
 import UserType from '@/screens/onboarding/UserType';
 import CreatorType from '@/screens/onboarding/CreatorType';
 import Identity from '@/screens/onboarding/Identity';
@@ -30,6 +31,7 @@ export default function OnboardingNavigator() {
     >
       <Stack.Screen name="Welcome" component={Welcome} />
       <Stack.Screen name="Auth" component={Auth} />
+      <Stack.Screen name="Otp" component={Otp} />
       <Stack.Screen name="UserType" component={UserType} />
       <Stack.Screen name="CreatorType" component={CreatorType} />
       <Stack.Screen name="Identity" component={Identity} options={{ animation: 'none' }} />
