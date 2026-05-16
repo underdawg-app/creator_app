@@ -7,7 +7,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from '@/navigation';
+import { router, useLocalSearchParams } from '@/navigation';
 import { Ionicons } from '@/icons';
 import { palette as staticPalette } from '@/theme/colors';
 import { fonts, type as T } from '@/theme/typography';
@@ -19,14 +19,21 @@ const FG = staticPalette.bone;
 const MUTE = 'rgba(242,239,230,0.6)';
 const ACID = staticPalette.acid;
 const EMBER = staticPalette.ember;
+const BLUSH = staticPalette.blush;
 
-type Mode = 'PHOTO' | 'VIDEO' | 'TEXT';
-const MODES: Mode[] = ['PHOTO', 'VIDEO', 'TEXT'];
+type Mode = 'PHOTO' | 'VIDEO' | 'STORY';
+const MODES: Mode[] = ['PHOTO', 'VIDEO', 'STORY'];
 
 const { height: SCREEN_H } = Dimensions.get('window');
 
+function isMode(v: string | undefined): v is Mode {
+  return v === 'PHOTO' || v === 'VIDEO' || v === 'STORY';
+}
+
 export default function CameraScreen() {
-  const [mode, setMode] = useState<Mode>('PHOTO');
+  const params = useLocalSearchParams<{ mode?: string }>();
+  const initialMode: Mode = isMode(params.mode) ? params.mode : 'PHOTO';
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [flash, setFlash] = useState<'off' | 'on' | 'auto'>('off');
   const [front, setFront] = useState(false);
   const [recording, setRecording] = useState(false);
@@ -34,13 +41,33 @@ export default function CameraScreen() {
 
   const onShutterPress = () => {
     if (mode === 'VIDEO') {
-      setRecording((v) => !v);
-      toast(recording ? 'Recording saved.' : 'Recording…', 'default');
+      if (recording) {
+        setRecording(false);
+        toast('Recording saved.', 'success');
+        // Unified post screen handles caption / tags / publish for both
+        // images and videos — no separate video wizard.
+        router.push('/(modules)/studio/image-composer');
+      } else {
+        setRecording(true);
+        toast('Recording…', 'default');
+      }
     } else if (mode === 'PHOTO') {
       toast('Snap captured.', 'success');
+      router.push('/(modules)/studio/image-composer');
     } else {
-      toast('Type your message.', 'default');
+      toast('Story captured. 24h ticking.', 'success');
+      router.push('/(modules)/studio/image-composer');
     }
+  };
+
+  const onPickFromGallery = () => {
+    // Stub: a real implementation wires react-native-image-picker here.
+    // For now we simulate a successful pick and route to the unified
+    // post-detail screen so the flow feels complete.
+    toast('Picking from your camera roll…', 'default');
+    setTimeout(() => {
+      router.push('/(modules)/studio/image-composer');
+    }, 350);
   };
 
   const flashIcon =
@@ -132,12 +159,13 @@ export default function CameraScreen() {
 
         <View style={styles.shutterRow}>
           <Tap
-            onPress={() => toast('Open gallery', 'default')}
+            onPress={onPickFromGallery}
             style={styles.sideBtn}
-            burstColor={FG}
+            burstColor={ACID}
+            variant="heavy"
           >
-            <View style={styles.gallery}>
-              <Ionicons name="images-outline" size={20} color={FG} />
+            <View style={styles.galleryStrong}>
+              <Ionicons name="images" size={22} color={ACID} />
             </View>
             <RNText style={styles.sideLabel}>GALLERY</RNText>
           </Tap>
@@ -332,6 +360,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.35)',
+  },
+  galleryStrong: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: ACID,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(216,255,61,0.12)',
   },
   sideLabel: {
     ...T.small,

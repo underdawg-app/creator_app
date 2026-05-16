@@ -326,7 +326,7 @@ const makeStyles = (palette: typeof staticPalette) =>
     },
 
     footerWrap: {
-      paddingHorizontal: 24,
+      paddingHorizontal: 12,
       paddingVertical: 14,
       borderTopWidth: 1,
       borderTopColor: palette.line,

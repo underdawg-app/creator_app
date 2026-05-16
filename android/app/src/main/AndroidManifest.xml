@@ -2,6 +2,12 @@
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
   <uses-permission android:name="android.permission.VIBRATE"/>
+  <!-- Image picker (gallery) — READ_MEDIA_IMAGES on Android 13+,
+       READ_EXTERNAL_STORAGE on older. maxSdkVersion caps the old one to
+       12 so 13+ devices use the scoped media permission. -->
+  <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32"/>
+  <uses-permission android:name="android.permission.CAMERA"/>
   <queries>
     <intent>
       <action android:name="android.intent.action.VIEW"/>

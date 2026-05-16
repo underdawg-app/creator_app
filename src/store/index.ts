@@ -35,6 +35,7 @@ type Profile = {
   bio: string;
   type: string;
   location: string;
+  avatar: string;
   niches: string[];
   openTo: string[];
   reputation: number;
@@ -191,6 +192,7 @@ const initialProfile: Profile = {
   bio: profileMock.bio,
   type: profileMock.type,
   location: profileMock.location,
+  avatar: profileMock.avatar,
   niches: [...profileMock.niches],
   openTo: ['BRAND DEALS', 'COMMISSIONS', 'COLLABS'],
   reputation: profileMock.stats.reputation,
@@ -496,16 +498,6 @@ export const useStore = create<StoreState>()(
       onboarded: false,
       setOnboarded: (v) => set({ onboarded: v }),
       logout: () => {
-        // Fire-and-forget Firebase sign-out so the next launch lands on
-        // Welcome. Wrapped in a require()/try so the store still works in
-        // tests / environments where Firebase isn't installed.
-        try {
-          // eslint-disable-next-line @typescript-eslint/no-var-requires
-          const auth = require('@react-native-firebase/auth').default;
-          auth().signOut().catch(() => {});
-        } catch {
-          // No-op: Firebase not available in this environment.
-        }
         set({ onboarded: false, profile: initialProfile });
       },
       resetDemo: () => {

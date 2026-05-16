@@ -26,12 +26,12 @@ export default function Badges() {
             <Tap
               key={b.key}
               onPress={() => toast(b.note, 'default')}
-              burstColor={palette.acid}
-              style={[styles.badge, { backgroundColor: palette.acid }]}
+              burstColor={staticPalette.acid}
+              style={[styles.badge, { backgroundColor: staticPalette.acid }]}
             >
-              <Ionicons name="checkmark-circle" size={18} color={palette.ink} />
+              <Ionicons name="checkmark-circle" size={18} color={staticPalette.ink} />
               <RNText
-                style={styles.badgeName}
+                style={[styles.badgeName, { color: staticPalette.ink }]}
                 numberOfLines={2}
                 adjustsFontSizeToFit
                 minimumFontScale={0.75}
@@ -39,7 +39,11 @@ export default function Badges() {
               >
                 {b.name}
               </RNText>
-              <RNText style={styles.badgeNote} numberOfLines={2} maxFontSizeMultiplier={1.15}>
+              <RNText
+                style={[styles.badgeNote, { color: staticPalette.ink }]}
+                numberOfLines={2}
+                maxFontSizeMultiplier={1.15}
+              >
                 {b.note}
               </RNText>
             </Tap>

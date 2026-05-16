@@ -7,41 +7,59 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0C80B921A6F3F58F76C31292 /* libPods-Underdawgs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-Underdawgs.a */; };
+		0A2D449846D44219BB3A7B5F /* video.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 95D55A2FC68D497AACBF10DB /* video.mp4 */; };
+		1218711FD80B4C4CA56F9EEA /* fashion.gif in Resources */ = {isa = PBXBuildFile; fileRef = 10B91A4D29A94804AF4806B8 /* fashion.gif */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		293A33879BEA34DC918C7272 /* libPods-Underdawgs.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E98D7491170536A223068FDA /* libPods-Underdawgs.a */; };
 		2D7B2003B32D4AE0AEDA0B83 /* SpaceGrotesk_400Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 254A5943BB6940C5A1ACCC0F /* SpaceGrotesk_400Regular.ttf */; };
+		3A95CC1938034835A049B9B6 /* writer.gif in Resources */ = {isa = PBXBuildFile; fileRef = 36D68B90040948A5BF8C755C /* writer.gif */; };
+		67FC6422F21247BAB1026B3D /* performer.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = D55E1C5CD770489989AEEDD7 /* performer.mp4 */; };
+		71483927344044CD81BCA38F /* visual.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 6D535C4ECF654271BC804029 /* visual.mp4 */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		7CF4707BB4E0439E9D8A2A71 /* InstrumentSerif_400Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B9D5E4C03E2C4337A84AE745 /* InstrumentSerif_400Regular.ttf */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		9ABBEB4D39104401BBD7D0DB /* Archivo_900Black_Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = BF71405484C442D28DCF5F4D /* Archivo_900Black_Italic.ttf */; };
+		A460A8FF52B94AE6B748F4F2 /* musician.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 8B3C4ADF2FFD44DE968914B3 /* musician.mp4 */; };
 		AE462B70FD994B449DC37461 /* SpaceGrotesk_500Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B2AAC82AF4B14B6B9D986706 /* SpaceGrotesk_500Medium.ttf */; };
 		C3D8D8D8BBE547EEBCBB1425 /* InstrumentSerif_400Regular_Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 78480477B2254514BC43587E /* InstrumentSerif_400Regular_Italic.ttf */; };
+		C5C482EBB5E74E3F8494172F /* streamer.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = EBCE445B84164912B3FF4965 /* streamer.mp4 */; };
 		C7C67847F144F2D924748011 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+		CCCF97CBBB434EBF92FD47F1 /* educator.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 6C21ABB0B4724188987E43EF /* educator.mp4 */; };
 		D8BA46679BC5460D8B549B94 /* Archivo_800ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3888F072EA58402CA568A6E4 /* Archivo_800ExtraBold.ttf */; };
 		E2A4051A485343058E7CCC68 /* SpaceGrotesk_700Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DECD8EE0306548D796FA0108 /* SpaceGrotesk_700Bold.ttf */; };
+		EAC3B7EFD6FB80F869EB4822 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A514575A5BDA21DC79DBE0EA /* GoogleService-Info.plist */; };
 		F8CBFB2257804723A64A7901 /* Anton_400Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 10FC596FE5AC46C89AA284F1 /* Anton_400Regular.ttf */; };
 		FD30727EE64942A2A1AC39F0 /* Archivo_900Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DC59D39D28FA4A67AA69261A /* Archivo_900Black.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		10B91A4D29A94804AF4806B8 /* fashion.gif */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = fashion.gif; path = ../assets/transitions/fashion.gif; sourceTree = "<group>"; };
 		10FC596FE5AC46C89AA284F1 /* Anton_400Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Anton_400Regular.ttf; path = ../assets/fonts/Anton_400Regular.ttf; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Underdawgs.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Underdawgs.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Underdawgs/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Underdawgs/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = Underdawgs/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		254A5943BB6940C5A1ACCC0F /* SpaceGrotesk_400Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = SpaceGrotesk_400Regular.ttf; path = ../assets/fonts/SpaceGrotesk_400Regular.ttf; sourceTree = "<group>"; };
+		36D68B90040948A5BF8C755C /* writer.gif */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = writer.gif; path = ../assets/transitions/writer.gif; sourceTree = "<group>"; };
 		3888F072EA58402CA568A6E4 /* Archivo_800ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Archivo_800ExtraBold.ttf; path = ../assets/fonts/Archivo_800ExtraBold.ttf; sourceTree = "<group>"; };
-		3B4392A12AC88292D35C810B /* Pods-Underdawgs.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Underdawgs.debug.xcconfig"; path = "Target Support Files/Pods-Underdawgs/Pods-Underdawgs.debug.xcconfig"; sourceTree = "<group>"; };
-		5709B34CF0A7D63546082F79 /* Pods-Underdawgs.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Underdawgs.release.xcconfig"; path = "Target Support Files/Pods-Underdawgs/Pods-Underdawgs.release.xcconfig"; sourceTree = "<group>"; };
-		5DCACB8F33CDC322A6C60F78 /* libPods-Underdawgs.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Underdawgs.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6C21ABB0B4724188987E43EF /* educator.mp4 */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = educator.mp4; path = ../assets/transitions/educator.mp4; sourceTree = "<group>"; };
+		6D535C4ECF654271BC804029 /* visual.mp4 */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = visual.mp4; path = ../assets/transitions/visual.mp4; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = Underdawgs/AppDelegate.swift; sourceTree = "<group>"; };
 		78480477B2254514BC43587E /* InstrumentSerif_400Regular_Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = InstrumentSerif_400Regular_Italic.ttf; path = ../assets/fonts/InstrumentSerif_400Regular_Italic.ttf; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = Underdawgs/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		83145190A25E3096D006652A /* Pods-Underdawgs.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Underdawgs.debug.xcconfig"; path = "Target Support Files/Pods-Underdawgs/Pods-Underdawgs.debug.xcconfig"; sourceTree = "<group>"; };
+		854327A78405663961CC16BE /* Pods-Underdawgs.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Underdawgs.release.xcconfig"; path = "Target Support Files/Pods-Underdawgs/Pods-Underdawgs.release.xcconfig"; sourceTree = "<group>"; };
+		8B3C4ADF2FFD44DE968914B3 /* musician.mp4 */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = musician.mp4; path = ../assets/transitions/musician.mp4; sourceTree = "<group>"; };
+		95D55A2FC68D497AACBF10DB /* video.mp4 */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = video.mp4; path = ../assets/transitions/video.mp4; sourceTree = "<group>"; };
+		A514575A5BDA21DC79DBE0EA /* GoogleService-Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "Underdawgs/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		B2AAC82AF4B14B6B9D986706 /* SpaceGrotesk_500Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = SpaceGrotesk_500Medium.ttf; path = ../assets/fonts/SpaceGrotesk_500Medium.ttf; sourceTree = "<group>"; };
 		B9D5E4C03E2C4337A84AE745 /* InstrumentSerif_400Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = InstrumentSerif_400Regular.ttf; path = ../assets/fonts/InstrumentSerif_400Regular.ttf; sourceTree = "<group>"; };
 		BF71405484C442D28DCF5F4D /* Archivo_900Black_Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Archivo_900Black_Italic.ttf; path = ../assets/fonts/Archivo_900Black_Italic.ttf; sourceTree = "<group>"; };
+		D55E1C5CD770489989AEEDD7 /* performer.mp4 */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = performer.mp4; path = ../assets/transitions/performer.mp4; sourceTree = "<group>"; };
 		DC59D39D28FA4A67AA69261A /* Archivo_900Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Archivo_900Black.ttf; path = ../assets/fonts/Archivo_900Black.ttf; sourceTree = "<group>"; };
 		DECD8EE0306548D796FA0108 /* SpaceGrotesk_700Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = SpaceGrotesk_700Bold.ttf; path = ../assets/fonts/SpaceGrotesk_700Bold.ttf; sourceTree = "<group>"; };
+		E98D7491170536A223068FDA /* libPods-Underdawgs.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Underdawgs.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBCE445B84164912B3FF4965 /* streamer.mp4 */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = streamer.mp4; path = ../assets/transitions/streamer.mp4; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -50,7 +68,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0C80B921A6F3F58F76C31292 /* libPods-Underdawgs.a in Frameworks */,
+				293A33879BEA34DC918C7272 /* libPods-Underdawgs.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +83,7 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
+				A514575A5BDA21DC79DBE0EA /* GoogleService-Info.plist */,
 			);
 			name = Underdawgs;
 			sourceTree = "<group>";
@@ -73,7 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				5DCACB8F33CDC322A6C60F78 /* libPods-Underdawgs.a */,
+				E98D7491170536A223068FDA /* libPods-Underdawgs.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -120,6 +139,14 @@
 				3888F072EA58402CA568A6E4 /* Archivo_800ExtraBold.ttf */,
 				BF71405484C442D28DCF5F4D /* Archivo_900Black_Italic.ttf */,
 				DECD8EE0306548D796FA0108 /* SpaceGrotesk_700Bold.ttf */,
+				D55E1C5CD770489989AEEDD7 /* performer.mp4 */,
+				EBCE445B84164912B3FF4965 /* streamer.mp4 */,
+				6D535C4ECF654271BC804029 /* visual.mp4 */,
+				6C21ABB0B4724188987E43EF /* educator.mp4 */,
+				95D55A2FC68D497AACBF10DB /* video.mp4 */,
+				36D68B90040948A5BF8C755C /* writer.gif */,
+				10B91A4D29A94804AF4806B8 /* fashion.gif */,
+				8B3C4ADF2FFD44DE968914B3 /* musician.mp4 */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -127,8 +154,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				3B4392A12AC88292D35C810B /* Pods-Underdawgs.debug.xcconfig */,
-				5709B34CF0A7D63546082F79 /* Pods-Underdawgs.release.xcconfig */,
+				83145190A25E3096D006652A /* Pods-Underdawgs.debug.xcconfig */,
+				854327A78405663961CC16BE /* Pods-Underdawgs.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -140,13 +167,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Underdawgs" */;
 			buildPhases = (
-				C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */,
+				E9785BC09A50590C91ECB323 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
-				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
+				33D0E605E8B59B87745F2C0B /* [CP] Embed Pods Frameworks */,
+				69A22A4CF7882765C23773BD /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -205,6 +232,15 @@
 				9ABBEB4D39104401BBD7D0DB /* Archivo_900Black_Italic.ttf in Resources */,
 				E2A4051A485343058E7CCC68 /* SpaceGrotesk_700Bold.ttf in Resources */,
 				C7C67847F144F2D924748011 /* PrivacyInfo.xcprivacy in Resources */,
+				EAC3B7EFD6FB80F869EB4822 /* GoogleService-Info.plist in Resources */,
+				67FC6422F21247BAB1026B3D /* performer.mp4 in Resources */,
+				C5C482EBB5E74E3F8494172F /* streamer.mp4 in Resources */,
+				71483927344044CD81BCA38F /* visual.mp4 in Resources */,
+				CCCF97CBBB434EBF92FD47F1 /* educator.mp4 in Resources */,
+				0A2D449846D44219BB3A7B5F /* video.mp4 in Resources */,
+				3A95CC1938034835A049B9B6 /* writer.gif in Resources */,
+				1218711FD80B4C4CA56F9EEA /* fashion.gif in Resources */,
+				A460A8FF52B94AE6B748F4F2 /* musician.mp4 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,7 +263,7 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */ = {
+		33D0E605E8B59B87745F2C0B /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -244,7 +280,24 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Underdawgs/Pods-Underdawgs-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */ = {
+		69A22A4CF7882765C23773BD /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Underdawgs/Pods-Underdawgs-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Underdawgs/Pods-Underdawgs-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Underdawgs/Pods-Underdawgs-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E9785BC09A50590C91ECB323 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -266,23 +319,6 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E235C05ADACE081382539298 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Underdawgs/Pods-Underdawgs-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Underdawgs/Pods-Underdawgs-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Underdawgs/Pods-Underdawgs-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -299,7 +335,7 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-Underdawgs.debug.xcconfig */;
+			baseConfigurationReference = 83145190A25E3096D006652A /* Pods-Underdawgs.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
@@ -328,7 +364,7 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5709B34CF0A7D63546082F79 /* Pods-Underdawgs.release.xcconfig */;
+			baseConfigurationReference = 854327A78405663961CC16BE /* Pods-Underdawgs.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;

@@ -16,6 +16,8 @@ type Props = {
   variant?: Variant;
   splash?: boolean;
   disabled?: boolean;
+  /** Press scale on iOS (Android uses native ripple). Pass 1 to disable bounce. */
+  scale?: number;
   children: React.ReactNode;
 };
 
@@ -47,6 +49,7 @@ export function Tap({
   variant = 'default',
   splash = false,
   disabled,
+  scale,
   children,
 }: Props) {
   const handlePress = useCallback(
@@ -77,6 +80,7 @@ export function Tap({
       haptic="none"
       onPress={handlePress}
       disabled={disabled}
+      scale={scale}
     >
       {children}
     </TapBurst>

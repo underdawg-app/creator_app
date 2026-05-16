@@ -36,6 +36,38 @@
     {
       "path": "assets/fonts/SpaceGrotesk_700Bold.ttf",
       "sha1": "14f3d7d974d0232f0fba31566783b2c262b4d2a2"
+    },
+    {
+      "path": "assets/transitions/educator.mp4",
+      "sha1": "871c59ce8d99bf2aba6e11c93dcf501ff27a605c"
+    },
+    {
+      "path": "assets/transitions/fashion.gif",
+      "sha1": "83d3c1d5864342a95d04ae01392379ff786b8487"
+    },
+    {
+      "path": "assets/transitions/musician.mp4",
+      "sha1": "90f5e9dc498bc3d206344568a143410757dda1af"
+    },
+    {
+      "path": "assets/transitions/performer.mp4",
+      "sha1": "bbf04c7c12ba58ac500a14e1f4560b25e9bd559b"
+    },
+    {
+      "path": "assets/transitions/streamer.mp4",
+      "sha1": "250433d7b7934128b5b2b71069a695f57533489f"
+    },
+    {
+      "path": "assets/transitions/video.mp4",
+      "sha1": "ed8873e3e2f3a1e4292192513992101b1bee6e60"
+    },
+    {
+      "path": "assets/transitions/visual.mp4",
+      "sha1": "e4da093afa0337bb1553d9a8a540b0656c402fc5"
+    },
+    {
+      "path": "assets/transitions/writer.gif",
+      "sha1": "dcb44e41363fc4be45a0634f8298476f0d96053b"
     }
   ]
 }

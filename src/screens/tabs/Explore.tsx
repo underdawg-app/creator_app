@@ -31,7 +31,6 @@ import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import {
   risingList,
-  challenges,
   trendingTags,
   categoriesGrid,
   feedPosts,
@@ -326,150 +325,22 @@ export default function Explore() {
           </View>
         </View>
 
-        {/* ===== PLATFORM MODULES ===== */}
-        <View style={styles.section}>
-          <View style={styles.sectionHead}>
-            <RNText style={styles.sectionKicker} maxFontSizeMultiplier={1.15}>
-              — YOUR WORLD · 2 MODULES
-            </RNText>
-          </View>
-          <RNText style={styles.sectionTitle} maxFontSizeMultiplier={1.1}>
-            go{' '}
-            <RNText style={styles.heroItalic}>further.</RNText>
-          </RNText>
-
-          {/* COMMUNITY + LEARNING — side by side */}
-          <View style={styles.modulePairRow}>
-            <View style={{ flex: 1 }}>
-            <Tap
-              style={styles.moduleCommunity}
-              onPress={() => router.push('/(modules)/community' as any)}
-              burstColor="#2E5BFF"
-              variant="heavy"
-            >
-              <View style={styles.moduleCommunityIconRow}>
-                {['#4A7DFF', '#2E5BFF', '#1A3FCC'].map((c, i) => (
-                  <View key={i} style={[styles.moduleCommunityDot, { backgroundColor: c, marginLeft: i > 0 ? -8 : 0 }]} />
-                ))}
-              </View>
-              <RNText style={styles.moduleCommunityTitle} maxFontSizeMultiplier={1.1}>
-                BUILD{'\n'}YOUR{'\n'}CIRCLE.
-              </RNText>
-              <RNText style={styles.moduleCommunityMeta} maxFontSizeMultiplier={1.1}>
-                connect · collab · grow
-              </RNText>
-              <View style={styles.moduleArrowCorner}>
-                <ArrowMark size={14} color={staticPalette.bone} strokeWidth={1.6} />
-              </View>
-            </Tap>
-            </View>
-
-            <View style={{ flex: 1 }}>
-            <Tap
-              style={styles.moduleLearning}
-              onPress={() => router.push('/(modules)/learning' as any)}
-              burstColor="#D8FF3D"
-              variant="heavy"
-            >
-              <View style={styles.moduleLearningIconWrap}>
-                <Ionicons name="play" size={22} color={staticPalette.acid} />
-              </View>
-              <RNText style={styles.moduleLearningTitle} maxFontSizeMultiplier={1.1}>
-                LEVEL{'\n'}UP.
-              </RNText>
-              <RNText style={styles.moduleLearningMeta} maxFontSizeMultiplier={1.1}>
-                skills · courses{'\n'}workshops
-              </RNText>
-              <View style={styles.moduleArrowCorner}>
-                <ArrowMark size={14} color={staticPalette.ink} strokeWidth={1.8} />
-              </View>
-            </Tap>
-            </View>
-          </View>
-
-        </View>
-
-        {/* Challenges row */}
-        <View style={styles.section}>
-          <View style={styles.sectionHead}>
-            <RNText style={styles.sectionKicker} maxFontSizeMultiplier={1.15}>
-              — CHALLENGES · LIVE
-            </RNText>
-            <Tap
-              onPress={() => router.push('/(modules)/community/challenges' as any)}
-              burstColor={palette.ink}
-            >
-              <RNText style={styles.sectionAction} maxFontSizeMultiplier={1.15}>
-                SEE ALL
-              </RNText>
-            </Tap>
-          </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.challengeContent}
-            decelerationRate="fast"
-            snapToAlignment="start"
-            snapToInterval={260 + 12}
-          >
-            {challenges.map((c) => (
-              <Tap
-                key={c.id}
-                onPress={() =>
-                  router.push(`/(modules)/community/challenges/${c.id}` as any)
-                }
-                burstColor={c.color}
-                variant="heavy"
-                style={[styles.challenge, { backgroundColor: c.color }]}
-              >
-                <View style={styles.challengeTop}>
-                  <RNText
-                    style={styles.challengeTag}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.8}
-                    maxFontSizeMultiplier={1.1}
-                  >
-                    {c.tag}
-                  </RNText>
-                  <View style={styles.challengeDays}>
-                    <RNText style={styles.challengeDaysText}>
-                      {c.daysLeft}D
-                    </RNText>
-                  </View>
-                </View>
-                <RNText
-                  style={styles.challengePrompt}
-                  numberOfLines={2}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.8}
-                  maxFontSizeMultiplier={1.1}
-                >
-                  {c.prompt}
-                </RNText>
-                <View style={styles.challengeBottom}>
-                  <RNText style={styles.challengeMeta} maxFontSizeMultiplier={1.1}>
-                    {c.entries} ENTRIES
-                  </RNText>
-                  <ArrowMark size={14} color={staticPalette.ink} strokeWidth={1.6} />
-                </View>
-              </Tap>
-            ))}
-          </ScrollView>
-        </View>
-
         <View style={styles.strip}>
           <View style={styles.hairline} />
           <Marquee
             items={['RISING THIS WEEK', 'NO GATEKEEPING', 'NO PAY TO PLAY', 'JUST GOOD WORK']}
+            speed={40}
+            separator="   ·   "
             textStyle={{
-              fontFamily: fonts.bodyBold,
-              fontSize: 12,
-              letterSpacing: 4,
-              textTransform: 'uppercase',
+              fontFamily: fonts.displayBold,
               color: palette.ink,
+              opacity: 0.85,
+              fontSize: 18,
+              lineHeight: 22,
+              letterSpacing: -0.4,
+              includeFontPadding: false,
             }}
-            speed={32}
+            style={{ height: 26 }}
           />
           <View style={styles.hairline} />
         </View>
@@ -803,7 +674,6 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     justifyContent: 'space-between',
   },
   sectionKicker: { ...T.label, color: palette.ink, opacity: 0.6 },
-  sectionAction: { ...T.label, color: palette.electric },
   sectionCount: { ...T.micro, color: palette.ink, opacity: 0.55 },
   sectionTitle: {
     fontFamily: fonts.displayBold,
@@ -814,58 +684,6 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     marginTop: 12,
     paddingHorizontal: H_PADDING,
   },
-
-  challengeContent: {
-    gap: 12,
-    paddingTop: 14,
-    paddingHorizontal: H_PADDING,
-  },
-  challenge: {
-    width: 260,
-    minHeight: 170,
-    borderRadius: 22,
-    padding: 16,
-    justifyContent: 'space-between',
-  },
-  challengeTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 10,
-  },
-  challengeTag: {
-    fontFamily: fonts.displayBold,
-    fontSize: 20,
-    letterSpacing: -0.6,
-    color: staticPalette.ink,
-    flexShrink: 1,
-  },
-  challengeDays: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    backgroundColor: staticPalette.ink,
-  },
-  challengeDaysText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 2,
-    color: staticPalette.bone,
-  },
-  challengePrompt: {
-    fontFamily: fonts.editorialItalic,
-    fontSize: 22,
-    lineHeight: 24,
-    color: staticPalette.ink,
-    marginTop: 12,
-  },
-  challengeBottom: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 14,
-  },
-  challengeMeta: { ...T.micro, color: staticPalette.ink, opacity: 0.72 },
 
   catGrid: {
     marginTop: 14,
@@ -1011,115 +829,6 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     ...T.micro,
     color: palette.ink,
     opacity: 0.45,
-  },
-
-  /* ---- Platform modules section ---- */
-  moduleEyebrow: {
-    ...T.micro,
-    color: staticPalette.bone,
-    opacity: 0.5,
-    letterSpacing: 1,
-  },
-
-  /* Community + Learning pair */
-  modulePairRow: {
-    flexDirection: 'row',
-    gap: GUTTER,
-    marginTop: GUTTER,
-  },
-
-  /* Community */
-  moduleEyebrowCenter: {
-    ...T.micro,
-    color: staticPalette.bone,
-    opacity: 0.5,
-    letterSpacing: 1,
-    textAlign: 'center',
-  },
-  moduleCommunity: {
-    width: '100%',
-    backgroundColor: '#0D1F5C',
-    borderRadius: 22,
-    padding: 16,
-    paddingBottom: 44,
-    overflow: 'hidden',
-    alignItems: 'center',
-  },
-  moduleCommunityIconRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 12,
-  },
-  moduleCommunityDot: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 2,
-    borderColor: '#0D1F5C',
-  },
-  moduleCommunityTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 26,
-    lineHeight: 24,
-    letterSpacing: -1,
-    color: staticPalette.bone,
-    textAlign: 'center',
-  },
-  moduleCommunityMeta: {
-    ...T.micro,
-    color: staticPalette.bone,
-    opacity: 0.5,
-    textAlign: 'center',
-    marginTop: 8,
-  },
-  moduleArrowCorner: {
-    position: 'absolute',
-    bottom: 14,
-    right: 14,
-  },
-
-  /* Learning */
-  moduleLearning: {
-    width: '100%',
-    backgroundColor: staticPalette.acid,
-    borderRadius: 22,
-    padding: 16,
-    paddingBottom: 44,
-    overflow: 'hidden',
-    alignItems: 'center',
-  },
-  moduleLearningEyebrow: {
-    ...T.micro,
-    color: staticPalette.ink,
-    opacity: 0.55,
-    letterSpacing: 1,
-    textAlign: 'center',
-  },
-  moduleLearningIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: staticPalette.ink,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 16,
-    marginBottom: 12,
-  },
-  moduleLearningTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 26,
-    lineHeight: 24,
-    letterSpacing: -1,
-    color: staticPalette.ink,
-    textAlign: 'center',
-  },
-  moduleLearningMeta: {
-    ...T.micro,
-    color: staticPalette.ink,
-    opacity: 0.55,
-    textAlign: 'center',
-    marginTop: 8,
   },
 
 });

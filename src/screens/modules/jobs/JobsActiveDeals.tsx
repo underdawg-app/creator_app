@@ -540,7 +540,7 @@ const makeStyles = (palette: typeof staticPalette) =>
     empty: {
       marginTop: 18,
       paddingVertical: 32,
-      paddingHorizontal: 24,
+      paddingHorizontal: 12,
       borderRadius: 24,
       borderWidth: 1,
       borderColor: palette.lineDark,

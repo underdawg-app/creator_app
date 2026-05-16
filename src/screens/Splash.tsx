@@ -246,7 +246,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   waveAbs: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
   top: {
     paddingTop: 64,
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
   },
   topRow: {
     flexDirection: 'row',
@@ -274,7 +274,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
   },
   markWrap: {
     marginBottom: 28,
@@ -319,7 +319,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
 
   bottom: {
     paddingBottom: 40,
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
     gap: 12,
   },
   statusRow: {

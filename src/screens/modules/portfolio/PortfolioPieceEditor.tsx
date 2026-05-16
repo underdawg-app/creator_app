@@ -72,8 +72,8 @@ export default function PieceEditor() {
           <MagneticButton
             label="PASTE LINK"
             size="sm"
-            background={palette.bone}
-            foreground={palette.ink}
+            background={staticPalette.acid}
+            foreground={staticPalette.ink}
             onPress={() => toast('Link pasted.', 'success')}
           />
         </View>

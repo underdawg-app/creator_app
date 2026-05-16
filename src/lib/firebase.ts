@@ -1,51 +1,55 @@
 /**
- * Thin wrapper over @react-native-firebase/auth.
+ * STUB: Firebase Auth is not currently configured.
  *
- * The native Firebase SDK is auto-initialized from GoogleService-Info.plist
- * (iOS) and google-services.json (Android), so there's no `initializeApp`
- * call here — the app must drop those config files into the platform
- * folders before this module can be used at runtime.
+ * The real implementation lived here when @react-native-firebase/auth was
+ * installed. It was removed temporarily because the auth pod requires a
+ * `use_frameworks!` Podfile (which conflicts with the rest of our native
+ * module setup on RN 0.81 + New Architecture).
  *
- * Everything we need from `auth` is re-exported via `getAuth()` so callers
- * don't import the firebase namespace directly.
+ * To re-enable real auth:
+ *   1. Drop in real GoogleService-Info.plist + google-services.json
+ *   2. Install: @react-native-firebase/app, @react-native-firebase/auth
+ *   3. Add `use_frameworks! :linkage => :static` to ios/Podfile
+ *   4. Replace this file with the real wrappers
+ *
+ * For now every call resolves/rejects in a way that lets the JS layer
+ * render a "Auth coming soon" toast.
  */
 
-import authModule, {
-  FirebaseAuthTypes,
-} from '@react-native-firebase/auth';
+export type FirebaseUser = {
+  uid: string;
+  phoneNumber: string | null;
+  email: string | null;
+};
+export type ConfirmationResult = {
+  confirm: (code: string) => Promise<{ user: FirebaseUser }>;
+};
 
-export type FirebaseUser = FirebaseAuthTypes.User;
-export type PhoneAuthSnapshot = FirebaseAuthTypes.PhoneAuthSnapshot;
-export type ConfirmationResult = FirebaseAuthTypes.ConfirmationResult;
+class AuthNotConfiguredError extends Error {
+  constructor() {
+    super('Auth is not configured yet.');
+    this.name = 'AuthNotConfiguredError';
+  }
+}
 
-export const getAuth = () => authModule();
+export const getAuth = () => ({
+  currentUser: null as FirebaseUser | null,
+});
 
-/**
- * Subscribe to auth state changes. Fires once with the current user (or
- * null) and again on every sign-in / sign-out.
- */
-export const onAuthChanged = (cb: (user: FirebaseUser | null) => void) =>
-  authModule().onAuthStateChanged(cb);
+export const onAuthChanged = (cb: (user: FirebaseUser | null) => void) => {
+  // Fire once with null so consumers don't get stuck in 'loading'.
+  setTimeout(() => cb(null), 0);
+  return () => {};
+};
 
-/**
- * Send the SMS code. Returns a confirmation handle that the OTP screen uses
- * to verify the entered code.
- */
-export const sendPhoneCode = (e164Phone: string) =>
-  authModule().signInWithPhoneNumber(e164Phone);
+export const sendPhoneCode = async (_phone: string): Promise<ConfirmationResult> => {
+  throw new AuthNotConfiguredError();
+};
 
-/**
- * Sign the user out of Firebase. Safe to call even when there's no current
- * user (resolves immediately).
- */
-export const signOut = () => authModule().signOut();
+export const signOut = async () => {
+  // No-op when auth isn't configured.
+};
 
-/**
- * Build a Google credential from an idToken (returned by GoogleSignin) and
- * exchange it for a Firebase user. The credential is one-shot — re-call
- * GoogleSignin.signIn() to get a fresh idToken next time.
- */
-export const signInWithGoogleIdToken = (idToken: string) => {
-  const cred = authModule.GoogleAuthProvider.credential(idToken);
-  return authModule().signInWithCredential(cred);
+export const signInWithGoogleIdToken = async (_idToken: string) => {
+  throw new AuthNotConfiguredError();
 };

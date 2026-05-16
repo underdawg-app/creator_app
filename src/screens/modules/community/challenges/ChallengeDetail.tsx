@@ -96,8 +96,8 @@ export default function ChallengeDetail() {
         />
         <MagneticButton
           label="SHARE"
-          background={palette.bone}
-          foreground={palette.ink}
+          background={staticPalette.acid}
+          foreground={staticPalette.ink}
           onPress={() => toast('Link copied.', 'success')}
         />
       </View>

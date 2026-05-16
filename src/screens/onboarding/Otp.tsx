@@ -117,7 +117,7 @@ export default function Otp() {
         />
       </View>
 
-      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 24 }}>
+      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 12 }}>
         <View style={styles.topRow}>
           <Pressable onPress={() => router.back()} hitSlop={12} style={styles.back}>
             <Ionicons name="arrow-back" size={18} color={palette.ink} />
@@ -221,7 +221,7 @@ const makeStyles = (palette: typeof staticPalette) =>
     },
     stepRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     step: { ...T.label, color: palette.ink, opacity: 0.65 },
-    body: { paddingHorizontal: 24, paddingTop: 36 },
+    body: { paddingHorizontal: 12, paddingTop: 36 },
     heading: {
       fontFamily: fonts.displayBold,
       fontSize: 56,

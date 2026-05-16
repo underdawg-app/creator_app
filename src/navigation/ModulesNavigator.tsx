@@ -16,7 +16,8 @@ import StudioDrafts from '@/screens/modules/studio/StudioDrafts';
 import StudioSchedule from '@/screens/modules/studio/StudioSchedule';
 import StudioImageComposer from '@/screens/modules/studio/StudioImageComposer';
 import StudioTextComposer from '@/screens/modules/studio/StudioTextComposer';
-import StudioVideoComposer from '@/screens/modules/studio/StudioVideoComposer';
+import StudioAudioComposer from '@/screens/modules/studio/StudioAudioComposer';
+import StudioLiveComposer from '@/screens/modules/studio/StudioLiveComposer';
 
 import ArtIndex from '@/screens/modules/art/ArtIndex';
 import ArtList from '@/screens/modules/art/ArtList';
@@ -37,6 +38,7 @@ import CommunityEvents from '@/screens/modules/community/CommunityEvents';
 import CommunityGroups from '@/screens/modules/community/CommunityGroups';
 import ChallengesIndex from '@/screens/modules/community/challenges/ChallengesIndex';
 import ChallengeDetail from '@/screens/modules/community/challenges/ChallengeDetail';
+import ChallengeReel from '@/screens/modules/community/challenges/ChallengeReel';
 
 import InboxThread from '@/screens/modules/inbox/InboxThread';
 import CameraScreen from '@/screens/modules/camera/Camera';
@@ -45,6 +47,10 @@ import PortfolioIndex from '@/screens/modules/portfolio/PortfolioIndex';
 import PortfolioEdit from '@/screens/modules/portfolio/PortfolioEdit';
 import PortfolioPieceEditor from '@/screens/modules/portfolio/PortfolioPieceEditor';
 import PortfolioPublicPreview from '@/screens/modules/portfolio/PortfolioPublicPreview';
+
+import ProfilePostsViewer from '@/screens/modules/profile/PostsViewer';
+import ProfileReelViewer from '@/screens/modules/profile/ReelViewer';
+import ProfileEdit from '@/screens/modules/profile/ProfileEdit';
 
 import ReputationIndex from '@/screens/modules/reputation/ReputationIndex';
 import ReputationBadges from '@/screens/modules/reputation/ReputationBadges';
@@ -100,7 +106,8 @@ export default function ModulesNavigator() {
       <Stack.Screen name="StudioSchedule" component={StudioSchedule} />
       <Stack.Screen name="StudioImageComposer" component={StudioImageComposer} />
       <Stack.Screen name="StudioTextComposer" component={StudioTextComposer} />
-      <Stack.Screen name="StudioVideoComposer" component={StudioVideoComposer} />
+      <Stack.Screen name="StudioAudioComposer" component={StudioAudioComposer} />
+      <Stack.Screen name="StudioLiveComposer" component={StudioLiveComposer} />
 
       <Stack.Screen name="ArtIndex" component={ArtIndex} />
       <Stack.Screen name="ArtList" component={ArtList} />
@@ -121,6 +128,14 @@ export default function ModulesNavigator() {
       <Stack.Screen name="CommunityGroups" component={CommunityGroups} />
       <Stack.Screen name="ChallengesIndex" component={ChallengesIndex} />
       <Stack.Screen name="ChallengeDetail" component={ChallengeDetail} />
+      <Stack.Screen
+        name="ChallengeReel"
+        component={ChallengeReel}
+        options={{
+          animation: 'fade',
+          contentStyle: { backgroundColor: '#000' },
+        }}
+      />
 
       <Stack.Screen
         name="InboxThread"
@@ -146,6 +161,17 @@ export default function ModulesNavigator() {
       <Stack.Screen name="PortfolioEdit" component={PortfolioEdit} />
       <Stack.Screen name="PortfolioPieceEditor" component={PortfolioPieceEditor} />
       <Stack.Screen name="PortfolioPublicPreview" component={PortfolioPublicPreview} />
+
+      <Stack.Screen name="ProfilePostsViewer" component={ProfilePostsViewer} />
+      <Stack.Screen
+        name="ProfileReelViewer"
+        component={ProfileReelViewer}
+        options={{
+          animation: 'fade',
+          contentStyle: { backgroundColor: '#000' },
+        }}
+      />
+      <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
 
       <Stack.Screen name="ReputationIndex" component={ReputationIndex} />
       <Stack.Screen name="ReputationBadges" component={ReputationBadges} />

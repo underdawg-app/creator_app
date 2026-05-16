@@ -126,7 +126,7 @@ export default function Auth() {
         />
       </View>
 
-      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 24 }}>
+      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 12 }}>
         <View style={styles.topRow}>
           <Pressable onPress={() => router.back()} hitSlop={12} style={styles.back}>
             <Ionicons name="arrow-back" size={18} color={palette.ink} />
@@ -135,6 +135,14 @@ export default function Auth() {
             <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
             <RNText style={styles.step}>STEP 01 / 05</RNText>
           </View>
+          <Pressable
+            onPress={() => router.push('/(onboarding)/user-type')}
+            hitSlop={12}
+            style={styles.skip}
+          >
+            <RNText style={styles.skipLabel}>SKIP</RNText>
+            <Ionicons name="arrow-forward" size={14} color={palette.ink} />
+          </Pressable>
         </View>
       </SafeAreaView>
 
@@ -280,13 +288,28 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     color: palette.ink,
     opacity: 0.65,
   },
+  skip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 12,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: palette.line,
+  },
+  skipLabel: {
+    ...T.label,
+    color: palette.ink,
+    letterSpacing: 1.8,
+  },
   blobAnchor: {
     position: 'absolute',
     right: -80,
     top: 90,
   },
   scroll: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
     paddingTop: 36,
     paddingBottom: 48,
   },

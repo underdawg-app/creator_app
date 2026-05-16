@@ -95,7 +95,7 @@ const makeStyles = (palette: typeof import('@/theme/colors').palette) => ({
     marginBottom: 6,
   },
   header: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
     paddingTop: 14,
     paddingBottom: 8,
   },
@@ -110,7 +110,7 @@ const makeStyles = (palette: typeof import('@/theme/colors').palette) => ({
     color: palette.ink,
   },
   body: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
     paddingTop: 8,
     paddingBottom: 24,
   },

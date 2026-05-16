@@ -43,7 +43,11 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	<string/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Underdawgs needs access to your photos so you can choose a profile picture.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Underdawgs needs camera access so you can take a profile picture.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

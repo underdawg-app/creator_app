@@ -26,6 +26,8 @@ type Props = {
   size?: 'sm' | 'md' | 'lg';
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
+  /** Disable press scale + letter drift + fill animation. Haptic still fires. */
+  staticPress?: boolean;
 };
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -45,6 +47,7 @@ export function MagneticButton({
   size = 'md',
   style,
   disabled,
+  staticPress,
 }: Props) {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
@@ -81,10 +84,12 @@ export function MagneticButton({
   // finger contact including the start of a scroll, which is why we keep
   // haptic strictly on the committed `onPress` below.
   const handleIn = () => {
+    if (staticPress) return;
     progress.value = withTiming(1, { duration: 110, easing: Easing.out(Easing.quad) });
     hover.value = withTiming(1, { duration: 320 });
   };
   const handleOut = () => {
+    if (staticPress) return;
     progress.value = withTiming(0, { duration: 160, easing: Easing.out(Easing.quad) });
     hover.value = withTiming(0, { duration: 420 });
   };

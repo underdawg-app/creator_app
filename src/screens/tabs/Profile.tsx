@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
   Text as RNText,
   Dimensions,
   Platform,
+  Pressable,
   ScrollView,
+  Modal,
 } from 'react-native';
 
 const IS_ANDROID = Platform.OS === 'android';
@@ -14,13 +16,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@/icons';
 import { router } from '@/navigation';
 import Animated, {
+  Easing,
   useAnimatedScrollHandler,
+  useAnimatedStyle,
   useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
-import { profileMock, userFeed, type UserFeedItem } from '@/data/mock';
+import { profileMock, userFeed, coursesSeed, type UserFeedItem } from '@/data/mock';
 import { useStore } from '@/store';
 import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
 import { SkiaGrain } from '@/components/skia/SkiaGrain';
@@ -30,14 +35,14 @@ import { BadgePill } from '@/components/ui/BadgePill';
 
 const { width } = Dimensions.get('window');
 
-const SCREEN_PADDING = 24;
+const SCREEN_PADDING = 12;
 const GRID_GAP = 4;
 const VIDEO_GAP = 10;
 const POST_TILE_SIZE = (width - SCREEN_PADDING * 2 - GRID_GAP * 2) / 3;
 const VIDEO_TILE_W = Math.floor((width - SCREEN_PADDING * 2 - VIDEO_GAP) / 2);
 const VIDEO_TILE_H = VIDEO_TILE_W * 1.45;
 
-type FeedTab = 'POSTS' | 'VIDEOS' | 'WRITTEN';
+type FeedTab = 'POSTS' | 'VIDEOS' | 'WRITTEN' | 'LEVEL UP';
 
 /** Single continuous marquee strip below the hero. */
 const LOOP_HEIGHT = 44;
@@ -59,6 +64,7 @@ export default function Profile() {
   const earned = profileMock.stats.earned;
 
   const [tab, setTab] = useState<FeedTab>('POSTS');
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler({
@@ -73,12 +79,6 @@ export default function Profile() {
   const imagePosts = userFeed.filter((i) => i.kind === 'image');
   const videoPosts = userFeed.filter((i) => i.kind === 'video');
   const textPosts = userFeed.filter((i) => i.kind === 'text');
-
-  const tabCount: Record<FeedTab, number> = {
-    POSTS: imagePosts.length,
-    VIDEOS: videoPosts.length,
-    WRITTEN: textPosts.length,
-  };
 
   return (
     <View style={styles.root}>
@@ -109,9 +109,17 @@ export default function Profile() {
           </View>
           <SafeAreaView edges={['top']} style={styles.heroSafe}>
             <View style={styles.heroTopBar}>
-              <RNText style={styles.kicker} maxFontSizeMultiplier={1.1}>
-                YOUR PROFILE
-              </RNText>
+              <Tap
+                onPress={() => router.push('/(modules)/community')}
+                style={styles.profileMenuBtn}
+                burstColor={staticPalette.bone}
+              >
+                <Ionicons name="people-circle-outline" size={18} color={staticPalette.bone} />
+                <RNText style={styles.profileMenuLabel} maxFontSizeMultiplier={1.1}>
+                  COMMUNITY
+                </RNText>
+                <Ionicons name="chevron-forward" size={12} color={staticPalette.bone} />
+              </Tap>
               <Tap
                 onPress={() => router.push('/(modules)/settings')}
                 style={styles.iconBtn}
@@ -123,11 +131,19 @@ export default function Profile() {
 
             {/* Avatar (centered top) + Name block (centered below) */}
             <View style={styles.heroNameAvatarRow}>
-              {/* Avatar circle — centered above the name */}
-              <View style={styles.avatarWrap}>
+              {/* Avatar — tap anywhere on the photo (or the pencil badge) to
+                  open ProfileEdit. Pencil sits on the bottom-right corner,
+                  outside the ring's clipping, so it reads as a sticker. */}
+              <Pressable
+                onPress={() => router.push('/(modules)/profile/edit')}
+                onLongPress={() => setPreviewOpen(true)}
+                delayLongPress={250}
+                style={styles.avatarWrap}
+                hitSlop={6}
+              >
                 <View style={styles.avatarRing}>
                   <Image
-                    source={{ uri: profileMock.avatar }}
+                    source={{ uri: profile.avatar || profileMock.avatar }}
                     style={styles.avatar}
                     cachePolicy="memory-disk"
                     contentFit="cover"
@@ -136,8 +152,10 @@ export default function Profile() {
                     targetWidth={120}
                   />
                 </View>
-                <View style={styles.avatarStatusDot} />
-              </View>
+                <View style={styles.avatarEditPip}>
+                  <Ionicons name="pencil" size={12} color={staticPalette.ink} />
+                </View>
+              </Pressable>
 
               <View style={styles.nameBlock}>
                 <RNText
@@ -156,11 +174,12 @@ export default function Profile() {
             </View>
 
             <View style={styles.metaRow}>
+              {/* Locked at fontSize 16 — no adjustsFontSizeToFit. If the combined
+                  type + location overflows one line we wrap to two; we never
+                  shrink the type. */}
               <RNText
                 style={styles.metaText}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.85}
+                numberOfLines={2}
                 maxFontSizeMultiplier={1.1}
               >
                 {profile.type} · {profile.location}
@@ -304,37 +323,135 @@ export default function Profile() {
           </View>
 
           <View style={styles.tabBar}>
-            <FeedTabBtn
-              active={tab === 'POSTS'}
-              icon="grid-outline"
-              label="POSTS"
-              count={tabCount.POSTS}
-              onPress={() => setTab('POSTS')}
-            />
-            <FeedTabBtn
-              active={tab === 'VIDEOS'}
-              icon="play-circle-outline"
-              label="VIDEOS"
-              count={tabCount.VIDEOS}
-              onPress={() => setTab('VIDEOS')}
-            />
-            <FeedTabBtn
-              active={tab === 'WRITTEN'}
-              icon="reader-outline"
-              label="WRITTEN"
-              count={tabCount.WRITTEN}
-              onPress={() => setTab('WRITTEN')}
-            />
+            <View style={styles.tabSlot}>
+              <FeedTabBtn
+                active={tab === 'POSTS'}
+                icon="grid-outline"
+                onPress={() => setTab('POSTS')}
+              />
+            </View>
+            <View style={styles.tabSlot}>
+              <FeedTabBtn
+                active={tab === 'VIDEOS'}
+                icon="play-circle-outline"
+                onPress={() => setTab('VIDEOS')}
+              />
+            </View>
+            <View style={styles.tabSlot}>
+              <FeedTabBtn
+                active={tab === 'WRITTEN'}
+                icon="reader-outline"
+                onPress={() => setTab('WRITTEN')}
+              />
+            </View>
+            <View style={styles.tabSlot}>
+              <FeedTabBtn
+                active={tab === 'LEVEL UP'}
+                icon="rocket-outline"
+                onPress={() => setTab('LEVEL UP')}
+              />
+            </View>
           </View>
 
           {tab === 'POSTS' ? <PostsGrid items={imagePosts} /> : null}
           {tab === 'VIDEOS' ? <VideosGrid items={videoPosts} /> : null}
           {tab === 'WRITTEN' ? <WrittenList items={textPosts} /> : null}
+          {tab === 'LEVEL UP' ? <LevelUpList /> : null}
         </View>
       </Animated.ScrollView>
+
+      <AvatarPreview
+        visible={previewOpen}
+        uri={profile.avatar || profileMock.avatar}
+        onClose={() => setPreviewOpen(false)}
+      />
     </View>
   );
 }
+
+function AvatarPreview({
+  visible,
+  uri,
+  onClose,
+}: {
+  visible: boolean;
+  uri: string;
+  onClose: () => void;
+}) {
+  // Single shared value drives both backdrop fade + photo scale.
+  const p = useSharedValue(0);
+  useEffect(() => {
+    p.value = withTiming(visible ? 1 : 0, {
+      duration: visible ? 200 : 160,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [visible]);
+
+  const backdrop = useAnimatedStyle(() => ({ opacity: p.value * 0.92 }));
+  const photo = useAnimatedStyle(() => ({
+    opacity: p.value,
+    transform: [{ scale: 0.6 + p.value * 0.4 }],
+  }));
+
+  const big = Math.min(width - 48, 360);
+
+  return (
+    <Modal
+      transparent
+      visible={visible}
+      animationType="none"
+      onRequestClose={onClose}
+      statusBarTranslucent
+    >
+      <Pressable onPress={onClose} style={StyleSheet.absoluteFill}>
+        <Animated.View
+          style={[
+            StyleSheet.absoluteFillObject,
+            { backgroundColor: staticPalette.ink },
+            backdrop,
+          ]}
+        />
+        <View style={previewStyles.center} pointerEvents="none">
+          <Animated.View
+            style={[
+              previewStyles.frame,
+              { width: big, height: big, borderRadius: big / 2 },
+              photo,
+            ]}
+          >
+            <Image
+              source={{ uri }}
+              style={previewStyles.image}
+              cachePolicy="memory-disk"
+              contentFit="cover"
+              transition={100}
+              priority="high"
+              targetWidth={Math.round(big * 2)}
+            />
+          </Animated.View>
+        </View>
+      </Pressable>
+    </Modal>
+  );
+}
+
+const previewStyles = StyleSheet.create({
+  center: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  frame: {
+    overflow: 'hidden',
+    borderWidth: 3,
+    borderColor: staticPalette.acid,
+    backgroundColor: staticPalette.ink,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+});
 
 /* -----------------------------------------------------------------------
  * Feed tabs + per-kind layouts
@@ -343,14 +460,10 @@ export default function Profile() {
 function FeedTabBtn({
   active,
   icon,
-  label,
-  count,
   onPress,
 }: {
   active: boolean;
   icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  count: number;
   onPress: () => void;
 }) {
   const palette = useThemedPalette();
@@ -363,21 +476,9 @@ function FeedTabBtn({
     >
       <Ionicons
         name={icon}
-        size={16}
+        size={20}
         color={active ? palette.bone : palette.ink}
       />
-      <RNText
-        style={[styles.tabLabel, active && { color: palette.bone }]}
-        maxFontSizeMultiplier={1.1}
-      >
-        {label}
-      </RNText>
-      <RNText
-        style={[styles.tabCount, active && { color: palette.acid }]}
-        maxFontSizeMultiplier={1.1}
-      >
-        {count}
-      </RNText>
     </Tap>
   );
 }
@@ -387,15 +488,13 @@ function PostsGrid({ items }: { items: UserFeedItem[] }) {
   const styles = useThemedPaletteStyles(makeStyles);
   return (
     <View style={styles.postsGrid}>
-      {items.map((p, i) => (
+      {items.map((p) => (
         <Tap
           key={p.id}
-          style={[
-            styles.postTile,
-            i === 0 && styles.postTileFeatured,
-            { backgroundColor: palette.ink },
-          ]}
-          onPress={() => router.push('/(modules)/portfolio')}
+          style={[styles.postTile, { backgroundColor: palette.ink }]}
+          onPress={() =>
+            router.push(`/(modules)/profile/post/${p.id}` as any)
+          }
           burstColor={p.accent}
         >
           {p.image ? (
@@ -406,18 +505,6 @@ function PostsGrid({ items }: { items: UserFeedItem[] }) {
               transition={200}
               targetWidth={POST_TILE_SIZE}
             />
-          ) : null}
-          <View style={styles.postTileScrim} pointerEvents="none" />
-          <View style={[styles.postTileAccent, { backgroundColor: p.accent }]} />
-          {i === 0 ? (
-            <View style={styles.postTileMeta}>
-              <RNText style={styles.postTileTitle} numberOfLines={1} maxFontSizeMultiplier={1.1}>
-                {p.title}
-              </RNText>
-              <RNText style={styles.postTileAgo} maxFontSizeMultiplier={1.1}>
-                {p.postedAgo} · {compact(p.likes)} likes
-              </RNText>
-            </View>
           ) : null}
         </Tap>
       ))}
@@ -434,7 +521,9 @@ function VideosGrid({ items }: { items: UserFeedItem[] }) {
         <Tap
           key={v.id}
           style={[styles.videoTile, { backgroundColor: palette.ink }]}
-          onPress={() => router.push('/(modules)/portfolio')}
+          onPress={() =>
+            router.push(`/(modules)/profile/reel/${v.id}` as any)
+          }
           burstColor={v.accent}
         >
           {v.image ? (
@@ -447,46 +536,8 @@ function VideosGrid({ items }: { items: UserFeedItem[] }) {
             />
           ) : null}
           <View style={styles.videoTileScrim} pointerEvents="none" />
-          <View style={styles.videoTileTop}>
-            <View style={[styles.videoCategoryPill, { backgroundColor: v.accent }]}>
-              <RNText style={styles.videoCategoryLabel} maxFontSizeMultiplier={1.1}>
-                {v.category ?? 'VIDEO'}
-              </RNText>
-            </View>
-            {v.duration ? (
-              <View style={styles.videoDurationPill}>
-                <Ionicons name="time-outline" size={11} color={staticPalette.bone} />
-                <RNText style={styles.videoDuration} maxFontSizeMultiplier={1.1}>
-                  {v.duration}
-                </RNText>
-              </View>
-            ) : null}
-          </View>
-          <View style={styles.videoPlayBadge}>
-            <Ionicons name="play" size={22} color={staticPalette.ink} />
-          </View>
-          <View style={styles.videoTileBottom}>
-            <RNText style={styles.videoTileTitle} numberOfLines={1} maxFontSizeMultiplier={1.1}>
-              {v.title}
-            </RNText>
-            <View style={styles.videoTileFoot}>
-              <View style={styles.videoStat}>
-                <Ionicons name="heart" size={11} color={staticPalette.bone} />
-                <RNText style={styles.videoStatText} maxFontSizeMultiplier={1.1}>
-                  {compact(v.likes)}
-                </RNText>
-              </View>
-              <View style={styles.videoStat}>
-                <Ionicons name="chatbubble" size={10} color={staticPalette.bone} />
-                <RNText style={styles.videoStatText} maxFontSizeMultiplier={1.1}>
-                  {compact(v.comments)}
-                </RNText>
-              </View>
-              <View style={{ flex: 1 }} />
-              <RNText style={styles.videoTileAgo} maxFontSizeMultiplier={1.1}>
-                {v.postedAgo}
-              </RNText>
-            </View>
+          <View style={styles.videoPlayMark}>
+            <Ionicons name="play" size={14} color={staticPalette.bone} />
           </View>
         </Tap>
       ))}
@@ -546,6 +597,127 @@ function WrittenList({ items }: { items: UserFeedItem[] }) {
           </View>
         </Tap>
       ))}
+    </View>
+  );
+}
+
+function LevelUpList() {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  const progress = useStore((s) => s.lessonProgress);
+
+  const totalLessons = profileMock ? coursesSeed.reduce((a, c) => a + c.lessons, 0) : 0;
+  const totalDone = coursesSeed.reduce((a, c) => a + (progress[c.id] ?? 0), 0);
+  const pct = totalLessons === 0 ? 0 : Math.round((totalDone / totalLessons) * 100);
+
+  return (
+    <View style={styles.levelUpWrap}>
+      {/* Progress summary card */}
+      <Tap
+        style={styles.levelUpSummary}
+        burstColor={palette.acid}
+        variant="heavy"
+        onPress={() => router.push('/(modules)/learning' as any)}
+      >
+        <View style={styles.levelUpSummaryLeft}>
+          <RNText style={styles.levelUpKicker} maxFontSizeMultiplier={1.1}>
+            LEVEL UP · {coursesSeed.length} COURSES
+          </RNText>
+          <RNText style={styles.levelUpHeadline} maxFontSizeMultiplier={1.1}>
+            <RNText style={styles.levelUpHeadlineAccent}>{totalDone}</RNText>
+            <RNText> of {totalLessons} lessons done.</RNText>
+          </RNText>
+          <View style={styles.levelUpBar}>
+            <View
+              style={[
+                styles.levelUpBarFill,
+                { width: `${pct}%`, backgroundColor: staticPalette.acid },
+              ]}
+            />
+          </View>
+          <RNText style={styles.levelUpBarMeta} maxFontSizeMultiplier={1.1}>
+            {pct}% complete · keep going.
+          </RNText>
+        </View>
+        <View style={styles.levelUpPctBadge}>
+          <RNText style={styles.levelUpPctText}>{pct}%</RNText>
+        </View>
+      </Tap>
+
+      {/* Course cards */}
+      {coursesSeed.map((c) => {
+        const done = progress[c.id] ?? 0;
+        const courseProgress = c.lessons === 0 ? 0 : (done / c.lessons) * 100;
+        const finished = done >= c.lessons;
+        return (
+          <Tap
+            key={c.id}
+            style={[styles.courseCard, { backgroundColor: c.accent }]}
+            burstColor={c.accent}
+            variant="heavy"
+            onPress={() => router.push(`/(modules)/learning/${c.id}` as any)}
+          >
+            <View style={styles.courseHead}>
+              <View style={styles.coursePill}>
+                <RNText style={styles.coursePillLabel} maxFontSizeMultiplier={1.1}>
+                  {c.category}
+                </RNText>
+              </View>
+              {finished ? (
+                <View style={styles.courseDoneTag}>
+                  <Ionicons name="checkmark" size={12} color={staticPalette.bone} />
+                  <RNText style={styles.courseDoneLabel} maxFontSizeMultiplier={1.1}>
+                    DONE
+                  </RNText>
+                </View>
+              ) : null}
+            </View>
+            <RNText
+              style={styles.courseTitle}
+              numberOfLines={3}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+              maxFontSizeMultiplier={1.1}
+            >
+              {c.title}
+            </RNText>
+            <RNText style={styles.courseMeta} maxFontSizeMultiplier={1.1}>
+              {c.instructor} · {c.duration} · {c.lessons} lessons
+            </RNText>
+            <View style={styles.courseBarTrack}>
+              <View
+                style={[
+                  styles.courseBarFill,
+                  { width: `${courseProgress}%` },
+                ]}
+              />
+            </View>
+            <View style={styles.courseFoot}>
+              <RNText style={styles.courseFootText} maxFontSizeMultiplier={1.1}>
+                {done} / {c.lessons} DONE
+              </RNText>
+              <View style={styles.courseFootRight}>
+                <RNText style={styles.courseFootCta} maxFontSizeMultiplier={1.1}>
+                  {finished ? 'REVIEW' : done > 0 ? 'CONTINUE' : 'START'}
+                </RNText>
+                <Ionicons name="arrow-forward" size={13} color={staticPalette.ink} />
+              </View>
+            </View>
+          </Tap>
+        );
+      })}
+
+      <Tap
+        style={styles.levelUpAll}
+        burstColor={palette.acid}
+        onPress={() => router.push('/(modules)/learning' as any)}
+      >
+        <Ionicons name="trophy-outline" size={14} color={palette.ink} />
+        <RNText style={styles.levelUpAllLabel} maxFontSizeMultiplier={1.1}>
+          OPEN LEVEL UP
+        </RNText>
+        <Ionicons name="arrow-forward" size={13} color={palette.ink} />
+      </Tap>
     </View>
   );
 }
@@ -624,7 +796,7 @@ function ProfileSetupStrip() {
       sub: 'show your face',
       icon: 'camera-outline',
       accent: palette.acid,
-      route: '/(modules)/portfolio/edit',
+      route: '/(modules)/profile/edit',
       done: !!profileMock.avatar,
     },
     {
@@ -633,7 +805,7 @@ function ProfileSetupStrip() {
       sub: 'one line on you',
       icon: 'create-outline',
       accent: palette.electric,
-      route: '/(modules)/portfolio/edit',
+      route: '/(modules)/profile/edit',
       done: !!profile.bio && profile.bio.trim().length > 0,
     },
     {
@@ -651,7 +823,7 @@ function ProfileSetupStrip() {
       sub: 'where you are',
       icon: 'location-outline',
       accent: palette.ember,
-      route: '/(modules)/portfolio/edit',
+      route: '/(modules)/profile/edit',
       done: !!profile.location && profile.location.trim().length > 0,
     },
     {
@@ -842,6 +1014,21 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     justifyContent: 'space-between',
   },
   kicker: { ...T.label, color: staticPalette.bone, opacity: 0.7 },
+  profileMenuBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: 'rgba(242,239,230,0.18)',
+  },
+  profileMenuLabel: {
+    ...T.label,
+    color: staticPalette.bone,
+    letterSpacing: 1.8,
+  },
   iconBtn: {
     width: 34,
     height: 34,
@@ -886,6 +1073,22 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     backgroundColor: staticPalette.acid,
     borderWidth: 2,
     borderColor: staticPalette.ink,
+  },
+  // Pencil sticker for "tap the photo to edit profile". Sits at the top-right
+  // corner, opposite the status dot, outside the ring's clipping so it reads
+  // as a chip floating on the photo.
+  avatarEditPip: {
+    position: 'absolute',
+    right: -4,
+    top: -4,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: staticPalette.acid,
+    borderWidth: 2,
+    borderColor: staticPalette.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   /* ---------- Name + Avatar stack (centered) ---------- */
@@ -932,11 +1135,11 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   metaRow: { marginTop: 14, alignItems: 'center' },
   metaText: {
     fontFamily: fonts.bodyMedium,
-    fontSize: 14,
-    lineHeight: 18,
-    letterSpacing: 1.2,
+    fontSize: 16,
+    lineHeight: 20,
+    letterSpacing: 0.6,
     color: staticPalette.bone,
-    opacity: 0.88,
+    opacity: 0.92,
     textAlign: 'center',
   },
 
@@ -1191,28 +1394,16 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     borderWidth: 1,
     borderColor: palette.line,
   },
+  tabSlot: { flex: 1 },
   tabBtn: {
-    flex: 1,
-    flexDirection: 'row',
+    width: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
+    paddingVertical: 12,
     borderRadius: 20,
   },
   tabBtnActive: {
     backgroundColor: palette.ink,
-  },
-  tabLabel: {
-    ...T.button,
-    fontSize: 11,
-    color: palette.ink,
-  },
-  tabCount: {
-    ...T.micro,
-    fontSize: 10,
-    color: palette.mute,
   },
 
   /* ---------- POSTS — Instagram-style 3-col grid ---------- */
@@ -1227,41 +1418,6 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     height: POST_TILE_SIZE,
     overflow: 'hidden',
     borderRadius: 4,
-  },
-  postTileFeatured: {
-    width: POST_TILE_SIZE * 2 + GRID_GAP,
-    height: POST_TILE_SIZE * 2 + GRID_GAP,
-    borderRadius: 8,
-  },
-  postTileScrim: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.18)',
-  },
-  postTileAccent: {
-    position: 'absolute',
-    left: 8,
-    top: 8,
-    width: 22,
-    height: 3,
-    borderRadius: 2,
-  },
-  postTileMeta: {
-    position: 'absolute',
-    left: 12,
-    right: 12,
-    bottom: 12,
-  },
-  postTileTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 18,
-    lineHeight: 20,
-    letterSpacing: -0.6,
-    color: staticPalette.bone,
-  },
-  postTileAgo: {
-    ...T.micro,
-    color: 'rgba(242,239,230,0.78)',
-    marginTop: 4,
   },
 
   /* ---------- VIDEOS — 2-col reel grid ---------- */
@@ -1279,85 +1435,18 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   videoTileScrim: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.32)',
+    backgroundColor: 'rgba(0,0,0,0.18)',
   },
-  videoTileTop: {
+  videoPlayMark: {
     position: 'absolute',
     top: 10,
-    left: 10,
     right: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  videoCategoryPill: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  videoCategoryLabel: {
-    ...T.micro,
-    fontSize: 9,
-    color: staticPalette.ink,
-  },
-  videoDurationPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-    borderRadius: 10,
-    backgroundColor: 'rgba(10,10,10,0.6)',
-  },
-  videoDuration: {
-    ...T.micro,
-    fontSize: 10,
-    color: staticPalette.bone,
-  },
-  videoPlayBadge: {
-    position: 'absolute',
-    alignSelf: 'center',
-    top: '40%',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: staticPalette.acid,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(10,10,10,0.55)',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  videoTileBottom: {
-    position: 'absolute',
-    left: 10,
-    right: 10,
-    bottom: 10,
-  },
-  videoTileTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 14,
-    lineHeight: 16,
-    letterSpacing: -0.4,
-    color: staticPalette.bone,
-  },
-  videoTileFoot: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 6,
-  },
-  videoStat: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  videoStatText: {
-    ...T.micro,
-    fontSize: 10,
-    color: staticPalette.bone,
-  },
-  videoTileAgo: {
-    ...T.micro,
-    fontSize: 10,
-    color: 'rgba(242,239,230,0.7)',
   },
 
   /* ---------- WRITTEN — editorial posts on page surface, hairline-separated ---------- */
@@ -1417,5 +1506,174 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   writtenStatText: {
     ...T.micro,
     color: palette.ink,
+  },
+
+  /* ---------- LEVEL UP — course cards inside the feed ---------- */
+  levelUpWrap: {
+    marginTop: 18,
+    gap: 12,
+  },
+  levelUpSummary: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    padding: 18,
+    borderRadius: 22,
+    backgroundColor: staticPalette.ink,
+    overflow: 'hidden',
+  },
+  levelUpSummaryLeft: { flex: 1, gap: 8 },
+  levelUpKicker: {
+    ...T.label,
+    color: staticPalette.bone,
+    opacity: 0.55,
+  },
+  levelUpHeadline: {
+    fontFamily: fonts.displayBold,
+    fontSize: 22,
+    lineHeight: 24,
+    letterSpacing: -0.6,
+    color: staticPalette.bone,
+  },
+  levelUpHeadlineAccent: {
+    fontFamily: fonts.editorialItalic,
+    color: staticPalette.acid,
+  },
+  levelUpBar: {
+    marginTop: 4,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: 'rgba(242,239,230,0.18)',
+    overflow: 'hidden',
+  },
+  levelUpBarFill: { height: '100%', borderRadius: 3 },
+  levelUpBarMeta: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+    color: 'rgba(242,239,230,0.7)',
+  },
+  levelUpPctBadge: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: staticPalette.acid,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  levelUpPctText: {
+    fontFamily: fonts.displayBold,
+    fontSize: 14,
+    letterSpacing: -0.3,
+    color: staticPalette.ink,
+  },
+
+  courseCard: {
+    padding: 18,
+    borderRadius: 22,
+    gap: 10,
+  },
+  courseHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  coursePill: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: staticPalette.ink,
+  },
+  coursePillLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 1.6,
+    color: staticPalette.ink,
+    textTransform: 'uppercase',
+  },
+  courseDoneTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: staticPalette.ink,
+  },
+  courseDoneLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 1.6,
+    color: staticPalette.bone,
+    textTransform: 'uppercase',
+  },
+  courseTitle: {
+    fontFamily: fonts.displayBold,
+    fontSize: 24,
+    lineHeight: 26,
+    letterSpacing: -0.8,
+    color: staticPalette.ink,
+    marginTop: 4,
+  },
+  courseMeta: {
+    ...T.micro,
+    fontSize: 10,
+    color: staticPalette.ink,
+    opacity: 0.7,
+  },
+  courseBarTrack: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(10,10,10,0.18)',
+    overflow: 'hidden',
+    marginTop: 4,
+  },
+  courseBarFill: { height: '100%', backgroundColor: staticPalette.ink, borderRadius: 3 },
+  courseFoot: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 4,
+  },
+  courseFootText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 1.4,
+    color: staticPalette.ink,
+    opacity: 0.85,
+    textTransform: 'uppercase',
+  },
+  courseFootRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  courseFootCta: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.8,
+    color: staticPalette.ink,
+    textTransform: 'uppercase',
+  },
+
+  levelUpAll: {
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 48,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: palette.line,
+    backgroundColor: palette.paper,
+  },
+  levelUpAllLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 1.6,
+    color: palette.ink,
+    textTransform: 'uppercase',
   },
 });

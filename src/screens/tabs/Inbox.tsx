@@ -651,7 +651,7 @@ const styles = StyleSheet.create({
   },
 
   empty: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
     paddingVertical: 80,
     alignItems: 'center',
     gap: 8,

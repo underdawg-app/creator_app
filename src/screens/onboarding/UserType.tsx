@@ -47,7 +47,7 @@ export default function UserTypeScreen() {
         />
       </View>
 
-      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 24 }}>
+      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 12 }}>
         <View style={styles.topRow}>
           <Pressable
             onPress={() => router.back()}
@@ -226,7 +226,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     color: palette.ink,
     opacity: 0.7,
   },
-  scroll: { paddingHorizontal: 24, paddingTop: 28, paddingBottom: 40 },
+  scroll: { paddingHorizontal: 12, paddingTop: 28, paddingBottom: 40 },
   sub: {
     ...T.body,
     color: palette.ink,
@@ -270,7 +270,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     maxWidth: 300,
   },
 
-  footerSafe: { paddingHorizontal: 24, paddingBottom: 6 },
+  footerSafe: { paddingHorizontal: 12, paddingBottom: 6 },
   hairline: { height: 1, backgroundColor: palette.line },
   footer: {
     flexDirection: 'row',

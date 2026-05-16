@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,34 +7,29 @@ import {
 } from 'react-native';
 import Animated, {
   Easing,
-  interpolate,
-  Extrapolation,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import { palette as staticPalette } from '@/theme/colors';
+import FastImage from '@d11/react-native-fast-image';
+import Video from 'react-native-video';
 import { fonts } from '@/theme/typography';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-/**
- * 3.2 seconds — paced deliberately so every phase reads:
- *   0.00–0.06  ink wash fades in over the old screen
- *   0.08–0.40  color panel slides in from the category's edge
- *   0.28–0.52  kicker + huge word + footer + accent fade in (word mask-revealed)
- *   0.52–0.78  HOLD — full composition visible, cinematic beat
- *   0.78–0.88  content fades out
- *   0.86       destination screen mounts behind the overlay (router.push)
- *   0.86–1.00  color panel + ink slide out in the same direction as entry,
- *              exposing the destination page cleanly
- */
-export const TRANSITION_MS = 3200;
-// Fire navigation well before the exit phase so the destination screen is
-// mounted and ready by the time the overlay starts sliding off.
-const NAVIGATE_AT = 0.62;
+// Slide-in and slide-out at the SAME speed (400ms each) with a 3s hold of
+// video in between. Total visible time = 3.8s after the video has loaded.
+const ENTER_MS = 400;
+const HOLD_MS = 3000;
+const EXIT_MS = 400;
+// Hard cap on how long we wait for the video to deliver its first frame before
+// starting the slide anyway. Avoids the panel sitting off-screen forever if a
+// clip is slow to load or onLoad never fires.
+const MAX_PRELOAD_MS = 600;
+export const TRANSITION_MS = ENTER_MS + HOLD_MS + EXIT_MS; // 3800
+const NAVIGATE_AT_MS = ENTER_MS + 1000; // 1.4s in — leaves 2.4s for step 4 to render
 
 export type TransitionKey =
   | 'visual'
@@ -48,25 +43,36 @@ export type TransitionKey =
   | 'fashion'
   | 'multi';
 
-type CategoryDef = {
-  word: string;
-  kicker: string;
-  footer: string;
-  enterFrom: 'bottom' | 'top' | 'left' | 'right';
-  accent: 'circle' | 'triangle' | 'bars' | 'dot' | 'star' | 'diamond' | 'rings' | 'rec' | 'plus' | 'square';
+type MediaKind = 'video' | 'gif' | null;
+
+const MEDIA: Record<TransitionKey, { kind: MediaKind; source: any }> = {
+  visual:    { kind: 'video', source: require('../../../assets/transitions/visual.mp4') },
+  musician:  { kind: 'video', source: require('../../../assets/transitions/musician.mp4') },
+  video:     { kind: 'video', source: require('../../../assets/transitions/video.mp4') },
+  performer: { kind: 'video', source: require('../../../assets/transitions/performer.mp4') },
+  educator:  { kind: 'video', source: require('../../../assets/transitions/educator.mp4') },
+  streamer:  { kind: 'video', source: require('../../../assets/transitions/streamer.mp4') },
+  writer:    { kind: 'gif',   source: require('../../../assets/transitions/writer.gif') },
+  fashion:   { kind: 'gif',   source: require('../../../assets/transitions/fashion.gif') },
+  podcaster: { kind: null,    source: null },
+  multi:     { kind: null,    source: null },
 };
 
-const CAT: Record<TransitionKey, CategoryDef> = {
-  visual:    { word: 'VISUAL',  kicker: 'N° 01 · VISUAL ART',  footer: 'IMAGES / PAINT / PRINT', enterFrom: 'right',  accent: 'square' },
-  musician:  { word: 'MUSIC',   kicker: 'N° 02 · MUSIC',       footer: 'NOTES / LOOPS / LIVE',  enterFrom: 'bottom', accent: 'bars' },
-  video:     { word: 'VIDEO',   kicker: 'N° 03 · VIDEO',       footer: 'FRAMES / CUT / SHIP',   enterFrom: 'left',   accent: 'triangle' },
-  writer:    { word: 'WORDS',   kicker: 'N° 04 · WRITING',     footer: 'PAGES / INK / VOICE',   enterFrom: 'bottom', accent: 'dot' },
-  performer: { word: 'LIVE',    kicker: 'N° 05 · PERFORMER',   footer: 'STAGE / BODY / SHOW',   enterFrom: 'top',    accent: 'star' },
-  educator:  { word: 'TEACH',   kicker: 'N° 06 · EDUCATOR',    footer: 'BOOKS / SCHOOL / Q&A',  enterFrom: 'left',   accent: 'diamond' },
-  podcaster: { word: 'ON AIR',  kicker: 'N° 07 · PODCASTER',   footer: 'MIC / TAPE / TALK',     enterFrom: 'right',  accent: 'rings' },
-  streamer:  { word: 'STREAM',  kicker: 'N° 08 · STREAMER',    footer: 'LIVE / CHAT / PLAY',    enterFrom: 'bottom', accent: 'rec' },
-  fashion:   { word: 'STYLE',   kicker: 'N° 09 · FASHION',     footer: 'CLOTH / FIT / FEEL',    enterFrom: 'top',    accent: 'diamond' },
-  multi:     { word: 'ALL IN',  kicker: 'N° 10 · MULTI',       footer: 'CRAFT / CROSS / CODE',  enterFrom: 'right',  accent: 'plus' },
+// Editorial-magazine style overlay per category. Kicker sits top-left in
+// uppercase tracked caps; headline sits centered/lower in italic display
+// serif; footer is a small uppercase strip with the brand mark.
+type Copy = { kicker: string; headline: string; footer: string };
+const COPY: Record<TransitionKey, Copy> = {
+  visual:    { kicker: 'N° 01 — VISUAL ART',  headline: 'The frame is the world.',     footer: 'IMAGE · PAINT · PRINT' },
+  musician:  { kicker: 'N° 02 — MUSIC',       headline: 'Notes, before words.',        footer: 'NOTE · LOOP · LIVE' },
+  video:     { kicker: 'N° 03 — VIDEO',       headline: 'Tell it in motion.',          footer: 'FRAME · CUT · SHIP' },
+  writer:    { kicker: 'N° 04 — WRITING',     headline: 'Pages before voices.',        footer: 'PAGE · INK · VOICE' },
+  performer: { kicker: 'N° 05 — PERFORMER',   headline: 'The body remembers.',         footer: 'STAGE · BODY · SHOW' },
+  educator:  { kicker: 'N° 06 — EDUCATOR',    headline: 'What you give, multiplies.',  footer: 'BOOK · CLASS · Q & A' },
+  podcaster: { kicker: 'N° 07 — PODCASTER',   headline: 'Voices in the dark.',         footer: 'MIC · TAPE · TALK' },
+  streamer:  { kicker: 'N° 08 — STREAMER',    headline: 'Live. Always live.',          footer: 'LIVE · CHAT · PLAY' },
+  fashion:   { kicker: 'N° 09 — FASHION',     headline: 'Worn, then known.',           footer: 'CLOTH · FIT · FEEL' },
+  multi:     { kicker: 'N° 10 — MULTI',       headline: 'All of it. At once.',         footer: 'CRAFT · CROSS · CODE' },
 };
 
 type Props = {
@@ -77,376 +83,224 @@ type Props = {
   onComplete: () => void;
 };
 
-export function CategoryTransition({ active, category, color, onMid, onComplete }: Props) {
-  const p = useSharedValue(0);
+export function CategoryTransition({
+  active,
+  category,
+  color,
+  onMid,
+  onComplete,
+}: Props) {
+  // 0 = off-screen LEFT, 1 = covering, 2 = off-screen RIGHT.
+  const slide = useSharedValue(0);
+  const [mediaReady, setMediaReady] = useState(false);
 
+  // Mount the media element as soon as `active` flips. The slide doesn't run
+  // yet — first we wait for the video's onLoad (or the preload cap) so the
+  // first frame is on screen before the panel becomes visible.
   useEffect(() => {
     if (!active || !category) {
-      p.value = 0;
+      slide.value = 0;
+      setMediaReady(false);
       return;
     }
-    p.value = 0;
-    p.value = withTiming(
+
+    const media = MEDIA[category];
+    // GIFs and "no media" categories have nothing meaningful to preload —
+    // start the slide immediately.
+    if (media.kind !== 'video') {
+      setMediaReady(true);
+      return;
+    }
+
+    setMediaReady(false);
+    const capTimer = setTimeout(() => setMediaReady(true), MAX_PRELOAD_MS);
+    return () => clearTimeout(capTimer);
+  }, [active, category]);
+
+  // Once the media is primed, run enter → hold → exit.
+  useEffect(() => {
+    if (!active || !category || !mediaReady) return;
+
+    slide.value = 0;
+    slide.value = withTiming(
       1,
-      { duration: TRANSITION_MS, easing: Easing.bezier(0.5, 0, 0.2, 1) },
-      (finished) => { if (finished) runOnJS(onComplete)(); }
+      { duration: ENTER_MS, easing: Easing.bezier(0.5, 0, 0.2, 1) },
     );
 
-    // One-shot navigate trigger near the end of the hold, so the destination
-    // screen is already mounted when the panel slides off.
+    const exitTimer = setTimeout(() => {
+      slide.value = withTiming(
+        2,
+        { duration: EXIT_MS, easing: Easing.bezier(0.5, 0, 0.2, 1) },
+        (finished) => { if (finished) runOnJS(onComplete)(); },
+      );
+    }, ENTER_MS + HOLD_MS);
+
     const midTimer = setTimeout(() => {
       onMid?.();
-    }, TRANSITION_MS * NAVIGATE_AT);
+    }, NAVIGATE_AT_MS);
 
-    return () => clearTimeout(midTimer);
-  }, [active, category]);
+    return () => {
+      clearTimeout(exitTimer);
+      clearTimeout(midTimer);
+    };
+  }, [mediaReady, active, category]);
 
   if (!active || !category) return null;
 
-  const def = CAT[category];
+  const media = MEDIA[category];
+  const showVideo = media.kind === 'video';
+  const showGif = media.kind === 'gif';
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="auto">
-      <InkCover progress={p} />
-      <ColorCover progress={p} color={color} from={def.enterFrom} />
-      <PanelContent progress={p} def={def} />
+      <SlidingPanel slide={slide} color={color}>
+        {showVideo ? (
+          <Video
+            source={media.source}
+            style={StyleSheet.absoluteFill}
+            resizeMode="cover"
+            repeat
+            paused={false}
+            muted
+            playInBackground={false}
+            ignoreSilentSwitch="ignore"
+            controls={false}
+            // `onReadyForDisplay` fires when the player has actually composited
+            // its first frame — `onLoad` fires earlier (metadata-only) and was
+            // letting the colored panel flash for a frame before the video
+            // surface had pixels.
+            onReadyForDisplay={() => setMediaReady(true)}
+            onError={() => setMediaReady(true)}
+          />
+        ) : null}
+        {showGif ? (
+          <FastImage
+            source={media.source}
+            style={StyleSheet.absoluteFill}
+            resizeMode={FastImage.resizeMode.cover}
+          />
+        ) : null}
+        <View style={styles.scrim} pointerEvents="none" />
+        <EditorialOverlay copy={COPY[category]} />
+      </SlidingPanel>
     </View>
   );
 }
 
-// ── ink + color covers ───────────────────────────────────────────────────
-
-function InkCover({ progress }: { progress: SharedValue<number> }) {
-  const s = useAnimatedStyle(() => ({
-    // Fade up at start, fade down during exit.
-    opacity: interpolate(
-      progress.value,
-      [0, 0.06, 0.82, 0.96],
-      [0, 1, 1, 0],
-      Extrapolation.CLAMP
-    ),
-  }));
-  return (
-    <Animated.View
-      pointerEvents="none"
-      style={[StyleSheet.absoluteFill, { backgroundColor: staticPalette.ink }, s]}
-    />
-  );
-}
-
-function ColorCover({
-  progress, color, from,
+function SlidingPanel({
+  slide,
+  color,
+  children,
 }: {
-  progress: SharedValue<number>;
+  slide: SharedValue<number>;
   color: string;
-  from: 'bottom' | 'top' | 'left' | 'right';
+  children?: React.ReactNode;
 }) {
-  const s = useAnimatedStyle(() => {
-    const v = progress.value;
-    let off = 1; // 1 = fully off-screen in the "from" direction, 0 = covering, -1 = off-screen opposite
+  const s = useAnimatedStyle(() => ({
+    transform: [{ translateX: (slide.value - 1) * width }],
+  }));
 
-    if (v < 0.08) {
-      off = 1; // not yet
-    } else if (v < 0.4) {
-      // entry
-      const t = (v - 0.08) / (0.4 - 0.08);
-      const eased = 1 - Math.pow(1 - t, 3);
-      off = 1 - eased;
-    } else if (v < 0.86) {
-      off = 0; // locked in place
-    } else {
-      // exit — continues through in the same direction the panel was moving
-      const t = (v - 0.86) / (1 - 0.86);
-      const eased = Math.pow(t, 3);
-      off = -eased;
-    }
-
-    return {
-      transform: [
-        { translateX: from === 'left' ? -width * off : from === 'right' ? width * off : 0 },
-        { translateY: from === 'top' ? -height * off : from === 'bottom' ? height * off : 0 },
-      ],
-    };
-  });
   return (
     <Animated.View
-      pointerEvents="none"
       style={[StyleSheet.absoluteFill, { backgroundColor: color }, s]}
-    />
-  );
-}
-
-// ── content layer ────────────────────────────────────────────────────────
-
-function PanelContent({ progress, def }: { progress: SharedValue<number>; def: CategoryDef }) {
-  const outer = useAnimatedStyle(() => ({
-    // Fade in after panel is mostly in, hold, fade out at exit.
-    opacity: interpolate(
-      progress.value,
-      [0.28, 0.44, 0.78, 0.86],
-      [0, 1, 1, 0],
-      Extrapolation.CLAMP
-    ),
-  }));
-
-  return (
-    <Animated.View
-      pointerEvents="none"
-      style={[StyleSheet.absoluteFill, outer]}
     >
-      <KickerStrip progress={progress} label={def.kicker} />
-      <BigWord progress={progress} word={def.word} />
-      <FooterStrip progress={progress} label={def.footer} />
-      <Accent progress={progress} kind={def.accent} />
+      {children}
     </Animated.View>
   );
 }
 
-function KickerStrip({ progress, label }: { progress: SharedValue<number>; label: string }) {
-  const anim = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: interpolate(progress.value, [0.28, 0.46], [-14, 0], Extrapolation.CLAMP) },
-    ],
-  }));
+function EditorialOverlay({ copy }: { copy: Copy }) {
   return (
-    <Animated.View style={[styles.kicker, anim]}>
-      <View style={styles.kickerDot} />
-      <RNText style={styles.kickerText}>{label}</RNText>
-      <View style={styles.kickerLine} />
-    </Animated.View>
-  );
-}
+    <View style={styles.overlay} pointerEvents="none">
+      <View style={styles.kickerRow}>
+        <View style={styles.kickerDot} />
+        <RNText style={styles.kickerText}>{copy.kicker}</RNText>
+        <View style={styles.kickerRule} />
+      </View>
 
-function FooterStrip({ progress, label }: { progress: SharedValue<number>; label: string }) {
-  const anim = useAnimatedStyle(() => ({
-    transform: [
-      { translateY: interpolate(progress.value, [0.34, 0.52], [14, 0], Extrapolation.CLAMP) },
-    ],
-  }));
-  return (
-    <Animated.View style={[styles.footer, anim]}>
-      <View style={styles.footerLine} />
-      <RNText style={styles.footerText}>{label}</RNText>
-      <RNText style={styles.footerText}>MMXXVI</RNText>
-    </Animated.View>
-  );
-}
+      <View style={styles.headlineWrap}>
+        <RNText style={styles.headline} adjustsFontSizeToFit numberOfLines={2} minimumFontScale={0.6}>
+          {copy.headline}
+        </RNText>
+      </View>
 
-/**
- * Single-Text big word with mask reveal. Using one Text (not per-letter)
- * means numberOfLines={1} + adjustsFontSizeToFit can guarantee the word
- * always fits on-screen, even for 'ON AIR' or 'ALL IN'. We still get the
- * cinematic mask reveal via a clipped parent and a translateY.
- */
-function BigWord({ progress, word }: { progress: SharedValue<number>; word: string }) {
-  const maskH = 140;
-
-  const anim = useAnimatedStyle(() => {
-    const inT = interpolate(progress.value, [0.3, 0.52], [0, 1], Extrapolation.CLAMP);
-    const outT = interpolate(progress.value, [0.78, 0.86], [0, 1], Extrapolation.CLAMP);
-    const easedIn = 1 - Math.pow(1 - inT, 3);
-    const easedOut = Math.pow(outT, 3);
-    const y = (1 - easedIn) * maskH - easedOut * maskH * 0.6;
-    return { transform: [{ translateY: y }] };
-  });
-
-  return (
-    <View style={styles.wordWrap}>
-      <View style={[styles.wordClip, { height: maskH }]}>
-        <Animated.Text
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.5}
-          style={[styles.bigWord, anim]}
-        >
-          {word}
-        </Animated.Text>
+      <View style={styles.footerRow}>
+        <RNText style={styles.footerText}>{copy.footer}</RNText>
+        <View style={styles.footerRule} />
+        <RNText style={styles.footerText}>UNDERDAWG · MMXXVI</RNText>
       </View>
     </View>
   );
 }
 
-// ── accent geometry ──────────────────────────────────────────────────────
-
-function Accent({ progress, kind }: { progress: SharedValue<number>; kind: CategoryDef['accent'] }) {
-  const anim = useAnimatedStyle(() => ({
-    transform: [
-      { scale: interpolate(progress.value, [0.42, 0.56, 0.64], [0.6, 1.1, 1], Extrapolation.CLAMP) },
-    ],
-  }));
-
-  return (
-    <Animated.View pointerEvents="none" style={[styles.accent, anim]}>
-      {kind === 'circle' && <View style={styles.acCircle} />}
-      {kind === 'square' && <View style={styles.acSquare} />}
-      {kind === 'triangle' && <View style={styles.acTriangle} />}
-      {kind === 'bars' && <Bars progress={progress} />}
-      {kind === 'dot' && <View style={styles.acDot} />}
-      {kind === 'star' && <Star />}
-      {kind === 'diamond' && <View style={styles.acDiamond} />}
-      {kind === 'rings' && <Rings />}
-      {kind === 'rec' && <Rec />}
-      {kind === 'plus' && <Plus />}
-    </Animated.View>
-  );
-}
-
-function Bars({ progress }: { progress: SharedValue<number> }) {
-  return (
-    <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: 80, gap: 6 }}>
-      {[0, 1, 2, 3, 4].map((i) => (
-        <BarItem key={i} i={i} progress={progress} />
-      ))}
-    </View>
-  );
-}
-
-function BarItem({ i, progress }: { i: number; progress: SharedValue<number> }) {
-  const anim = useAnimatedStyle(() => {
-    const t = interpolate(progress.value, [0.44 + i * 0.02, 0.6 + i * 0.02], [0, 1], Extrapolation.CLAMP);
-    const wave = Math.sin(progress.value * 12 + i * 1.1);
-    const h = 20 + t * (50 + wave * 20);
-    return { height: h };
-  });
-  return <Animated.View style={[{ width: 10, backgroundColor: staticPalette.ink, borderRadius: 5 }, anim]} />;
-}
-
-function Star() {
-  return (
-    <View style={styles.acStar}>
-      {[0, 45, 90, 135].map((r) => (
-        <View key={r} style={[styles.acStarBar, { transform: [{ rotate: `${r}deg` }] }]} />
-      ))}
-    </View>
-  );
-}
-
-function Rings() {
-  return (
-    <View style={styles.acRings}>
-      <View style={[styles.acRing, { width: 90, height: 90, borderRadius: 45 }]} />
-      <View style={[styles.acRing, { width: 60, height: 60, borderRadius: 30, position: 'absolute' }]} />
-      <View style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: staticPalette.ink, position: 'absolute' }} />
-    </View>
-  );
-}
-
-function Rec() {
-  return (
-    <View style={styles.acRec}>
-      <View style={styles.acRecDot} />
-      <RNText style={styles.acRecText}>REC</RNText>
-    </View>
-  );
-}
-
-function Plus() {
-  return (
-    <View style={styles.acPlus}>
-      <View style={styles.acPlusH} />
-      <View style={styles.acPlusV} />
-    </View>
-  );
-}
-
-// ── styles ───────────────────────────────────────────────────────────────
-
-const SIDE_PAD = 28;
+// Editorial overlay sits on top of the video. To read cleanly we treat the
+// whole overlay area as a black surface — heavy scrim, soft off-white type,
+// hairline rules at low opacity. No bright-white blocks, no neon accents.
+const INK = 'rgba(255,255,255,0.92)';
+const RULE = 'rgba(255,255,255,0.28)';
 
 const styles = StyleSheet.create({
-  kicker: {
-    position: 'absolute',
-    top: 84,
-    left: SIDE_PAD,
-    right: SIDE_PAD,
+  scrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.62)',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    paddingHorizontal: 28,
+    paddingTop: 96,
+    paddingBottom: 80,
+    justifyContent: 'space-between',
+  },
+  kickerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  kickerDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: staticPalette.ink },
+  kickerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    borderWidth: 1,
+    borderColor: INK,
+    backgroundColor: 'transparent',
+  },
   kickerText: {
     fontFamily: fonts.bodyBold,
     fontSize: 11,
-    letterSpacing: 2.4,
-    color: staticPalette.ink,
+    letterSpacing: 2.6,
+    color: INK,
     textTransform: 'uppercase',
   },
-  kickerLine: { flex: 1, height: 1, backgroundColor: staticPalette.ink, opacity: 0.2 },
-
-  footer: {
-    position: 'absolute',
-    bottom: 84,
-    left: SIDE_PAD,
-    right: SIDE_PAD,
+  kickerRule: {
+    flex: 1,
+    height: 1,
+    backgroundColor: RULE,
+  },
+  headlineWrap: {
+    paddingRight: 16,
+  },
+  headline: {
+    fontFamily: fonts.editorialItalic,
+    fontSize: 56,
+    lineHeight: 60,
+    letterSpacing: -1.2,
+    color: INK,
+  },
+  footerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
   },
-  footerLine: { width: 14, height: 1, backgroundColor: staticPalette.ink },
   footerText: {
     fontFamily: fonts.bodyBold,
     fontSize: 10,
     letterSpacing: 2.4,
-    color: staticPalette.ink,
+    color: INK,
     textTransform: 'uppercase',
   },
-
-  wordWrap: {
-    position: 'absolute',
-    top: 0, left: SIDE_PAD, right: SIDE_PAD, bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
+  footerRule: {
+    flex: 1,
+    height: 1,
+    backgroundColor: RULE,
   },
-  wordClip: {
-    width: '100%',
-    overflow: 'hidden',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bigWord: {
-    fontFamily: fonts.displayBold,
-    fontSize: 124,
-    lineHeight: 124,
-    letterSpacing: -5,
-    color: staticPalette.ink,
-    textAlign: 'center',
-    width: '100%',
-  },
-
-  accent: {
-    position: 'absolute',
-    top: 160,
-    right: SIDE_PAD,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 100,
-    width: 100,
-  },
-  acCircle: { width: 74, height: 74, borderRadius: 37, backgroundColor: staticPalette.ink },
-  acSquare: { width: 68, height: 68, backgroundColor: staticPalette.ink },
-  acTriangle: {
-    width: 0, height: 0,
-    borderLeftWidth: 40, borderRightWidth: 40, borderBottomWidth: 60,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: staticPalette.ink,
-    transform: [{ rotate: '90deg' }],
-  },
-  acDot: { width: 22, height: 22, borderRadius: 11, backgroundColor: staticPalette.ink },
-  acStar: { width: 84, height: 84, alignItems: 'center', justifyContent: 'center' },
-  acStarBar: { position: 'absolute', width: 84, height: 4, backgroundColor: staticPalette.ink, borderRadius: 2 },
-  acDiamond: { width: 54, height: 54, backgroundColor: staticPalette.ink, transform: [{ rotate: '45deg' }] },
-  acRings: { width: 100, height: 100, alignItems: 'center', justifyContent: 'center' },
-  acRing: { borderWidth: 2, borderColor: staticPalette.ink, position: 'absolute' },
-  acRec: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  acRecDot: { width: 16, height: 16, borderRadius: 8, backgroundColor: '#FF3B30' },
-  acRecText: {
-    fontFamily: fonts.displayBold,
-    fontSize: 26,
-    letterSpacing: -0.6,
-    color: staticPalette.ink,
-  },
-  acPlus: { width: 70, height: 70, alignItems: 'center', justifyContent: 'center' },
-  acPlusH: { position: 'absolute', width: 70, height: 10, backgroundColor: staticPalette.ink },
-  acPlusV: { position: 'absolute', width: 10, height: 70, backgroundColor: staticPalette.ink },
 });

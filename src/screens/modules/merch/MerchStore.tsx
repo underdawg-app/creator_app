@@ -99,7 +99,7 @@ export default function Store() {
 
 const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   strip: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: palette.line },
-  hero: { paddingHorizontal: 24, paddingTop: 22, paddingBottom: 20 },
+  hero: { paddingHorizontal: 12, paddingTop: 22, paddingBottom: 20 },
   kicker: { ...T.label, color: palette.ink, opacity: 0.55 },
   title: {
     fontFamily: fonts.displayBold,
@@ -110,7 +110,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     marginTop: 6,
   },
   italic: { fontFamily: fonts.editorialItalic, color: palette.electric },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 24 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, paddingHorizontal: 12 },
   card: { height: 220, borderRadius: 20, overflow: 'hidden', padding: 14, justifyContent: 'flex-end' },
   cardIcon: { position: 'absolute', right: 14, top: 14, opacity: 0.92 },
   name: { fontFamily: fonts.displayBold, fontSize: 20, letterSpacing: -0.5 },

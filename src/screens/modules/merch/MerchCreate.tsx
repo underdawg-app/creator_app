@@ -198,8 +198,8 @@ export default function CreateProduct() {
           />
           <MagneticButton
             label="BACK"
-            background={palette.bone}
-            foreground={palette.ink}
+            background={staticPalette.acid}
+            foreground={staticPalette.ink}
             onPress={() => setStep(2)}
           />
         </View>

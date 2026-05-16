@@ -52,7 +52,7 @@ export default function Identity() {
         />
       </View>
 
-      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 24 }}>
+      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 12 }}>
         <View style={styles.topRow}>
           <Pressable
             onPress={() => router.back()}
@@ -168,8 +168,8 @@ export default function Identity() {
             </View>
             <MagneticButton
               label="NEXT"
-              background={palette.ink}
-              foreground={palette.bone}
+              background={staticPalette.acid}
+              foreground={staticPalette.ink}
               size="lg"
               disabled={!ready}
               onPress={() => {
@@ -226,15 +226,15 @@ function Field({
             style={[
               styles.pill,
               {
-                backgroundColor: valid ? palette.acid : 'transparent',
-                borderColor: valid ? palette.acid : palette.line,
+                backgroundColor: valid ? staticPalette.acid : 'transparent',
+                borderColor: valid ? staticPalette.acid : palette.line,
               },
             ]}
           >
             <RNText
               style={[
                 styles.pillText,
-                { color: valid ? palette.ink : palette.mute },
+                { color: valid ? staticPalette.ink : palette.mute },
               ]}
             >
               {valid ? 'OK' : 'REQUIRED'}
@@ -301,7 +301,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     color: palette.ink,
     letterSpacing: 1.8,
   },
-  scroll: { paddingHorizontal: 24, paddingTop: 28, paddingBottom: 20 },
+  scroll: { paddingHorizontal: 12, paddingTop: 28, paddingBottom: 20 },
   sub: {
     ...T.body,
     color: palette.ink,
@@ -354,7 +354,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     color: palette.ink,
     paddingVertical: 0,
   },
-  footerSafe: { paddingHorizontal: 24, paddingBottom: 6 },
+  footerSafe: { paddingHorizontal: 12, paddingBottom: 6 },
   hairline: { height: 1, backgroundColor: palette.line },
   footer: {
     flexDirection: 'row',

@@ -13,6 +13,7 @@ import * as Haptics from '@/haptics';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts } from '@/theme/typography';
+import Arena from '@/screens/tabs/Arena';
 import Feed from '@/screens/tabs/Feed';
 import Explore from '@/screens/tabs/Explore';
 import Create from '@/screens/tabs/Create';
@@ -22,11 +23,12 @@ import JobsIndex from '@/screens/modules/jobs/JobsIndex';
 
 const Tab = createBottomTabNavigator();
 
-type ItemKey = 'Feed' | 'Explore' | 'Jobs' | 'Profile';
+type ItemKey = 'Arena' | 'Feed' | 'Explore' | 'Jobs' | 'Profile';
 
 const items: { key: ItemKey; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: 'Feed', label: 'FEED', icon: 'home' },
+  { key: 'Arena', label: 'ARENA', icon: 'trophy' },
   { key: 'Explore', label: 'EXPLORE', icon: 'search' },
+  { key: 'Feed', label: 'FEED', icon: 'home' },
   { key: 'Jobs', label: 'JOBS', icon: 'briefcase' },
   { key: 'Profile', label: 'YOU', icon: 'person' },
 ];
@@ -40,8 +42,8 @@ export default function TabsNavigator() {
       screenOptions={{
         headerShown: false,
         // Don't mount a tab's screen until the user taps it for the first
-        // time. Cuts cold-start work on Android by ~4× because Feed is the
-        // only screen that mounts up front.
+        // time. Cuts cold-start work on Android by ~4× because only the
+        // initial tab (Jobs) mounts up front.
         lazy: true,
         // Pause the inactive tab's React tree the moment it's blurred. Stops
         // every off-screen Skia clock, Reanimated scroll handler, and
@@ -50,8 +52,9 @@ export default function TabsNavigator() {
       }}
       tabBar={renderTabBar}
     >
-      <Tab.Screen name="Feed" component={Feed} />
+      <Tab.Screen name="Arena" component={Arena} />
       <Tab.Screen name="Explore" component={Explore} />
+      <Tab.Screen name="Feed" component={Feed} />
       <Tab.Screen name="Jobs" component={JobsIndex} />
       <Tab.Screen name="Profile" component={Profile} />
       {/* Create is reachable from the Feed header. Hidden tab. */}

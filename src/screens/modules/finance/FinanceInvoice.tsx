@@ -84,8 +84,8 @@ export default function Invoice() {
         />
         <MagneticButton
           label="DOWNLOAD"
-          background={palette.bone}
-          foreground={palette.ink}
+          background={staticPalette.acid}
+          foreground={staticPalette.ink}
           onPress={() => toast('PDF downloaded.', 'success')}
         />
       </View>

@@ -80,6 +80,6 @@ export function ScreenFrame({
 
 const styles = StyleSheet.create({
   root: { flex: 1, overflow: 'hidden' },
-  header: { paddingHorizontal: 24 },
-  contentPadded: { paddingHorizontal: 24, paddingBottom: 120 },
+  header: { paddingHorizontal: 12 },
+  contentPadded: { paddingHorizontal: 12, paddingBottom: 120 },
 });

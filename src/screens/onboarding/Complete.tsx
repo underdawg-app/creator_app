@@ -156,7 +156,7 @@ export default function Complete() {
         style={[{ flex: 1 }, pageStyle]}
         pointerEvents={entering ? 'none' : 'auto'}
       >
-        <SafeAreaView style={{ flex: 1, paddingHorizontal: 24 }}>
+        <SafeAreaView style={{ flex: 1, paddingHorizontal: 12 }}>
           <View style={styles.top}>
             <View style={styles.stepRow}>
               <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />

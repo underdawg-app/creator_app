@@ -73,8 +73,8 @@ export default function ArtDetail() {
         />
         <MagneticButton
           label="BACK"
-          background={palette.bone}
-          foreground={palette.ink}
+          background={staticPalette.acid}
+          foreground={staticPalette.ink}
           onPress={() => router.back()}
         />
       </View>

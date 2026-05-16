@@ -1,25 +1,39 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TextInput, Text as RNText } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TextInput,
+  Text as RNText,
+  ScrollView,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
 import { palette as staticPalette } from '@/theme/colors';
-import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
+import { useTheme } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
-import { ScreenFrame } from '@/components/ui/ScreenFrame';
 import { ModuleHeader } from '@/components/ui/ModuleHeader';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { Chip } from '@/components/ui/Chip';
 import { useStore } from '@/store';
 
+const SURFACE = staticPalette.ink;
+const FG = staticPalette.bone;
+const FG_DIM = 'rgba(242,239,230,0.65)';
+const FG_MUTED = 'rgba(242,239,230,0.45)';
+const CARD_BG = 'rgba(242,239,230,0.06)';
+const CARD_BORDER = 'rgba(242,239,230,0.16)';
+const ACCENT = staticPalette.acid;
+
 export default function TextComposer() {
-  const palette = useThemedPalette();
-  const styles = useThemedPaletteStyles(makeStyles);
+  const { scheme } = useTheme();
+  const inverse = scheme === 'light';
+
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
-  const [kind, setKind] = useState<'TEXT' | 'AUDIO'>('TEXT');
+  const [form, setForm] = useState<'ESSAY' | 'POEM' | 'NOTE'>('ESSAY');
   const publishImmediate = useStore((s) => s.publishImmediate);
   const addDraft = useStore((s) => s.addDraft);
   const toast = useStore((s) => s.toast);
-  const confetti = useStore((s) => s.confetti);
 
   const publish = () => {
     if (!title.trim() && !body.trim()) {
@@ -27,128 +41,148 @@ export default function TextComposer() {
       return;
     }
     publishImmediate({
-      kind,
+      kind: 'TEXT',
       caption: title ? `${title}\n\n${body}` : body,
-      tags: [],
-      color: palette.electric,
-      bg: palette.paper,
-      fg: palette.ink,
+      tags: [form.toLowerCase()],
+      color: ACCENT,
+      bg: SURFACE,
+      fg: FG,
     });
-    confetti();
     toast('Published.', 'success');
     router.replace('/(tabs)');
   };
 
-  return (
-    <ScreenFrame
-      header={<ModuleHeader eyebrow="COMPOSE" title={kind === 'TEXT' ? 'ESSAY / POEM' : 'AUDIO / PODCAST'} />}
-    >
-      <View style={styles.chipRow}>
-        <Chip label="TEXT" active={kind === 'TEXT'} onPress={() => setKind('TEXT')} accent={palette.ember} />
-        <Chip label="AUDIO" active={kind === 'AUDIO'} onPress={() => setKind('AUDIO')} accent={palette.blush} />
-      </View>
+  const saveDraft = () => {
+    addDraft({
+      kind: 'TEXT',
+      caption: title ? `${title}\n\n${body}` : body,
+      tags: [form.toLowerCase()],
+      color: ACCENT,
+      bg: SURFACE,
+      fg: FG,
+    });
+    toast('Draft saved.', 'success');
+    router.replace('/(modules)/studio/drafts');
+  };
 
-      {kind === 'AUDIO' ? (
-        <View style={styles.audioCard}>
-          <View style={styles.audioLevel}>
-            {Array.from({ length: 32 }).map((_, i) => (
-              <View
-                key={i}
-                style={{
-                  width: 3,
-                  height: 12 + (Math.sin(i * 0.8) + 1) * 28,
-                  backgroundColor: palette.acid,
-                  opacity: 0.6 + (i % 3) * 0.15,
-                  borderRadius: 2,
-                }}
+  const wordCount = body.trim().split(/\s+/).filter(Boolean).length;
+
+  return (
+    <View style={styles.root}>
+      <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+        <View style={styles.headerPad}>
+          <ModuleHeader eyebrow="COMPOSE · TEXT" title="WRITE IT" inverse={inverse} />
+        </View>
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+          <View style={styles.chipRow}>
+            {(['ESSAY', 'POEM', 'NOTE'] as const).map((k) => (
+              <Chip
+                key={k}
+                label={k}
+                active={form === k}
+                onPress={() => setForm(k)}
+                accent={staticPalette.ember}
+                inverse={inverse}
               />
             ))}
           </View>
-          <RNText style={styles.audioLabel} maxFontSizeMultiplier={1.15}>
-            TAP TO RECORD · 00:00 / 30:00
-          </RNText>
-        </View>
-      ) : null}
 
-      <View style={styles.field}>
-        <RNText style={styles.label}>TITLE</RNText>
-        <TextInput
-          style={styles.input}
-          value={title}
-          onChangeText={setTitle}
-          placeholder="thirteen small prayers"
-          placeholderTextColor={palette.mute}
-          maxFontSizeMultiplier={1.2}
-        />
-      </View>
+          <View style={styles.field}>
+            <RNText style={styles.label}>TITLE</RNText>
+            <TextInput
+              style={styles.input}
+              value={title}
+              onChangeText={setTitle}
+              placeholder={
+                form === 'POEM'
+                  ? 'thirteen small prayers'
+                  : form === 'NOTE'
+                  ? 'one note, untitled'
+                  : 'on the way home from the studio'
+              }
+              placeholderTextColor={FG_MUTED}
+              maxFontSizeMultiplier={1.2}
+            />
+          </View>
 
-      <View style={styles.field}>
-        <RNText style={styles.label}>{kind === 'AUDIO' ? 'SHOW NOTES' : 'BODY'}</RNText>
-        <TextInput
-          style={[styles.input, { minHeight: 240, textAlignVertical: 'top' }]}
-          value={body}
-          onChangeText={setBody}
-          multiline
-          placeholder={kind === 'AUDIO' ? 'what this episode is about.' : 'write without waiting.'}
-          placeholderTextColor={palette.mute}
-          maxFontSizeMultiplier={1.2}
-        />
-      </View>
+          <View style={styles.field}>
+            <View style={styles.labelRow}>
+              <RNText style={styles.label}>BODY</RNText>
+              <RNText style={styles.wordCount}>{wordCount} words</RNText>
+            </View>
+            <TextInput
+              style={[styles.input, styles.bodyInput]}
+              value={body}
+              onChangeText={setBody}
+              multiline
+              placeholder={
+                form === 'POEM'
+                  ? 'one line at a time.\nbreak where it breathes.'
+                  : 'write without waiting.'
+              }
+              placeholderTextColor={FG_MUTED}
+              maxFontSizeMultiplier={1.2}
+            />
+          </View>
 
-      <View style={styles.actions}>
-        <MagneticButton
-          label="DRAFT"
-          background={palette.bone}
-          foreground={palette.ink}
-          onPress={() => {
-            addDraft({
-              kind,
-              caption: title ? `${title}\n\n${body}` : body,
-              tags: [],
-              color: palette.electric,
-              bg: palette.paper,
-              fg: palette.ink,
-            });
-            toast('Draft saved.', 'success');
-            router.replace('/(modules)/studio/drafts');
-          }}
-        />
-        <MagneticButton
-          label="PUBLISH"
-          size="lg"
-          background={palette.ink}
-          foreground={palette.acid}
-          onPress={publish}
-        />
-      </View>
-    </ScreenFrame>
+          <View style={styles.actions}>
+            <MagneticButton
+              label="DRAFT"
+              background={staticPalette.acid}
+              foreground={staticPalette.ink}
+              onPress={saveDraft}
+            />
+            <MagneticButton
+              label="PUBLISH"
+              size="lg"
+              background={ACCENT}
+              foreground={staticPalette.ink}
+              onPress={publish}
+            />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
 
-const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
-  chipRow: { flexDirection: 'row', gap: 8 },
+const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: SURFACE },
+  headerPad: { paddingHorizontal: 12 },
+  scroll: { paddingHorizontal: 12, paddingBottom: 140 },
+
+  chipRow: { flexDirection: 'row', gap: 8, marginTop: 4 },
   field: { marginTop: 22, gap: 10 },
-  label: { ...T.label, color: palette.ink, opacity: 0.65 },
+  labelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  label: { ...T.label, color: FG, opacity: 0.65, letterSpacing: 1.6 },
+  wordCount: { ...T.micro, color: FG_MUTED },
+
   input: {
     borderWidth: 1,
-    borderColor: palette.line,
+    borderColor: CARD_BORDER,
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontFamily: fonts.body,
     fontSize: 16,
-    color: palette.ink,
-    backgroundColor: palette.paper,
+    color: FG,
+    backgroundColor: CARD_BG,
   },
-  audioCard: {
-    marginTop: 18,
-    borderRadius: 20,
-    backgroundColor: palette.ink,
-    padding: 22,
-    alignItems: 'center',
-    gap: 14,
+  bodyInput: {
+    minHeight: 280,
+    textAlignVertical: 'top',
+    fontFamily: fonts.body,
+    fontSize: 17,
+    lineHeight: 26,
   },
-  audioLevel: { flexDirection: 'row', alignItems: 'center', gap: 3, height: 60 },
-  audioLabel: { ...T.label, color: palette.bone, opacity: 0.7 },
-  actions: { marginTop: 30, flexDirection: 'row', gap: 10 },
+
+  actions: {
+    marginTop: 30,
+    flexDirection: 'row',
+    gap: 10,
+  },
 });

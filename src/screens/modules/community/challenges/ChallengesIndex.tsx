@@ -22,7 +22,7 @@ export default function ChallengesList() {
           <Tap
             key={c.id}
             style={[styles.card, { backgroundColor: c.color }]}
-            onPress={() => router.push(`/(modules)/community/challenges/${c.id}` as any)}
+            onPress={() => router.push(`/(modules)/community/challenges/${c.id}/reel` as any)}
             burstColor={c.color}
           >
             <RNText style={styles.cardTag} numberOfLines={1} maxFontSizeMultiplier={1.1}>

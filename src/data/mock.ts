@@ -447,7 +447,67 @@ export const featuredCreator = {
   nextDrop: 'SATURDAY 19:00 / RESIN SERIES NO. 05',
 };
 
-export const challenges = [
+export type ChallengeAudio = {
+  id: string;
+  title: string;
+  creator: string;
+  durationMs: number;
+  startMs: number;
+};
+
+export type ChallengeEntry = {
+  id: string;
+  uid: string;
+  handle: string;
+  caption: string;
+  videoUrl: string;
+  coverUrl: string;
+  likes: number;
+  comments: number;
+};
+
+export type Challenge = {
+  id: string;
+  tag: string;
+  prompt: string;
+  prize: string;
+  daysLeft: number;
+  entries: number;
+  color: string;
+  audio: ChallengeAudio;
+  reel: ChallengeEntry[];
+};
+
+// Reel videos. Sourced from Mixkit's free CDN — direct mp4 downloads of
+// real creators making things (painting, music, dance, filming). Each is
+// ~3-5 MB / ~15s 720p with audio and streams over a global CDN, so swipes
+// don't stall. URLs verified live before commit. Swap in real submissions
+// once the backend lands.
+//   pattern: https://assets.mixkit.co/videos/{ID}/{ID}-720.mp4
+const M = (id: number) => `https://assets.mixkit.co/videos/${id}/${id}-720.mp4`;
+const VID_PAINTING_OIL = M(12762);     // girl painting an oil painting
+const VID_PAINT_BRUSHES = M(43427);    // an artist's brushes
+const VID_PAINT_PALETTE = M(41611);    // artist mixing paint on a palette
+const VID_PAINT_DETAIL = M(40310);     // detail view of an artist painting
+const VID_GUITARIST = M(42824);        // skillful guitarist on black guitar
+const VID_PIANIST = M(44147);          // hands of a pianist
+const VID_GUITAR_CLOSE = M(483);       // playing guitar close up
+const VID_DANCE_STREET = M(51295);     // young people dancing a choreography in the street
+const VID_DANCE_SMOKE = M(33899);      // woman dancing under a cloud of smoke
+const VID_BREAKDANCE = M(452);         // man breakdancing
+const VID_HIPHOP = M(40369);           // group of hip-hop dancers
+const VID_FILMING_LAKE = M(49647);     // young woman filming a video by the lake
+const VID_CLAPPERBOARD = M(46353);     // using a clapperboard
+const VID_FILMING_CAMERA = M(23485);   // young man recording himself with a camera
+const VID_CAMERAMAN = M(22016);        // cameraman filming in the city
+
+// Creator-themed covers (Unsplash CDN). Each is rewritten with `?w=720` so
+// FastImage downloads a phone-sized JPEG instead of the 3000px original —
+// loads in <200ms on LTE, decodes to ~1 MB of bitmap instead of ~20 MB.
+const COVER = (seed: string) =>
+  `https://images.unsplash.com/photo-${seed}?w=720&auto=format&fit=crop&q=70`;
+
+export const challenges: Challenge[] = [
   {
     id: 'c1',
     tag: '#BONETONES',
@@ -456,6 +516,55 @@ export const challenges = [
     daysLeft: 4,
     entries: 218,
     color: '#D8FF3D',
+    audio: {
+      id: 'a1',
+      title: 'BONETONES LOOP',
+      creator: '@dawnshade',
+      durationMs: 60_000,
+      startMs: 0,
+    },
+    reel: [
+      {
+        id: 'c1-e1',
+        uid: 'u_maya',
+        handle: '@maya_films',
+        caption: 'three colors. one room. one take.',
+        videoUrl: VID_PAINTING_OIL,
+        coverUrl: COVER('1513364776144-60967b0f800f'),
+        likes: 1240,
+        comments: 88,
+      },
+      {
+        id: 'c1-e2',
+        uid: 'u_sola',
+        handle: '@solaroux',
+        caption: 'cyan / oxblood / bone',
+        videoUrl: VID_PAINT_PALETTE,
+        coverUrl: COVER('1452860606245-08befc0ff44b'),
+        likes: 980,
+        comments: 41,
+      },
+      {
+        id: 'c1-e3',
+        uid: 'u_ari',
+        handle: '@ari.s',
+        caption: 'spray + thread + chalk',
+        videoUrl: VID_PAINT_BRUSHES,
+        coverUrl: COVER('1547826039-bfc35e0f1ea8'),
+        likes: 712,
+        comments: 22,
+      },
+      {
+        id: 'c1-e4',
+        uid: 'u_jules',
+        handle: '@jules.iyoha',
+        caption: 'wearable canvas — only three',
+        videoUrl: VID_PAINT_DETAIL,
+        coverUrl: COVER('1545959570-a94084071b5d'),
+        likes: 538,
+        comments: 14,
+      },
+    ],
   },
   {
     id: 'c2',
@@ -465,6 +574,45 @@ export const challenges = [
     daysLeft: 7,
     entries: 96,
     color: '#FF6BB5',
+    audio: {
+      id: 'a2',
+      title: 'NIGHT BUS PULSE',
+      creator: '@kore.odu',
+      durationMs: 45_000,
+      startMs: 4_000,
+    },
+    reel: [
+      {
+        id: 'c2-e1',
+        uid: 'u_kore',
+        handle: '@kore.odu',
+        caption: 'metro line 7 at 11pm',
+        videoUrl: VID_GUITARIST,
+        coverUrl: COVER('1511735111819-9a3f7709049c'),
+        likes: 2210,
+        comments: 174,
+      },
+      {
+        id: 'c2-e2',
+        uid: 'u_ren',
+        handle: '@ren.c',
+        caption: 'bus + boombox + chorus',
+        videoUrl: VID_PIANIST,
+        coverUrl: COVER('1493225457124-a3eb161ffa5f'),
+        likes: 1090,
+        comments: 63,
+      },
+      {
+        id: 'c2-e3',
+        uid: 'u_lin',
+        handle: '@lin.w',
+        caption: 'haiku over the hum',
+        videoUrl: VID_GUITAR_CLOSE,
+        coverUrl: COVER('1485579149621-3123dd979885'),
+        likes: 604,
+        comments: 28,
+      },
+    ],
   },
   {
     id: 'c3',
@@ -474,6 +622,35 @@ export const challenges = [
     daysLeft: 11,
     entries: 52,
     color: '#2E5BFF',
+    audio: {
+      id: 'a3',
+      title: 'MONSOON RUMBLE',
+      creator: '@maya_films',
+      durationMs: 60_000,
+      startMs: 12_000,
+    },
+    reel: [
+      {
+        id: 'c3-e1',
+        uid: 'u_maya',
+        handle: '@maya_films',
+        caption: 'gutter, glass, gold',
+        videoUrl: VID_CAMERAMAN,
+        coverUrl: COVER('1501691223387-dd0506c89d33'),
+        likes: 1820,
+        comments: 134,
+      },
+      {
+        id: 'c3-e2',
+        uid: 'u_ari',
+        handle: '@ari.s',
+        caption: 'minute one — only puddles',
+        videoUrl: VID_CLAPPERBOARD,
+        coverUrl: COVER('1444090542259-0af8fa96557e'),
+        likes: 740,
+        comments: 39,
+      },
+    ],
   },
 ];
 
@@ -485,6 +662,46 @@ export const risingList = [
   { rank: '05', name: 'ARI SAGAWA', handle: '@ari.s', city: 'TOKYO', type: 'DESIGNER', rep: 71 },
   { rank: '06', name: 'LIN WATANABE', handle: '@lin.w', city: 'KYOTO', type: 'POET', rep: 69 },
   { rank: '07', name: 'REN CAMPOS', handle: '@ren.c', city: 'MEXICO CITY', type: 'PRODUCER', rep: 67 },
+];
+
+export type LeaderRow = {
+  rank: number;
+  uid: string;
+  handle: string;
+  name: string;
+  niche: string;
+  city: string;
+  repScore: number;
+  repDelta: number;
+  avatarUrl: string;
+};
+
+const avatarFor = (seed: string) => `https://i.pravatar.cc/200?u=${seed}`;
+
+export const leaderboardWeek: LeaderRow[] = [
+  { rank: 1, uid: 'u_maya', handle: '@maya_films', name: 'MAYA PATEL', niche: 'FILM', city: 'MUMBAI', repScore: 9_840, repDelta: 612, avatarUrl: avatarFor('maya') },
+  { rank: 2, uid: 'u_sola', handle: '@solaroux', name: 'SOLA ROUX', niche: 'VISUAL', city: 'NYC', repScore: 9_510, repDelta: 488, avatarUrl: avatarFor('sola') },
+  { rank: 3, uid: 'u_kore', handle: '@kore.odu', name: 'KOREDE O.', niche: 'MUSIC', city: 'LAGOS', repScore: 9_220, repDelta: 461, avatarUrl: avatarFor('kore') },
+  { rank: 4, uid: 'u_jules', handle: '@jules.iyoha', name: 'JULES IYOHA', niche: 'DANCE', city: 'BERLIN', repScore: 8_960, repDelta: 402, avatarUrl: avatarFor('jules') },
+  { rank: 5, uid: 'u_ari', handle: '@ari.s', name: 'ARI SAGAWA', niche: 'DESIGN', city: 'TOKYO', repScore: 8_710, repDelta: 358, avatarUrl: avatarFor('ari') },
+  { rank: 6, uid: 'u_lin', handle: '@lin.w', name: 'LIN WATANABE', niche: 'POETRY', city: 'KYOTO', repScore: 8_440, repDelta: 314, avatarUrl: avatarFor('lin') },
+  { rank: 7, uid: 'u_ren', handle: '@ren.c', name: 'REN CAMPOS', niche: 'AUDIO', city: 'MEX CITY', repScore: 8_180, repDelta: 287, avatarUrl: avatarFor('ren') },
+  { rank: 8, uid: 'u_dawn', handle: '@dawnshade', name: 'DAWN SHADE', niche: 'MUSIC', city: 'LA', repScore: 7_920, repDelta: 254, avatarUrl: avatarFor('dawn') },
+  { rank: 9, uid: 'u_riv', handle: '@riv.studio', name: 'RIV BASU', niche: 'FILM', city: 'DELHI', repScore: 7_660, repDelta: 221, avatarUrl: avatarFor('riv') },
+  { rank: 10, uid: 'u_neo', handle: '@neo.crt', name: 'NEO CHEN', niche: 'CODE/ART', city: 'TAIPEI', repScore: 7_410, repDelta: 198, avatarUrl: avatarFor('neo') },
+];
+
+export const leaderboardAllTime: LeaderRow[] = [
+  { rank: 1, uid: 'u_sola', handle: '@solaroux', name: 'SOLA ROUX', niche: 'VISUAL', city: 'NYC', repScore: 84_220, repDelta: 488, avatarUrl: avatarFor('sola') },
+  { rank: 2, uid: 'u_maya', handle: '@maya_films', name: 'MAYA PATEL', niche: 'FILM', city: 'MUMBAI', repScore: 78_410, repDelta: 612, avatarUrl: avatarFor('maya') },
+  { rank: 3, uid: 'u_kore', handle: '@kore.odu', name: 'KOREDE O.', niche: 'MUSIC', city: 'LAGOS', repScore: 72_180, repDelta: 461, avatarUrl: avatarFor('kore') },
+  { rank: 4, uid: 'u_dawn', handle: '@dawnshade', name: 'DAWN SHADE', niche: 'MUSIC', city: 'LA', repScore: 68_540, repDelta: 254, avatarUrl: avatarFor('dawn') },
+  { rank: 5, uid: 'u_jules', handle: '@jules.iyoha', name: 'JULES IYOHA', niche: 'DANCE', city: 'BERLIN', repScore: 63_710, repDelta: 402, avatarUrl: avatarFor('jules') },
+  { rank: 6, uid: 'u_ari', handle: '@ari.s', name: 'ARI SAGAWA', niche: 'DESIGN', city: 'TOKYO', repScore: 59_820, repDelta: 358, avatarUrl: avatarFor('ari') },
+  { rank: 7, uid: 'u_ren', handle: '@ren.c', name: 'REN CAMPOS', niche: 'AUDIO', city: 'MEX CITY', repScore: 54_300, repDelta: 287, avatarUrl: avatarFor('ren') },
+  { rank: 8, uid: 'u_lin', handle: '@lin.w', name: 'LIN WATANABE', niche: 'POETRY', city: 'KYOTO', repScore: 48_910, repDelta: 314, avatarUrl: avatarFor('lin') },
+  { rank: 9, uid: 'u_riv', handle: '@riv.studio', name: 'RIV BASU', niche: 'FILM', city: 'DELHI', repScore: 41_240, repDelta: 221, avatarUrl: avatarFor('riv') },
+  { rank: 10, uid: 'u_neo', handle: '@neo.crt', name: 'NEO CHEN', niche: 'CODE/ART', city: 'TAIPEI', repScore: 38_770, repDelta: 198, avatarUrl: avatarFor('neo') },
 ];
 
 export const weeklyHeadline = {
@@ -1289,11 +1506,111 @@ export const eventsSeed = [
   { id: 'e3', title: 'RESIN CLASS — LEVEL 01', date: 'JUN 02', host: 'RESIN + POUR', rsvps: 58, accent: '#FF6BB5' },
 ];
 
-export const communityPostsSeed = [
-  { id: 'cp1', from: '@maya_films', kind: 'WIN', body: 'AFTER WATER just got into a festival. year-making.', ago: '2h' },
-  { id: 'cp2', from: '@kore.odu', kind: 'STRUGGLE', body: 'three versions of NIGHT BUS. none feel finished. send ears.', ago: '5h' },
-  { id: 'cp3', from: '@lin.w', kind: 'TIP', body: 'self-publish your poems as zines. people still buy paper.', ago: '1d' },
-  { id: 'cp4', from: '@ari.s', kind: 'RESOURCE', body: 'brutalist type specimens — free bundle → inside WOMEN WHO PAINT', ago: '1d' },
+// Community post taxonomy per Module 13 spec (8 types).
+export type CommunityPostKind =
+  | 'DISCUSSION'
+  | 'QUESTION'
+  | 'WIN'
+  | 'STRUGGLE'
+  | 'TIP'
+  | 'RESOURCE'
+  | 'COLLAB'
+  | 'FEEDBACK';
+
+export const communityPostsSeed: Array<{
+  id: string;
+  from: string;
+  kind: CommunityPostKind;
+  body: string;
+  ago: string;
+  likes: number;
+  comments: number;
+}> = [
+  { id: 'cp1', from: '@maya_films',  kind: 'WIN',        body: 'AFTER WATER just got into a festival. year-making.',                              ago: '2h',  likes: 218, comments: 34 },
+  { id: 'cp2', from: '@kore.odu',    kind: 'STRUGGLE',   body: 'three versions of NIGHT BUS. none feel finished. send ears.',                    ago: '5h',  likes: 92,  comments: 41 },
+  { id: 'cp3', from: '@lin.w',       kind: 'TIP',        body: 'self-publish your poems as zines. people still buy paper.',                      ago: '1d',  likes: 184, comments: 22 },
+  { id: 'cp4', from: '@ari.s',       kind: 'RESOURCE',   body: 'brutalist type specimens — free bundle → inside WOMEN WHO PAINT',                ago: '1d',  likes: 312, comments: 18 },
+  { id: 'cp5', from: '@deepfield',   kind: 'DISCUSSION', body: 'is selling prints "selling out"? been wrestling with this for months.',          ago: '4h',  likes: 67,  comments: 96 },
+  { id: 'cp6', from: '@tori.d',      kind: 'QUESTION',   body: 'what actually moves the needle on tiktok in 2026 for visual artists? real talk.', ago: '6h',  likes: 58,  comments: 71 },
+  { id: 'cp7', from: '@jules.iyoha', kind: 'COLLAB',     body: 'looking for a poet for a 3-minute vertical film. brooklyn. paid. dm.',           ago: '8h',  likes: 41,  comments: 12 },
+  { id: 'cp8', from: '@nyla.collect',kind: 'FEEDBACK',   body: 'rough cut of CICLOS TRACK 02 — be brutal, please. (link in profile)',           ago: '12h', likes: 33,  comments: 28 },
+];
+
+// --- Groups, Events, Mentors, Q&A, Polls (Module 13) -----------------------
+
+export type CommunityGroupKind = 'NICHE' | 'LOCATION' | 'INTEREST' | 'PRIVATE';
+export const communityGroupsSeed: Array<{
+  id: string;
+  name: string;
+  kind: CommunityGroupKind;
+  members: number;
+  blurb: string;
+  accent: string;
+}> = [
+  { id: 'cg1', name: 'WOMEN WHO PAINT',      kind: 'NICHE',    members: 4_820, blurb: 'painters · printmakers · resin obsessives',  accent: '#D8FF3D' },
+  { id: 'cg2', name: 'BROOKLYN CREATORS',    kind: 'LOCATION', members: 2_140, blurb: 'studios · shows · meet-ups within the BK',     accent: '#2E5BFF' },
+  { id: 'cg3', name: 'VERTICAL FILMMAKERS',  kind: 'INTEREST', members: 6_310, blurb: 'short-form film, ig + tiktok native',         accent: '#FF6BB5' },
+  { id: 'cg4', name: 'THE BACK ROOM',        kind: 'PRIVATE',  members: 48,    blurb: 'invite-only — verified senior creators',      accent: '#FF5A1F' },
+];
+
+export const communityEventsSeed: Array<{
+  id: string;
+  title: string;
+  kind: 'MEETUP' | 'WEBINAR' | 'AMA' | 'WORKSHOP';
+  host: string;
+  when: string;
+  location: string;
+  rsvps: number;
+  accent: string;
+}> = [
+  { id: 'ev1', title: 'PORTFOLIO TEARDOWN',         kind: 'WEBINAR',  host: 'Maya Patel',       when: 'Thu · 19:00', location: 'Online',           rsvps: 412, accent: '#D8FF3D' },
+  { id: 'ev2', title: 'BROOKLYN OPEN STUDIOS',      kind: 'MEETUP',   host: 'BK Creators',      when: 'Sat · 14:00', location: 'Williamsburg',     rsvps: 188, accent: '#2E5BFF' },
+  { id: 'ev3', title: 'PRICING AMA — RAISE YOUR RATES', kind: 'AMA',  host: 'Underdawg Legal',  when: 'Sun · 11:00', location: 'Online',           rsvps: 264, accent: '#FF6BB5' },
+];
+
+export const mentorsSeed: Array<{
+  id: string;
+  handle: string;
+  name: string;
+  expertise: string;
+  rate: string;
+  avail: 'OPEN' | 'WAITLIST' | 'FULL';
+  rating: number;
+  reviews: number;
+  accent: string;
+}> = [
+  { id: 'm1', handle: '@maya_films',   name: 'Maya Patel',      expertise: 'PRICING · CLIENT WORK', rate: '$120 / hr', avail: 'OPEN',     rating: 4.9, reviews: 64, accent: '#D8FF3D' },
+  { id: 'm2', handle: '@kore.odu',     name: 'Kore Odu',        expertise: 'MUSIC PRODUCTION',      rate: '$95 / hr',  avail: 'WAITLIST', rating: 4.8, reviews: 42, accent: '#2E5BFF' },
+  { id: 'm3', handle: '@lin.w',        name: 'Lin Wei',         expertise: 'WRITING · ZINES',       rate: 'FREE',      avail: 'OPEN',     rating: 5.0, reviews: 22, accent: '#FF6BB5' },
+];
+
+export const qaSeed: Array<{ id: string; from: string; question: string; answers: number; ago: string }> = [
+  { id: 'qa1', from: '@nyla.collect',  question: 'how do you price a 6-piece commission for a hotel chain?',          answers: 14, ago: '3h' },
+  { id: 'qa2', from: '@ari.s',         question: 'best print-on-demand for archival giclée? (US shipping)',           answers: 9,  ago: '7h' },
+  { id: 'qa3', from: '@deepfield',     question: 'how do you handle a client ghosting after a deposit?',              answers: 22, ago: '1d' },
+];
+
+export const pollsSeed: Array<{
+  id: string;
+  from: string;
+  question: string;
+  options: Array<{ key: string; label: string; votes: number }>;
+  totalVotes: number;
+  ago: string;
+}> = [
+  {
+    id: 'pl1',
+    from: '@maya_films',
+    question: 'where do you actually find paid commissions?',
+    options: [
+      { key: 'ig',  label: 'INSTAGRAM DMs',     votes: 124 },
+      { key: 'rep', label: 'REPEAT CLIENTS',    votes: 312 },
+      { key: 'ref', label: 'WORD OF MOUTH',     votes: 248 },
+      { key: 'pl',  label: 'A PLATFORM (?)',    votes: 41 },
+    ],
+    totalVotes: 725,
+    ago: '5h',
+  },
 ];
 
 /* -------------------------------------------------------------------------
@@ -1351,12 +1668,12 @@ export const lessonsSample = [
  * MODULE 3 — STUDIO (content types)
  * ----------------------------------------------------------------------- */
 export const contentTypes = [
-  { key: 'image', name: 'IMAGE', sub: 'single or carousel', accent: '#D8FF3D', route: '/(modules)/studio/image-composer' },
-  { key: 'video', name: 'VIDEO', sub: 'short or long form', accent: '#2E5BFF', route: '/(modules)/studio/video-composer' },
-  { key: 'audio', name: 'AUDIO', sub: 'track, clip, podcast', accent: '#FF6BB5', route: '/(modules)/studio/text-composer' },
+  { key: 'image', name: 'IMAGE', sub: 'capture or pick from gallery', accent: '#D8FF3D', route: '/(modules)/camera?mode=PHOTO' },
+  { key: 'video', name: 'VIDEO', sub: 'record or pick from gallery', accent: '#2E5BFF', route: '/(modules)/camera?mode=VIDEO' },
+  { key: 'audio', name: 'AUDIO', sub: 'track, clip, podcast', accent: '#FF6BB5', route: '/(modules)/studio/audio-composer' },
   { key: 'text', name: 'TEXT', sub: 'essay, poem, note', accent: '#FF5A1F', route: '/(modules)/studio/text-composer' },
-  { key: 'story', name: 'STORY', sub: '24h ephemeral', accent: '#D8FF3D', route: '/(modules)/studio/image-composer' },
-  { key: 'live', name: 'LIVE', sub: 'go live, in real time', accent: '#FF5A1F', route: '/(modules)/studio/video-composer' },
+  { key: 'story', name: 'STORY', sub: '24h ephemeral', accent: '#D8FF3D', route: '/(modules)/camera?mode=STORY' },
+  { key: 'live', name: 'LIVE', sub: 'go live, in real time', accent: '#FF5A1F', route: '/(modules)/studio/live-composer' },
 ];
 
 /* -------------------------------------------------------------------------

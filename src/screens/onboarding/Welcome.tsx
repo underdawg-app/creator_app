@@ -294,7 +294,7 @@ function Slide({
   });
 
   return (
-    <View style={{ width, paddingHorizontal: 24, flex: 1 }}>
+    <View style={{ width, paddingHorizontal: 12, flex: 1 }}>
       {/* Kicker row with asterisk */}
       <View style={styles.slideHeader}>
         <Asterisk size={14} color={item.fg} strokeWidth={1.4} />
@@ -388,7 +388,7 @@ function Slide({
 
 const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   root: { flex: 1 },
-  topSafe: { paddingHorizontal: 24 },
+  topSafe: { paddingHorizontal: 12 },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -442,7 +442,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
 
   bottomSafe: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
     paddingBottom: 16,
     paddingTop: 0,
   },
