@@ -1,54 +1,28 @@
 import React, { useCallback } from 'react';
 import { Pressable, PressableProps, ViewStyle } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
 import * as Haptics from '@/haptics';
 
 type Props = PressableProps & {
+  /** No-op — kept for API compatibility after the press-scale removal. */
   scaleTo?: number;
   haptic?: 'light' | 'medium' | 'soft' | 'rigid' | 'none';
   style?: ViewStyle | ViewStyle[];
   children: React.ReactNode;
 };
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
+/**
+ * Originally a press-scale spring. Removed app-wide at the user's request —
+ * every press now commits state changes with zero visual bounce. Haptic
+ * still fires on commit.
+ */
 export function PressableScale({
-  scaleTo = 0.96,
+  scaleTo: _scaleTo,
   haptic = 'light',
   style,
-  onPressIn,
-  onPressOut,
   onPress,
   children,
   ...rest
 }: Props) {
-  const s = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: s.value }],
-  }));
-
-  const handlePressIn = useCallback(
-    (e: any) => {
-      s.value = withSpring(scaleTo, { mass: 0.3, damping: 14, stiffness: 280 });
-      onPressIn?.(e);
-    },
-    [scaleTo, onPressIn, s]
-  );
-
-  const handlePressOut = useCallback(
-    (e: any) => {
-      s.value = withSpring(1, { mass: 0.3, damping: 12, stiffness: 240 });
-      onPressOut?.(e);
-    },
-    [onPressOut, s]
-  );
-
   const handlePress = useCallback(
     (e: any) => {
       if (haptic !== 'none') {
@@ -66,14 +40,12 @@ export function PressableScale({
   );
 
   return (
-    <AnimatedPressable
+    <Pressable
       {...rest}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
       onPress={handlePress}
-      style={[style as any, animatedStyle]}
+      style={style as any}
     >
       {children}
-    </AnimatedPressable>
+    </Pressable>
   );
 }

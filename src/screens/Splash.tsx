@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Dimensions, Text as RNText, Platform } from 'react-native';
+import { View, StyleSheet, Dimensions, Text as RNText, Platform, Image as RNImage } from 'react-native';
 
 const IS_ANDROID = Platform.OS === 'android';
 import { router } from '@/navigation';
@@ -15,7 +15,27 @@ import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import { SkiaGrain } from '@/components/skia/SkiaGrain';
 import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
-import { AnimatedSignet } from '@/components/svg/AnimatedSignet';
+const BRAND_WORDMARK = require('@/objects/brand-splash.png');
+// Every bundled image the app uses, rendered invisibly below at 1×1 so the
+// PNG decoder warms the bitmap cache during splash. By the time the user
+// reaches the first real screen, none of these have to decode-on-render —
+// they paint instantly. Includes brand marks (header/tab-bar/splash) and
+// every decorative `obj-*.png` used across onboarding + auth + complete.
+const PRELOAD_ASSETS = [
+  require('@/objects/brand-logo.png'),
+  require('@/objects/brand-wordmark.png'),
+  require('@/objects/brand-splash.png'),
+  require('@/objects/obj-1.png'),
+  require('@/objects/obj-2.png'),
+  require('@/objects/obj-3.png'),
+  require('@/objects/obj-4.png'),
+  require('@/objects/obj-5.png'),
+  require('@/objects/obj-6.png'),
+  require('@/objects/obj-7.png'),
+  require('@/objects/obj-8.png'),
+  require('@/objects/obj-9.png'),
+  require('@/objects/obj-10.png'),
+];
 import { RuleDot, Asterisk } from '@/components/svg/Marks';
 import { prefetchImages } from '@/components/ui/Image';
 import { feedPosts, profileMock, userFeed } from '@/data/mock';
@@ -34,15 +54,22 @@ let CACHE_PREWARMED = false;
 function prewarmImageCache() {
   if (CACHE_PREWARMED) return;
   CACHE_PREWARMED = true;
-  // First 12 feed posts cover the initial visible window + a couple of
-  // off-screen-prefetch rows. Each is requested at the actual display size
-  // so the disk-cache key matches what Feed will ask for at render time.
-  const feedCovers = feedPosts.slice(0, 12).map((p) => ({
+  // Pre-warm FastImage's memory + disk cache for every remote URL the app
+  // will likely render in the first session. Splits into priority tiers so
+  // the visible-first-paint covers download first.
+  // HIGH: the initial feed window + every avatar (small, fast, ubiquitous).
+  // NORMAL: the rest of the feed gallery + user-feed grid.
+  const feedCoversHigh = feedPosts.slice(0, 12).map((p) => ({
     uri: p.image,
     targetWidth: width,
     priority: 'high' as const,
   }));
-  const feedAvatars = feedPosts.slice(0, 16).map((p) => ({
+  const feedCoversRest = feedPosts.slice(12).map((p) => ({
+    uri: p.image,
+    targetWidth: width,
+    priority: 'normal' as const,
+  }));
+  const feedAvatars = feedPosts.map((p) => ({
     uri: p.avatar,
     targetWidth: 42,
     priority: 'high' as const,
@@ -50,7 +77,6 @@ function prewarmImageCache() {
   const profile = [
     { uri: profileMock.avatar, targetWidth: 120, priority: 'high' as const },
     ...userFeed
-      .slice(0, 6)
       .filter((u): u is typeof u & { image: string } => typeof u.image === 'string')
       .map((u) => ({
         uri: u.image,
@@ -58,7 +84,12 @@ function prewarmImageCache() {
         priority: 'normal' as const,
       })),
   ];
-  prefetchImages([...feedCovers, ...feedAvatars, ...profile]);
+  prefetchImages([
+    ...feedCoversHigh,
+    ...feedAvatars,
+    ...profile,
+    ...feedCoversRest,
+  ]);
 }
 
 export default function Splash() {
@@ -175,24 +206,15 @@ export default function Splash() {
         <View style={styles.hairline} />
       </Animated.View>
 
-      {/* Center mark + wordmark */}
+      {/* Center wordmark */}
       <View style={styles.center}>
-        <Animated.View style={[styles.markWrap, markStyle]}>
-          <AnimatedSignet size={124} color={palette.bone} accent={palette.acid} />
+        <Animated.View style={[styles.wordmark, markStyle]}>
+          <RNImage
+            source={BRAND_WORDMARK}
+            style={styles.brandWordmark}
+            resizeMode="contain"
+          />
         </Animated.View>
-
-        <View style={styles.wordmark}>
-          <View style={styles.lineClip}>
-            <Animated.Text
-              style={[styles.word, wordStyle]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.5}
-            >
-              UNDER<Animated.Text style={styles.wordAccent}>DAWGS</Animated.Text>
-            </Animated.Text>
-          </View>
-        </View>
 
         <Animated.View style={[styles.tagline, taglineStyle]}>
           <RuleDot width={180} color={palette.bone} dotColor={palette.acid} />
@@ -234,11 +256,35 @@ export default function Splash() {
           tint={[1, 1, 1, 0.16]}
         />
       )}
+
+      {/* Off-screen preloaders — force RN to decode brand PNGs so the
+          headers (Feed/Explore/Welcome) and tab-bar logo render instantly
+          on first mount after splash. 1×1 px, fully transparent, behind
+          everything, never touched by the user. */}
+      <View
+        pointerEvents="none"
+        style={styles.preloader}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      >
+        {PRELOAD_ASSETS.map((src, i) => (
+          <RNImage key={i} source={src} style={styles.preloaderImg} />
+        ))}
+      </View>
     </View>
   );
 }
 
 const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
+  preloader: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: 1,
+    height: 1,
+    opacity: 0,
+  },
+  preloaderImg: { width: 1, height: 1 },
   root: {
     flex: 1,
     backgroundColor: palette.bone,
@@ -276,32 +322,13 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 12,
   },
-  markWrap: {
-    marginBottom: 28,
-  },
   wordmark: {
     alignSelf: 'stretch',
     alignItems: 'center',
   },
-  lineClip: {
-    width: '100%',
-    overflow: 'hidden',
-    alignItems: 'center',
-  },
-  word: {
-    fontFamily: fonts.displayBold,
-    fontSize: 54,
-    lineHeight: 58,
-    letterSpacing: -2.2,
-    color: palette.ink,
-    textAlign: 'center',
-  },
-  wordAccent: {
-    fontFamily: fonts.displayBold,
-    fontSize: 54,
-    lineHeight: 58,
-    letterSpacing: -2.2,
-    color: palette.acid,
+  brandWordmark: {
+    width: Math.min(width * 0.85, 380),
+    height: Math.min(width * 0.85, 380),
   },
 
   tagline: {

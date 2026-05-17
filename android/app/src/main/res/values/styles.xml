@@ -7,13 +7,13 @@
     <item name="android:windowBackground">@color/activityBackground</item>
   </style>
 
-  <!-- BootTheme: extends bootsplash's parent (which itself descends from
-       Theme.AppCompat) so MainActivity's AppCompat features work. The
-       `postBootSplashTheme` attr tells bootsplash which theme to swap to
-       once init() runs. -->
-  <style name="BootTheme" parent="Theme.BootSplash">
-    <item name="bootSplashBackground">@color/bootsplash_background</item>
-    <item name="bootSplashLogo">@drawable/splashscreen_logo</item>
-    <item name="postBootSplashTheme">@style/AppTheme</item>
+  <!-- BootTheme: self-contained launch theme. Was `parent="Theme.BootSplash"`
+       which pulled three custom attrs from the react-native-bootsplash AAR.
+       Bootsplash's Android autolink is now disabled (it crashed Android 9–11),
+       so we extend AppTheme directly and use a hand-rolled layer-list
+       drawable as the window background. Result is visually identical to
+       the prior native splash: brand logo centered on a black background. -->
+  <style name="BootTheme" parent="AppTheme">
+    <item name="android:windowBackground">@drawable/bootsplash_layer</item>
   </style>
 </resources>

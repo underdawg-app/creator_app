@@ -39,6 +39,8 @@ const STATIC: Record<string, ParseResult> = {
 
   '/(modules)/camera': { stack: 'Modules', screen: 'Camera' },
 
+  '/(modules)/notifications': { stack: 'Modules', screen: 'NotificationsIndex' },
+
   '/(modules)/settings': { stack: 'Modules', screen: 'SettingsIndex' },
   '/(modules)/settings/account': { stack: 'Modules', screen: 'SettingsAccount' },
   '/(modules)/settings/notifications': { stack: 'Modules', screen: 'SettingsNotifications' },

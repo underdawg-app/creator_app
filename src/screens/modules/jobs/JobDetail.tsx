@@ -1,5 +1,12 @@
-import React from 'react';
-import { View, StyleSheet, Text as RNText } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  StyleSheet,
+  Text as RNText,
+  ScrollView,
+  Pressable,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from '@/navigation';
 import { palette as staticPalette } from '@/theme/colors';
 import {
@@ -7,13 +14,14 @@ import {
   useThemedPaletteStyles,
 } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
-import { ScreenFrame } from '@/components/ui/ScreenFrame';
-import { ModuleHeader } from '@/components/ui/ModuleHeader';
-import { MagneticButton } from '@/components/ui/MagneticButton';
+import { Ionicons } from '@/icons';
 import { Tap } from '@/components/ui/Tap';
-import { Asterisk } from '@/components/svg/Marks';
 import { jobsSeed } from '@/data/mock';
 import { useStore } from '@/store';
+
+/* -------------------------------------------------------------------------
+ * Helpers
+ * ----------------------------------------------------------------------- */
 
 const formatINR = (n: number) =>
   n >= 100000
@@ -22,24 +30,50 @@ const formatINR = (n: number) =>
 
 const daysUntil = (iso: string) => {
   const target = new Date(iso).getTime();
-  const days = Math.ceil((target - Date.now()) / (1000 * 60 * 60 * 24));
-  return days;
+  return Math.ceil((target - Date.now()) / (1000 * 60 * 60 * 24));
 };
 
-function readableOn(hex: string) {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-  const isDark = luma < 145;
-  return {
-    fg: isDark ? staticPalette.bone : staticPalette.ink,
-    mute: isDark ? 'rgba(242,239,230,0.7)' : 'rgba(10,10,10,0.7)',
-    line: isDark ? 'rgba(242,239,230,0.18)' : 'rgba(10,10,10,0.14)',
-    isDark,
-  };
+function experienceLevel(budgetMax: number) {
+  if (budgetMax >= 200000) return 'Expert';
+  if (budgetMax >= 80000) return 'Intermediate';
+  return 'Entry';
 }
+
+function postedAgo(id: string) {
+  switch (id) {
+    case 'j1': return '1 hour ago';
+    case 'j2': return '3 hours ago';
+    case 'j3': return '13 hours ago';
+    case 'j4': return 'yesterday';
+    case 'j5': return '2 days ago';
+    case 'j6': return '4 days ago';
+    default: return '1 day ago';
+  }
+}
+
+function proposalRange(n: number) {
+  if (n >= 50) return '50+';
+  if (n >= 30) return '30 to 50';
+  if (n >= 20) return '20 to 30';
+  if (n >= 10) return '10 to 20';
+  if (n >= 5) return '5 to 10';
+  return 'less than 5';
+}
+
+function jobTags(niche: string, type: string): string[] {
+  const tags = new Set<string>([niche]);
+  if (type.includes('VIDEO')) { tags.add('Video Editing'); tags.add('Reels'); }
+  if (type.includes('UGC')) { tags.add('UGC'); tags.add('Storytelling'); }
+  if (type.includes('SPONSORED')) { tags.add('Content Creation'); tags.add('Brand Posts'); }
+  if (type.includes('AMBASSADOR')) { tags.add('Long-form'); tags.add('Retainer'); }
+  if (type.includes('PRODUCT REVIEW')) { tags.add('Review Videos'); tags.add('Honest Reviews'); }
+  if (type.includes('GET VIRAL')) { tags.add('Coordinated Drop'); tags.add('Multi-creator'); }
+  return Array.from(tags).slice(0, 6);
+}
+
+/* -------------------------------------------------------------------------
+ * Screen
+ * ----------------------------------------------------------------------- */
 
 export default function JobDetail() {
   const palette = useThemedPalette();
@@ -48,395 +82,577 @@ export default function JobDetail() {
   const job = jobsSeed.find((j) => j.id === id);
   const applied = useStore((s) => s.applications.some((a) => a.jobId === id));
   const toast = useStore((s) => s.toast);
+  const [saved, setSaved] = useState(false);
 
   if (!job) {
     return (
-      <ScreenFrame header={<ModuleHeader title="NOT FOUND" />}>
-        <RNText style={styles.body}>That job isn&apos;t open anymore.</RNText>
-      </ScreenFrame>
+      <View style={styles.root}>
+        <SafeAreaView edges={['top']} style={styles.headerSafe}>
+          <View style={styles.header}>
+            <Pressable onPress={() => router.back()} style={styles.iconBtn} hitSlop={6}>
+              <Ionicons name="arrow-back" size={18} color={palette.ink} />
+            </Pressable>
+          </View>
+        </SafeAreaView>
+        <View style={styles.notFoundWrap}>
+          <RNText style={styles.notFoundText} maxFontSizeMultiplier={1.15}>
+            That gig isn&apos;t open anymore.
+          </RNText>
+        </View>
+      </View>
     );
   }
 
   const days = daysUntil(job.deadline);
-  const c = readableOn(job.accent);
-
+  const tags = jobTags(job.niche, job.type);
   const deliverables = job.deliverable
     .split(/,\s*|\s*;\s*|\s+·\s+/)
     .map((s) => s.trim())
     .filter(Boolean);
+  const isHourly = job.type === 'PRODUCT REVIEW' || job.type === 'UGC CREATION';
+  const payLabel = isHourly ? 'Hourly' : 'Fixed-price';
+  const exp = experienceLevel(job.budgetMax);
 
   return (
-    <ScreenFrame
-      header={<ModuleHeader title={job.brand} />}
-      contentStyle={styles.screenContent}
-      footer={
-        <View style={styles.footerWrap}>
-          <View style={styles.footerInner}>
-            <Tap
-              onPress={() => toast('Saved to your shortlist.', 'success')}
-              burstColor={palette.ink}
-              style={styles.saveBtn}
-            >
-              <RNText style={styles.saveText}>SAVE</RNText>
-            </Tap>
-            <View style={{ flex: 1 }}>
-              <MagneticButton
-                label={applied ? 'APPLIED' : 'APPLY NOW'}
-                size="lg"
-                background={
-                  applied ? staticPalette.boneMuted : staticPalette.ink
-                }
-                foreground={
-                  applied ? staticPalette.ink : staticPalette.acid
-                }
-                onPress={() =>
-                  applied
-                    ? router.push('/(modules)/jobs/active-deals')
-                    : router.push(`/(modules)/jobs/apply?id=${job.id}` as any)
-                }
-                disabled={applied}
-              />
-            </View>
+    <View style={styles.root}>
+      {/* Clean header — back left, chat right. No empty placeholder circles. */}
+      <SafeAreaView edges={['top']} style={styles.headerSafe}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.iconBtn} hitSlop={6}>
+            <Ionicons name="arrow-back" size={18} color={palette.ink} />
+          </Pressable>
+          <View style={{ flex: 1 }} />
+          <Tap
+            onPress={() => router.push('/(tabs)/inbox')}
+            style={styles.iconBtn}
+            burstColor={palette.acid}
+          >
+            <Ionicons name="chatbubble-outline" size={18} color={palette.ink} />
+          </Tap>
+        </View>
+      </SafeAreaView>
+
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Posted meta chip */}
+        <View style={styles.metaWrap}>
+          <View style={styles.metaChip}>
+            <RNText style={styles.metaChipText} maxFontSizeMultiplier={1.1}>
+              Posted {postedAgo(job.id)}  ·  Proposals: {proposalRange(job.applicants)}
+            </RNText>
           </View>
         </View>
-      }
-    >
-      <View style={styles.eyebrowRow}>
-        <View style={[styles.typeDot, { backgroundColor: job.accent }]} />
-        <RNText style={styles.eyebrowType} maxFontSizeMultiplier={1.1}>
-          {job.type}
-        </RNText>
-        {job.verified ? (
-          <>
-            <View style={styles.eyebrowSep} />
-            <RNText style={styles.eyebrowVerified} maxFontSizeMultiplier={1.1}>
-              VERIFIED
-            </RNText>
-          </>
-        ) : null}
-      </View>
 
-      <RNText
-        style={styles.title}
-        numberOfLines={4}
-        adjustsFontSizeToFit
-        minimumFontScale={0.6}
-        maxFontSizeMultiplier={1.1}
-      >
-        {job.title}
-      </RNText>
-
-      <RNText style={styles.location} maxFontSizeMultiplier={1.15}>
-        {job.location}
-      </RNText>
-
-      <View style={[styles.budgetCard, { backgroundColor: job.accent }]}>
-        <View style={styles.budgetInner}>
-          <RNText style={[styles.budgetEyebrow, { color: c.mute }]}>BUDGET</RNText>
+        {/* Title + brand */}
+        <View style={styles.titleBlock}>
           <RNText
-            style={[styles.budgetValue, { color: c.fg }]}
-            numberOfLines={1}
+            style={styles.title}
+            numberOfLines={3}
             adjustsFontSizeToFit
-            minimumFontScale={0.7}
+            minimumFontScale={0.8}
             maxFontSizeMultiplier={1.1}
           >
-            ₹{formatINR(job.budgetMin)}
-            <RNText style={[styles.budgetDash, { color: c.mute }]}> – </RNText>
-            ₹{formatINR(job.budgetMax)}
+            {job.title}
           </RNText>
-
-          <View style={[styles.metaRow, { borderTopColor: c.line }]}>
-            <View style={styles.metaCol}>
-              <RNText style={[styles.metaKey, { color: c.mute }]}>DEADLINE</RNText>
-              <RNText
-                style={[styles.metaValue, { color: c.fg }]}
-                maxFontSizeMultiplier={1.15}
-              >
-                {days > 0 ? `${days} DAYS` : 'CLOSED'}
-              </RNText>
-            </View>
-            <View style={[styles.metaSep, { backgroundColor: c.line }]} />
-            <View style={styles.metaCol}>
-              <RNText style={[styles.metaKey, { color: c.mute }]}>APPLICANTS</RNText>
-              <RNText style={[styles.metaValue, { color: c.fg }]} maxFontSizeMultiplier={1.15}>
-                {job.applicants}
-              </RNText>
-            </View>
-            <View style={[styles.metaSep, { backgroundColor: c.line }]} />
-            <View style={styles.metaCol}>
-              <RNText style={[styles.metaKey, { color: c.mute }]}>NICHE</RNText>
-              <RNText
-                style={[styles.metaValue, { color: c.fg }]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                maxFontSizeMultiplier={1.15}
-              >
-                {job.niche}
-              </RNText>
-            </View>
+          <View style={styles.brandRow}>
+            <RNText style={styles.brand} numberOfLines={1} maxFontSizeMultiplier={1.15}>
+              {job.brand}
+            </RNText>
+            {job.verified ? (
+              <View style={styles.verifyBadge}>
+                <Ionicons name="checkmark" size={9} color={palette.bone} />
+              </View>
+            ) : null}
           </View>
+          <RNText style={styles.payLine} maxFontSizeMultiplier={1.15}>
+            {payLabel}  ·  ₹{formatINR(job.budgetMin)}–{formatINR(job.budgetMax)}  ·  {exp}
+          </RNText>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <View style={styles.sectionHead}>
-          <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
-          <RNText style={styles.sectionEyebrow}>THE BRIEF</RNText>
-        </View>
-        <RNText style={styles.brief} maxFontSizeMultiplier={1.2}>
-          {job.description}
-        </RNText>
-      </View>
+        {/* About this gig */}
+        <Section title="About this gig">
+          <RNText style={styles.body} maxFontSizeMultiplier={1.2}>
+            {job.description}
+          </RNText>
+        </Section>
 
-      <View style={styles.section}>
-        <View style={styles.sectionHead}>
-          <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
-          <RNText style={styles.sectionEyebrow}>DELIVERABLES</RNText>
-        </View>
-        <View style={styles.delivList}>
-          {deliverables.map((d, i) => (
-            <View key={`${i}-${d}`} style={styles.delivRow}>
-              <RNText style={styles.delivNum}>
-                {String(i + 1).padStart(2, '0')}
-              </RNText>
-              <RNText style={styles.delivText} maxFontSizeMultiplier={1.2}>
-                {d}
-              </RNText>
-            </View>
-          ))}
-        </View>
-      </View>
+        {/* Budget summary — compact, NOT giant */}
+        <Section title="Budget & timing">
+          <View style={styles.summaryGrid}>
+            <SummaryCell label="Budget" value={`₹${formatINR(job.budgetMin)}–${formatINR(job.budgetMax)}`} />
+            <SummaryCell label="Deadline" value={days > 0 ? `${days} days` : 'Closed'} />
+            <SummaryCell label="Experience" value={exp} />
+            <SummaryCell label="Niche" value={job.niche} />
+          </View>
+        </Section>
 
-      <View style={styles.section}>
-        <View style={styles.sectionHead}>
-          <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
-          <RNText style={styles.sectionEyebrow}>WHAT HAPPENS NEXT</RNText>
+        {/* Deliverables */}
+        <Section title="Deliverables">
+          <View style={styles.delivList}>
+            {deliverables.map((d, i) => (
+              <View key={`${i}-${d}`} style={styles.delivRow}>
+                <View style={styles.delivDot} />
+                <RNText style={styles.delivText} maxFontSizeMultiplier={1.2}>
+                  {d}
+                </RNText>
+              </View>
+            ))}
+          </View>
+        </Section>
+
+        {/* Skills + tags */}
+        <Section title="Skills">
+          <View style={styles.tagsRow}>
+            {tags.map((tag) => (
+              <View key={tag} style={styles.tagChip}>
+                <RNText style={styles.tagLabel} maxFontSizeMultiplier={1.1}>
+                  {tag}
+                </RNText>
+              </View>
+            ))}
+          </View>
+        </Section>
+
+        {/* Activity on the brand */}
+        <Section title="Activity">
+          <View style={styles.activityList}>
+            <ActivityRow label="Proposals" value={proposalRange(job.applicants)} />
+            <ActivityRow label="Posted" value={postedAgo(job.id)} />
+            <ActivityRow label="Location" value={job.location} />
+            <ActivityRow label="Brand verified" value={job.verified ? 'Yes' : 'No'} last />
+          </View>
+        </Section>
+
+        {/* What happens next */}
+        <Section title="What happens next">
+          <View style={styles.stepsList}>
+            {[
+              'Submit your pitch with the rate you want.',
+              'Brand reviews and shortlists within 48 hours.',
+              'Negotiate scope, sign on-platform, get paid.',
+            ].map((step, i) => (
+              <View key={i} style={[styles.stepRow, i === 2 && styles.stepRowLast]}>
+                <RNText style={styles.stepNum} maxFontSizeMultiplier={1.1}>
+                  {String(i + 1).padStart(2, '0')}
+                </RNText>
+                <RNText style={styles.stepText} maxFontSizeMultiplier={1.2}>
+                  {step}
+                </RNText>
+              </View>
+            ))}
+          </View>
+        </Section>
+      </ScrollView>
+
+      {/* Sticky footer — Save + Apply */}
+      <SafeAreaView edges={['bottom']} style={styles.footerSafe}>
+        <View style={styles.footerInner}>
+          <Pressable
+            onPress={() => {
+              setSaved((v) => !v);
+              toast(saved ? 'Removed from saved.' : 'Saved for later.', 'success');
+            }}
+            style={styles.saveBtn}
+            hitSlop={4}
+          >
+            <Ionicons
+              name={saved ? 'heart' : 'heart-outline'}
+              size={22}
+              color={saved ? palette.ember : palette.ink}
+            />
+          </Pressable>
+          <Pressable
+            onPress={() =>
+              applied
+                ? router.push('/(modules)/jobs/active-deals')
+                : router.push(`/(modules)/jobs/apply?id=${job.id}` as any)
+            }
+            disabled={applied}
+            style={[
+              styles.applyBtn,
+              applied && styles.applyBtnDisabled,
+            ]}
+          >
+            <RNText style={styles.applyLabel} maxFontSizeMultiplier={1.1}>
+              {applied ? 'APPLIED' : 'APPLY NOW'}
+            </RNText>
+          </Pressable>
         </View>
-        <View style={styles.steps}>
-          {[
-            'Submit your pitch with the rate you want.',
-            'Brand reviews and shortlists within 48 hours.',
-            'Negotiate scope, sign on-platform, get paid.',
-          ].map((step, i) => (
-            <View key={i} style={styles.stepRow}>
-              <RNText style={styles.stepNum}>
-                {String(i + 1).padStart(2, '0')}
-              </RNText>
-              <RNText style={styles.stepText} maxFontSizeMultiplier={1.2}>
-                {step}
-              </RNText>
-            </View>
-          ))}
-        </View>
-      </View>
-    </ScreenFrame>
+      </SafeAreaView>
+    </View>
   );
 }
 
+/* -------------------------------------------------------------------------
+ * Reusable bits
+ * ----------------------------------------------------------------------- */
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  const styles = useThemedPaletteStyles(makeStyles);
+  return (
+    <View style={styles.section}>
+      <View style={styles.sectionHead}>
+        <RNText style={styles.sectionTitle} maxFontSizeMultiplier={1.15}>
+          {title}
+        </RNText>
+      </View>
+      <View style={styles.sectionBody}>{children}</View>
+    </View>
+  );
+}
+
+function SummaryCell({ label, value }: { label: string; value: string }) {
+  const styles = useThemedPaletteStyles(makeStyles);
+  return (
+    <View style={styles.summaryCell}>
+      <RNText style={styles.summaryLabel} maxFontSizeMultiplier={1.1}>
+        {label}
+      </RNText>
+      <RNText
+        style={styles.summaryValue}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
+        maxFontSizeMultiplier={1.1}
+      >
+        {value}
+      </RNText>
+    </View>
+  );
+}
+
+function ActivityRow({
+  label,
+  value,
+  last,
+}: {
+  label: string;
+  value: string;
+  last?: boolean;
+}) {
+  const styles = useThemedPaletteStyles(makeStyles);
+  return (
+    <View style={[styles.activityRow, !last && styles.activityRowBorder]}>
+      <RNText style={styles.activityLabel} maxFontSizeMultiplier={1.15}>
+        {label}
+      </RNText>
+      <RNText
+        style={styles.activityValue}
+        numberOfLines={1}
+        maxFontSizeMultiplier={1.15}
+      >
+        {value}
+      </RNText>
+    </View>
+  );
+}
+
+/* -------------------------------------------------------------------------
+ * Styles
+ * ----------------------------------------------------------------------- */
+
 const makeStyles = (palette: typeof staticPalette) =>
   StyleSheet.create({
-    screenContent: { paddingHorizontal: 16, paddingBottom: 140 },
-    body: { ...T.body, color: palette.ink, opacity: 0.7 },
+    root: { flex: 1, backgroundColor: palette.bone },
 
-    eyebrowRow: {
+    /* ── Header ── */
+    headerSafe: {
+      backgroundColor: palette.bone,
+      borderBottomWidth: 1,
+      borderBottomColor: palette.line,
+    },
+    header: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
-      marginTop: 4,
+      paddingHorizontal: 16,
+      paddingTop: 6,
+      paddingBottom: 12,
+      gap: 10,
     },
-    typeDot: { width: 8, height: 8, borderRadius: 4 },
-    eyebrowType: {
-      ...T.label,
-      color: palette.ink,
-      letterSpacing: 1.8,
-    },
-    eyebrowSep: {
-      width: 3,
-      height: 3,
-      borderRadius: 1.5,
-      backgroundColor: palette.ink,
-      opacity: 0.4,
-    },
-    eyebrowVerified: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.7,
-      letterSpacing: 1.6,
+    iconBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: palette.line,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
 
+    /* ── Scroll ── */
+    scrollContent: { paddingBottom: 24 },
+
+    /* ── Top meta chip ── */
+    metaWrap: { paddingHorizontal: 20, paddingTop: 18 },
+    metaChip: {
+      paddingHorizontal: 10,
+      paddingVertical: 5,
+      borderRadius: 6,
+      backgroundColor: 'rgba(46,91,255,0.16)',
+      alignSelf: 'flex-start',
+    },
+    metaChipText: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 11,
+      letterSpacing: 0.1,
+      color: palette.electric,
+    },
+
+    /* ── Title block ── */
+    titleBlock: {
+      paddingHorizontal: 20,
+      paddingTop: 12,
+      paddingBottom: 22,
+      gap: 8,
+    },
     title: {
       fontFamily: fonts.displayBold,
-      fontSize: 48,
-      lineHeight: 48,
-      letterSpacing: -2.2,
-      color: palette.ink,
-      marginTop: 14,
-    },
-    location: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.6,
-      letterSpacing: 1.6,
-      marginTop: 12,
-    },
-
-    budgetCard: {
-      marginTop: 22,
-      borderRadius: 24,
-      overflow: 'hidden',
-      shadowColor: '#000',
-      shadowOpacity: 0.12,
-      shadowRadius: 18,
-      shadowOffset: { width: 0, height: 8 },
-      elevation: 4,
-    },
-    budgetInner: { padding: 22, gap: 8 },
-    budgetEyebrow: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.55,
-      letterSpacing: 1.8,
-    },
-    budgetValue: {
-      fontFamily: fonts.displayBold,
-      fontSize: 40,
-      lineHeight: 42,
-      letterSpacing: -1.8,
+      fontSize: 30,
+      lineHeight: 34,
+      letterSpacing: -1,
       color: palette.ink,
     },
-    budgetDash: {
-      fontFamily: fonts.editorialItalic,
-      fontSize: 34,
-      letterSpacing: 0,
-      color: palette.ink,
-      opacity: 0.5,
-    },
-    metaRow: {
-      marginTop: 14,
-      paddingTop: 14,
-      borderTopWidth: 1,
-      borderTopColor: 'rgba(10,10,10,0.12)',
-      flexDirection: 'row',
-      alignItems: 'stretch',
-    },
-    metaCol: { flex: 1, gap: 6 },
-    metaSep: {
-      width: 1,
-      backgroundColor: 'rgba(10,10,10,0.10)',
-      marginHorizontal: 6,
-    },
-    metaKey: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.55,
-      letterSpacing: 1.6,
-      fontSize: 10,
-    },
-    metaValue: {
-      fontFamily: fonts.displayBold,
-      fontSize: 14,
-      letterSpacing: -0.2,
-      color: palette.ink,
-    },
-
-    section: {
-      marginTop: 30,
-    },
-    sectionHead: {
+    brandRow: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
-      borderTopWidth: 1,
-      borderTopColor: palette.lineDark,
-      paddingTop: 14,
-      paddingBottom: 14,
+      gap: 6,
+      marginTop: 2,
     },
-    sectionEyebrow: {
-      ...T.label,
+    brand: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 13,
+      letterSpacing: 0.4,
       color: palette.ink,
-      opacity: 0.65,
-      letterSpacing: 1.8,
+      opacity: 0.85,
     },
-    brief: {
-      fontFamily: fonts.editorial,
-      fontSize: 19,
-      lineHeight: 28,
+    verifyBadge: {
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      backgroundColor: palette.electric,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    payLine: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 13,
       color: palette.ink,
-      opacity: 0.88,
-      maxWidth: 560,
+      opacity: 0.75,
+      marginTop: 4,
     },
 
+    /* ── Section ── */
+    section: { paddingHorizontal: 20 },
+    sectionHead: {
+      borderTopWidth: 1,
+      borderTopColor: palette.line,
+      paddingTop: 18,
+      paddingBottom: 10,
+    },
+    sectionTitle: {
+      fontFamily: fonts.displayBold,
+      fontSize: 18,
+      lineHeight: 22,
+      letterSpacing: -0.4,
+      color: palette.ink,
+    },
+    sectionBody: { paddingBottom: 22 },
+
+    body: {
+      ...T.body,
+      fontSize: 15,
+      lineHeight: 22,
+      color: palette.ink,
+      opacity: 0.88,
+    },
+
+    /* ── Summary grid (compact, replaces the old huge budget card) ── */
+    summaryGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 12,
+    },
+    summaryCell: {
+      flexBasis: '47%',
+      flexGrow: 1,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: palette.line,
+      backgroundColor: palette.paper,
+      gap: 4,
+    },
+    summaryLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 11,
+      letterSpacing: 1.4,
+      color: palette.ink,
+      opacity: 0.55,
+      textTransform: 'uppercase',
+    },
+    summaryValue: {
+      fontFamily: fonts.displayBold,
+      fontSize: 17,
+      lineHeight: 20,
+      letterSpacing: -0.3,
+      color: palette.ink,
+    },
+
+    /* ── Deliverables ── */
     delivList: { gap: 10 },
     delivRow: {
       flexDirection: 'row',
       alignItems: 'flex-start',
-      gap: 14,
-      paddingVertical: 6,
+      gap: 12,
     },
-    delivNum: {
-      fontFamily: fonts.displayBold,
-      fontSize: 12,
-      color: palette.ink,
-      opacity: 0.4,
-      letterSpacing: 0.4,
-      paddingTop: 3,
-      width: 26,
+    delivDot: {
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: palette.acid,
+      marginTop: 8,
     },
     delivText: {
-      ...T.body,
-      color: palette.ink,
       flex: 1,
+      ...T.body,
+      fontSize: 14,
       lineHeight: 22,
+      color: palette.ink,
     },
 
-    steps: { gap: 14 },
-    stepRow: {
+    /* ── Tags ── */
+    tagsRow: {
       flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: 14,
-      paddingBottom: 12,
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    tagChip: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 8,
+      backgroundColor: palette.boneMuted,
+    },
+    tagLabel: {
+      fontFamily: fonts.body,
+      fontSize: 13,
+      color: palette.ink,
+      opacity: 0.85,
+    },
+
+    /* ── Activity rows ── */
+    activityList: {},
+    activityRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 12,
+      gap: 12,
+    },
+    activityRowBorder: {
       borderBottomWidth: 1,
       borderBottomColor: palette.line,
     },
+    activityLabel: {
+      ...T.body,
+      fontSize: 14,
+      color: palette.ink,
+      opacity: 0.65,
+    },
+    activityValue: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 14,
+      color: palette.ink,
+      letterSpacing: 0.1,
+      flexShrink: 1,
+      textAlign: 'right',
+    },
+
+    /* ── Steps ── */
+    stepsList: {},
+    stepRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: 12,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: palette.line,
+    },
+    stepRowLast: { borderBottomWidth: 0 },
     stepNum: {
-      fontFamily: fonts.editorialItalic,
-      fontSize: 22,
-      color: palette.ember,
-      letterSpacing: -0.6,
-      width: 28,
-      lineHeight: 22,
+      fontFamily: fonts.bodyBold,
+      fontSize: 12,
+      letterSpacing: 1.4,
+      color: palette.ink,
+      opacity: 0.5,
+      width: 26,
       paddingTop: 2,
     },
     stepText: {
-      ...T.body,
-      color: palette.ink,
       flex: 1,
+      ...T.body,
+      fontSize: 14,
       lineHeight: 22,
+      color: palette.ink,
     },
 
-    footerWrap: {
+    /* ── Footer ── */
+    footerSafe: {
       backgroundColor: palette.bone,
       borderTopWidth: 1,
       borderTopColor: palette.line,
-      paddingHorizontal: 16,
-      paddingTop: 12,
-      paddingBottom: 14,
     },
     footerInner: {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 10,
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 6,
     },
     saveBtn: {
-      paddingVertical: 14,
-      paddingHorizontal: 18,
-      borderRadius: 999,
+      width: 48,
+      height: 48,
+      borderRadius: 24,
       borderWidth: 1,
-      borderColor: palette.lineDark,
+      borderColor: palette.line,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-    saveText: {
-      ...T.label,
-      color: palette.ink,
+    applyBtn: {
+      flex: 1,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: palette.ink,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    applyBtnDisabled: {
+      backgroundColor: palette.boneMuted,
+    },
+    applyLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 13,
       letterSpacing: 1.8,
+      color: palette.bone,
+      includeFontPadding: false,
+      textAlign: 'center',
+    },
+
+    /* ── Not found ── */
+    notFoundWrap: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 32,
+    },
+    notFoundText: {
+      ...T.body,
+      color: palette.ink,
+      opacity: 0.65,
+      textAlign: 'center',
     },
   });

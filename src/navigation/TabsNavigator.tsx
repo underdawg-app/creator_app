@@ -1,15 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, Pressable, Text as RNText } from 'react-native';
+import { View, StyleSheet, Pressable, Text as RNText, Image as RNImage } from 'react-native';
+
+const BRAND_LOGO = require('@/objects/brand-logo.png');
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@/icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
 import * as Haptics from '@/haptics';
+import { router } from '@/navigation';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts } from '@/theme/typography';
@@ -20,16 +17,21 @@ import Create from '@/screens/tabs/Create';
 import Inbox from '@/screens/tabs/Inbox';
 import Profile from '@/screens/tabs/Profile';
 import JobsIndex from '@/screens/modules/jobs/JobsIndex';
+import MerchIndex from '@/screens/modules/merch/MerchIndex';
 
 const Tab = createBottomTabNavigator();
 
-type ItemKey = 'Arena' | 'Feed' | 'Explore' | 'Jobs' | 'Profile';
+// New tab order: Explore (initial) · Gigs · + (camera) · Merch · You.
+// The center "+" is a hard-routed FAB — it never selects a tab, only
+// pushes the camera/video module. Arena/Feed/Inbox/Create stay registered
+// as hidden tabs so existing router.push('/(tabs)/...') paths still resolve.
+type ItemKey = 'Explore' | 'Jobs' | 'Plus' | 'Merch' | 'Profile';
 
-const items: { key: ItemKey; label: string; icon: keyof typeof Ionicons.glyphMap }[] = [
-  { key: 'Arena', label: 'ARENA', icon: 'trophy' },
-  { key: 'Explore', label: 'EXPLORE', icon: 'search' },
-  { key: 'Feed', label: 'FEED', icon: 'home' },
-  { key: 'Jobs', label: 'JOBS', icon: 'briefcase' },
+const items: { key: ItemKey; label: string; icon: keyof typeof Ionicons.glyphMap; emphasized?: boolean }[] = [
+  { key: 'Explore', label: 'EXPLORE', icon: 'compass' },
+  { key: 'Jobs', label: 'GIGS', icon: 'briefcase' },
+  { key: 'Plus', label: '', icon: 'add', emphasized: true },
+  { key: 'Merch', label: 'MERCH', icon: 'bag-handle' },
   { key: 'Profile', label: 'YOU', icon: 'person' },
 ];
 
@@ -38,28 +40,22 @@ const renderTabBar = (props: BottomTabBarProps) => <CustomTabBar {...props} />;
 export default function TabsNavigator() {
   return (
     <Tab.Navigator
-      initialRouteName="Jobs"
+      initialRouteName="Explore"
       screenOptions={{
         headerShown: false,
-        // Don't mount a tab's screen until the user taps it for the first
-        // time. Cuts cold-start work on Android by ~4× because only the
-        // initial tab (Jobs) mounts up front.
         lazy: true,
-        // Pause the inactive tab's React tree the moment it's blurred. Stops
-        // every off-screen Skia clock, Reanimated scroll handler, and
-        // useEffect from running while you're on another tab.
         freezeOnBlur: true,
       }}
       tabBar={renderTabBar}
     >
-      <Tab.Screen name="Arena" component={Arena} />
       <Tab.Screen name="Explore" component={Explore} />
-      <Tab.Screen name="Feed" component={Feed} />
       <Tab.Screen name="Jobs" component={JobsIndex} />
+      <Tab.Screen name="Merch" component={MerchIndex} />
       <Tab.Screen name="Profile" component={Profile} />
-      {/* Create is reachable from the Feed header. Hidden tab. */}
+      {/* Hidden tabs — reachable via router.push but not shown in the bar. */}
+      <Tab.Screen name="Feed" component={Feed} options={{ tabBarButton: () => null }} />
+      <Tab.Screen name="Arena" component={Arena} options={{ tabBarButton: () => null }} />
       <Tab.Screen name="Create" component={Create} options={{ tabBarButton: () => null }} />
-      {/* Inbox is reachable from the Feed header but no longer shown as a tab. */}
       <Tab.Screen name="Inbox" component={Inbox} options={{ tabBarButton: () => null }} />
     </Tab.Navigator>
   );
@@ -67,8 +63,9 @@ export default function TabsNavigator() {
 
 function CustomTabBar({ state, navigation }: BottomTabBarProps) {
   const styles = useThemedPaletteStyles(makeStyles);
-  // Keep handlers stable across re-renders so memoized TabButtons don't
-  // re-render every time another tab is tapped.
+
+  // Stable map of route.key → tab handler. Center Plus has no route in
+  // state.routes; we render it inline.
   const handlers = React.useMemo(() => {
     const map: Record<string, () => void> = {};
     state.routes.forEach((route, i) => {
@@ -88,14 +85,23 @@ function CustomTabBar({ state, navigation }: BottomTabBarProps) {
     return map;
   }, [state.routes, state.index, navigation]);
 
+  const onPlusPress = React.useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    router.push('/(modules)/studio');
+  }, []);
+
   return (
     <View style={styles.bar}>
       <SafeAreaView edges={['bottom']} style={styles.safe}>
         <View style={styles.row}>
-          {state.routes.map((route, i) => {
-            const item = items.find((it) => it.key === (route.name as ItemKey));
-            if (!item) return null;
-            const focused = state.index === i;
+          {items.map((item) => {
+            if (item.emphasized) {
+              return <PlusButton key="plus" onPress={onPlusPress} />;
+            }
+            const routeIndex = state.routes.findIndex((r) => r.name === item.key);
+            const route = state.routes[routeIndex];
+            if (!route) return null;
+            const focused = state.index === routeIndex;
             return (
               <TabButton
                 key={route.key}
@@ -116,43 +122,19 @@ const TabButton = React.memo(function TabButton({
   label,
   icon,
   focused,
-  emphasized,
   onPress,
 }: {
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   focused: boolean;
-  emphasized?: boolean;
   onPress: () => void;
 }) {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  const f = useSharedValue(focused ? 1 : 0);
-  React.useEffect(() => {
-    f.value = withTiming(focused ? 1 : 0, { duration: 180, easing: Easing.out(Easing.quad) });
-  }, [focused]);
-
-  const wrap = useAnimatedStyle(() => ({
-    transform: [{ translateY: -f.value * 2 }],
-  }));
-  const dot = useAnimatedStyle(() => ({
-    opacity: f.value,
-    transform: [{ scale: 0.6 + f.value * 0.4 }],
-  }));
-
-  if (emphasized) {
-    return (
-      <Pressable style={styles.createWrap} onPress={onPress} unstable_pressDelay={0}>
-        <View style={styles.create}>
-          <Ionicons name="add" size={28} color={staticPalette.ink} />
-        </View>
-      </Pressable>
-    );
-  }
 
   return (
     <Pressable style={styles.item} onPress={onPress} hitSlop={8} unstable_pressDelay={0}>
-      <Animated.View style={[styles.itemInner, wrap]}>
+      <View style={styles.itemInner}>
         <Ionicons
           name={icon}
           size={20}
@@ -166,11 +148,27 @@ const TabButton = React.memo(function TabButton({
         >
           {label}
         </RNText>
-        <Animated.View style={[styles.dot, dot]} />
-      </Animated.View>
+        <View style={[styles.dot, { opacity: focused ? 1 : 0 }]} />
+      </View>
     </Pressable>
   );
 });
+
+function PlusButton({ onPress }: { onPress: () => void }) {
+  const styles = useThemedPaletteStyles(makeStyles);
+  return (
+    <Pressable
+      style={styles.plusWrap}
+      onPress={onPress}
+      unstable_pressDelay={0}
+      hitSlop={8}
+    >
+      <View style={styles.plusBtn}>
+        <RNImage source={BRAND_LOGO} style={styles.plusLogo} resizeMode="contain" />
+      </View>
+    </Pressable>
+  );
+}
 
 const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   bar: {
@@ -194,17 +192,20 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     backgroundColor: palette.acid,
     marginTop: 2,
   },
-  createWrap: {
-    width: 68,
+  plusWrap: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  create: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: palette.acid,
+  plusBtn: {
+    width: 76,
+    height: 76,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: -14,
+  },
+  plusLogo: {
+    width: 72,
+    height: 72,
   },
 });

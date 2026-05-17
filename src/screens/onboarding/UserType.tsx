@@ -109,14 +109,21 @@ export default function UserTypeScreen() {
         </RNText>
 
         <View style={styles.grid}>
-          {userTypes.map((item) => (
-            <UserTypeCard
-              key={item.key}
-              item={item}
-              active={selected === item.key}
-              onPress={() => setSelected(item.key)}
-            />
-          ))}
+          {userTypes.map((item) => {
+            const disabled = item.key !== 'creator';
+            return (
+              <UserTypeCard
+                key={item.key}
+                item={item}
+                active={selected === item.key}
+                disabled={disabled}
+                onPress={() => {
+                  if (disabled) return;
+                  setSelected(item.key);
+                }}
+              />
+            );
+          })}
         </View>
       </ScrollView>
 
@@ -151,10 +158,12 @@ export default function UserTypeScreen() {
 function UserTypeCard({
   item,
   active,
+  disabled,
   onPress,
 }: {
   item: (typeof userTypes)[0];
   active: boolean;
+  disabled?: boolean;
   onPress: () => void;
 }) {
   const palette = useThemedPalette();
@@ -170,30 +179,37 @@ function UserTypeCard({
     transform: [{ scale: 1 - s.value * 0.006 }],
   }));
 
-  // On the active (pink) card, force everything to always-black for contrast
-  // against the neon accent. On the inactive (paper) card, let palette.ink
-  // follow the theme.
   const textColor = active ? staticPalette.ink : palette.ink;
   const borderColor = active ? staticPalette.ink : palette.ink;
 
   return (
-    <Pressable onPress={onPress} style={{ marginBottom: 10 }}>
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      style={{ marginBottom: 10, opacity: disabled ? 0.45 : 1 }}
+    >
       <Animated.View style={[styles.card, cardStyle]}>
         <View style={styles.cardTopRow}>
           <RNText style={[styles.cardTag, { color: textColor }]}>{item.tag}</RNText>
-          <View
-            style={[
-              styles.radio,
-              {
-                borderColor,
-                backgroundColor: active ? staticPalette.ink : 'transparent',
-              },
-            ]}
-          >
-            {active ? (
-              <Ionicons name="checkmark" size={12} color={item.accent} />
-            ) : null}
-          </View>
+          {disabled ? (
+            <View style={styles.comingSoonPill}>
+              <RNText style={styles.comingSoonText}>COMING SOON</RNText>
+            </View>
+          ) : (
+            <View
+              style={[
+                styles.radio,
+                {
+                  borderColor,
+                  backgroundColor: active ? staticPalette.ink : 'transparent',
+                },
+              ]}
+            >
+              {active ? (
+                <Ionicons name="checkmark" size={12} color={item.accent} />
+              ) : null}
+            </View>
+          )}
         </View>
         <RNText style={[styles.cardLabel, { color: textColor }]}>{item.label}</RNText>
         <RNText style={[styles.cardBody, { color: textColor }]}>{item.body}</RNText>
@@ -268,6 +284,20 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     opacity: 0.78,
     marginTop: 10,
     maxWidth: 300,
+  },
+  comingSoonPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: palette.ink,
+    backgroundColor: palette.bone,
+  },
+  comingSoonText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 1.6,
+    color: palette.ink,
   },
 
   footerSafe: { paddingHorizontal: 12, paddingBottom: 6 },

@@ -4,7 +4,6 @@ import Animated, {
   Easing,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -24,8 +23,10 @@ export function Sheet({ visible, onClose, title, eyebrow, children }: Props) {
   const p = useSharedValue(0);
 
   useEffect(() => {
+    // Smooth slide-up: a timing curve never overshoots, so the sheet
+    // settles into place without the spring "bounce" the user reported.
     if (visible) {
-      p.value = withSpring(1, { damping: 18, stiffness: 220 });
+      p.value = withTiming(1, { duration: 260, easing: Easing.out(Easing.cubic) });
     } else {
       p.value = withTiming(0, { duration: 200, easing: Easing.in(Easing.cubic) });
     }

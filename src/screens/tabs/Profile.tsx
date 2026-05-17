@@ -38,6 +38,11 @@ const { width } = Dimensions.get('window');
 const SCREEN_PADDING = 12;
 const GRID_GAP = 4;
 const VIDEO_GAP = 10;
+// Reserved exclusively for the "completed" state in the profile-setup
+// strip — progress bar fill, percent badge, count accent, and each step's
+// checkmark badge. Never used for any other UI state so the user can
+// always read "neon green = done".
+const NEON_GREEN = '#39FF14';
 const POST_TILE_SIZE = (width - SCREEN_PADDING * 2 - GRID_GAP * 2) / 3;
 const VIDEO_TILE_W = Math.floor((width - SCREEN_PADDING * 2 - VIDEO_GAP) / 2);
 const VIDEO_TILE_H = VIDEO_TILE_W * 1.45;
@@ -307,21 +312,6 @@ export default function Profile() {
 
         {/* ===== PERSONAL FEED ===== */}
         <View style={styles.feedSection}>
-          <View style={styles.feedHead}>
-            <RNText style={styles.feedKicker} maxFontSizeMultiplier={1.1}>
-              YOUR FEED · {userFeed.length} POSTS
-            </RNText>
-            <RNText
-              style={styles.feedTitle}
-              numberOfLines={2}
-              adjustsFontSizeToFit
-              minimumFontScale={0.7}
-              maxFontSizeMultiplier={1.1}
-            >
-              everything <RNText style={styles.feedItalic}>you</RNText> made.
-            </RNText>
-          </View>
-
           <View style={styles.tabBar}>
             <View style={styles.tabSlot}>
               <FeedTabBtn
@@ -789,13 +779,16 @@ function ProfileSetupStrip() {
   const following = useStore((s) => s.following);
   const followingCount = Object.values(following).filter(Boolean).length;
 
+  // Per-step accent — every step gets a distinct, non-red hue. Ember is
+  // intentionally absent; neon green is reserved exclusively for the
+  // "done" state so completion always pops.
   const steps: SetupStep[] = [
     {
       key: 'photo',
       title: 'ADD PHOTO',
       sub: 'show your face',
       icon: 'camera-outline',
-      accent: palette.acid,
+      accent: palette.blush,
       route: '/(modules)/profile/edit',
       done: !!profileMock.avatar,
     },
@@ -813,7 +806,7 @@ function ProfileSetupStrip() {
       title: 'PICK CRAFT',
       sub: 'what you make',
       icon: 'sparkles-outline',
-      accent: palette.blush,
+      accent: '#A78BFA',
       route: '/(onboarding)/creator-type',
       done: !!profile.type && profile.type.trim().length > 0,
     },
@@ -822,7 +815,7 @@ function ProfileSetupStrip() {
       title: 'LOCATION',
       sub: 'where you are',
       icon: 'location-outline',
-      accent: palette.ember,
+      accent: '#06B6D4',
       route: '/(modules)/profile/edit',
       done: !!profile.location && profile.location.trim().length > 0,
     },
@@ -840,7 +833,7 @@ function ProfileSetupStrip() {
       title: 'CONNECT',
       sub: 'IG · TT · SP',
       icon: 'link-outline',
-      accent: palette.electric,
+      accent: palette.blush,
       route: '/(modules)/audience',
       done: false,
     },
@@ -882,7 +875,7 @@ function ProfileSetupStrip() {
         <View
           style={[
             styles.setupBarFill,
-            { width: `${pct}%`, backgroundColor: palette.acid },
+            { width: `${pct}%`, backgroundColor: NEON_GREEN },
           ]}
         />
       </View>
@@ -921,7 +914,7 @@ function SetupCard({ step }: { step: SetupStep }) {
         style={[
           styles.setupIcon,
           step.done
-            ? { backgroundColor: palette.acid }
+            ? { backgroundColor: NEON_GREEN }
             : { backgroundColor: 'rgba(10,10,10,0.12)' },
         ]}
       >
@@ -1299,13 +1292,13 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   setupTitleAccent: {
     fontFamily: fonts.editorialItalic,
-    color: palette.ember,
+    color: NEON_GREEN,
   },
   setupPctBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
-    backgroundColor: palette.acid,
+    backgroundColor: NEON_GREEN,
   },
   setupPctText: {
     fontFamily: fonts.displayBold,

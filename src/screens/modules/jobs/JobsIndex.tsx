@@ -4,27 +4,22 @@ import {
   StyleSheet,
   Text as RNText,
   ScrollView,
+  Pressable,
   TextInput,
 } from 'react-native';
-import Animated, {
-  FadeInDown,
-  FadeOutUp,
-  LinearTransition,
-} from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
-import { ScreenFrame } from '@/components/ui/ScreenFrame';
-import { ModuleHeader } from '@/components/ui/ModuleHeader';
 import { Tap } from '@/components/ui/Tap';
-import { Chip } from '@/components/ui/Chip';
-import { ArrowMark, Asterisk } from '@/components/svg/Marks';
+import { Sheet } from '@/components/ui/Sheet';
 import { Ionicons } from '@/icons';
-import { jobsSeed, type Job } from '@/data/mock';
+import { jobsSeed } from '@/data/mock';
 import { useStore } from '@/store';
+import { JobRow } from '@/components/jobs/JobRow';
 
-const FILTERS = [
+const TYPE_FILTERS = [
   'ALL',
   'SPONSORED POST',
   'VIDEO INTEGRATION',
@@ -34,31 +29,39 @@ const FILTERS = [
   'UGC CREATION',
 ];
 
-const formatBudget = (n: number) =>
-  n >= 100000 ? `${(n / 100000).toFixed(n % 100000 === 0 ? 0 : 1)}L` : `${Math.round(n / 1000)}K`;
+const TABS = ['BEST MATCH', 'MOST RECENT', 'SAVED'] as const;
+type TabKey = (typeof TABS)[number];
 
-const daysUntil = (iso: string) => {
-  const target = new Date(iso).getTime();
-  const now = Date.now();
-  const days = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
-  return days;
-};
+/* -------------------------------------------------------------------------
+ * Screen
+ * ----------------------------------------------------------------------- */
 
 export default function JobsHome() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
   const apps = useStore((s) => s.applications);
   const deals = useStore((s) => s.deals);
-  const [filter, setFilter] = useState('ALL');
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [query, setQuery] = useState('');
+  const toast = useStore((s) => s.toast);
 
-  const filtered = useMemo(() => {
-    let out = jobsSeed;
-    if (filter !== 'ALL') out = out.filter((j) => j.type === filter);
+  const [tab, setTab] = useState<TabKey>('BEST MATCH');
+  const [filter, setFilter] = useState('ALL');
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  // Per-card local state — saved/hidden. Persist via useStore if you need
+  // them to survive a restart; left local so the rewrite stays isolated.
+  const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [hidden, setHidden] = useState<Record<string, boolean>>({});
+
+  const savedCount = Object.values(saved).filter(Boolean).length;
+
+  const visibleJobs = useMemo(() => {
+    let jobs = jobsSeed.filter((j) => !hidden[j.id]);
+    if (tab === 'SAVED') jobs = jobs.filter((j) => saved[j.id]);
+    else if (tab === 'MOST RECENT') jobs = [...jobs].reverse();
+    if (filter !== 'ALL') jobs = jobs.filter((j) => j.type === filter);
     const q = query.trim().toLowerCase();
     if (q) {
-      out = out.filter(
+      jobs = jobs.filter(
         (j) =>
           j.title.toLowerCase().includes(q) ||
           j.brand.toLowerCase().includes(q) ||
@@ -66,701 +69,515 @@ export default function JobsHome() {
           j.niche.toLowerCase().includes(q),
       );
     }
-    return out;
-  }, [filter, query]);
+    return jobs;
+  }, [tab, filter, saved, hidden, query]);
+
+  const helper =
+    tab === 'BEST MATCH'
+      ? 'Browse gigs that match your craft and budget. Ordered by most relevant.'
+      : tab === 'MOST RECENT'
+      ? 'Latest gigs from verified brands. Newest first.'
+      : 'Gigs you saved to apply later.';
 
   return (
-    <ScreenFrame
-      header={
-        <ModuleHeader
-          title="JOB BOARD"
-          showBack={false}
-          left={
-            <Tap
-              onPress={() => {
-                setSearchOpen((v) => !v);
-                if (searchOpen) setQuery('');
-              }}
-              style={styles.headerIconBtn}
-              burstColor={palette.acid}
-            >
-              <Ionicons
-                name={searchOpen ? 'close' : 'search'}
-                size={18}
-                color={palette.ink}
-              />
-            </Tap>
-          }
-          right={
-            <Tap
-              onPress={() => router.push('/(tabs)/inbox')}
-              style={styles.headerIconBtn}
-              burstColor={palette.acid}
-            >
-              <Ionicons name="chatbubble-outline" size={18} color={palette.ink} />
-            </Tap>
-          }
-        />
-      }
-      contentStyle={styles.screenContent}
-    >
-      {searchOpen ? (
-        <Animated.View
-          entering={FadeInDown.duration(220)}
-          exiting={FadeOutUp.duration(180)}
-          style={styles.searchBar}
-        >
-          <Ionicons name="search" size={16} color={palette.mute} />
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="search by title, brand, niche…"
-            placeholderTextColor={palette.mute}
-            style={styles.searchInput}
-            autoFocus
-            returnKeyType="search"
-            selectionColor={palette.acid}
-          />
-          {query ? (
-            <Tap onPress={() => setQuery('')} burstColor={palette.ink}>
-              <Ionicons name="close-circle" size={16} color={palette.mute} />
-            </Tap>
-          ) : null}
-        </Animated.View>
-      ) : null}
-
-      <Animated.View
-        layout={LinearTransition.duration(220)}
-        style={styles.heading}
-      >
-        <RNText style={styles.headingLine1} maxFontSizeMultiplier={1.1}>
-          BRANDS
-        </RNText>
-        <RNText style={styles.headingLine2} maxFontSizeMultiplier={1.1}>
-          ARE
-          <RNText style={styles.headingItalic}> waiting.</RNText>
-        </RNText>
-      </Animated.View>
-
-      <Animated.View
-        layout={LinearTransition.duration(220)}
-        style={styles.metricsRow}
-      >
-        <Metric label="APPLIED" value={apps.length} />
-        <View style={styles.metricSep} />
-        <Metric label="ACTIVE" value={deals.length} accent={palette.electric} />
-        <View style={styles.metricSep} />
-        <Metric label="OPEN" value={jobsSeed.length} accent={palette.acid} />
-      </Animated.View>
-
-      <View style={styles.shortcuts}>
-        <Tap
-          onPress={() => router.push('/(modules)/jobs/active-deals')}
-          burstColor={palette.acid}
-          style={[styles.shortcut, { backgroundColor: palette.acid }]}
-        >
-          <View style={{ flex: 1 }}>
-            <RNText style={styles.shortcutEyebrow}>YOURS</RNText>
-            <RNText style={styles.shortcutLabel}>MY DEALS</RNText>
-          </View>
-          <ArrowMark size={18} color={staticPalette.ink} strokeWidth={1.8} />
-        </Tap>
-        <Tap
-          onPress={() => router.push('/(modules)/jobs/rate-card')}
-          burstColor={palette.bone}
-          style={[styles.shortcut, { backgroundColor: palette.ink }]}
-        >
-          <View style={{ flex: 1 }}>
-            <RNText style={[styles.shortcutEyebrow, { color: palette.bone, opacity: 0.55 }]}>
-              YOURS
-            </RNText>
-            <RNText style={[styles.shortcutLabel, { color: palette.bone }]}>
-              RATE CARD
-            </RNText>
-          </View>
-          <ArrowMark size={18} color={palette.bone} strokeWidth={1.8} />
-        </Tap>
-      </View>
-
-      <View style={styles.filterBlock}>
-        <View style={styles.filterHead}>
-          <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
-          <RNText style={styles.filterEyebrow}>FILTER</RNText>
-        </View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterRow}
-          style={styles.filterScroll}
-        >
-          {FILTERS.map((f) => (
-            <Chip
-              key={f}
-              label={f}
-              active={filter === f}
-              onPress={() => setFilter(f)}
-              accent={palette.acid}
+    <View style={styles.root}>
+      <SafeAreaView edges={['top']} style={styles.headerSafe}>
+        <View style={styles.header}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={16} color={palette.mute} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search gigs"
+              placeholderTextColor={palette.mute}
+              style={styles.searchInput}
+              returnKeyType="search"
+              selectionColor={palette.acid}
             />
-          ))}
-        </ScrollView>
-      </View>
+            {query.length > 0 ? (
+              <Pressable onPress={() => setQuery('')} hitSlop={6}>
+                <Ionicons name="close-circle" size={16} color={palette.mute} />
+              </Pressable>
+            ) : null}
+          </View>
+          <Tap
+            onPress={() => router.push('/(tabs)/inbox')}
+            style={styles.iconBtn}
+            burstColor={palette.acid}
+          >
+            <Ionicons name="chatbubble-outline" size={18} color={palette.ink} />
+          </Tap>
+        </View>
+      </SafeAreaView>
 
-      <View style={styles.listHead}>
-        <View style={{ flex: 1 }}>
-          <RNText style={styles.listEyebrow}>OPEN · {filtered.length}</RNText>
-          <RNText style={styles.listTitle} maxFontSizeMultiplier={1.1}>
-            pick your shot.
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Quick links — list rows with a right chevron, hairline dividers */}
+        <View style={styles.quickRows}>
+          <QuickRow
+            label="My Deals"
+            count={deals.length + apps.length}
+            onPress={() => router.push('/(modules)/jobs/active-deals')}
+          />
+          <QuickRow
+            label="Rate Card"
+            onPress={() => router.push('/(modules)/jobs/rate-card')}
+            last
+          />
+        </View>
+
+        {/* "Gigs you might like" + segmented tabs */}
+        <View style={styles.feedHead}>
+          <RNText style={styles.feedHeadTitle} maxFontSizeMultiplier={1.1}>
+            Gigs you might like
           </RNText>
         </View>
-      </View>
 
-      <View style={styles.list}>
-        {filtered.length > 0 ? (
-          <FeaturedJobCard job={filtered[0]} />
-        ) : null}
+        <View style={styles.tabBar}>
+          {TABS.map((tk) => {
+            const active = tab === tk;
+            const label =
+              tk === 'SAVED' && savedCount > 0
+                ? `Saved (${savedCount})`
+                : tk === 'BEST MATCH'
+                ? 'Best Match'
+                : tk === 'MOST RECENT'
+                ? 'Most Recent'
+                : 'Saved';
+            return (
+              <Tap
+                key={tk}
+                onPress={() => setTab(tk)}
+                burstColor={palette.acid}
+                style={styles.tabItem}
+              >
+                <RNText
+                  style={[styles.tabLabel, active && styles.tabLabelActive]}
+                  maxFontSizeMultiplier={1.1}
+                >
+                  {label}
+                </RNText>
+                {active ? <View style={styles.tabUnderline} /> : null}
+              </Tap>
+            );
+          })}
+        </View>
 
-        {chunkPairs(filtered.slice(1)).map(([a, b], i) => (
-          <View key={`row-${i}`} style={styles.gridRow}>
-            <View style={{ flex: 1 }}>
-              <CompactJobCard job={a} />
-            </View>
-            <View style={{ flex: 1 }}>
-              {b ? <CompactJobCard job={b} /> : null}
-            </View>
+        <View style={styles.helperRow}>
+          <RNText style={styles.helperText} maxFontSizeMultiplier={1.2}>
+            {helper}
+          </RNText>
+        </View>
+
+        {/* Job rows */}
+        {visibleJobs.length === 0 ? (
+          <View style={styles.empty}>
+            <Ionicons name="briefcase-outline" size={28} color={palette.mute} />
+            <RNText style={styles.emptyText} maxFontSizeMultiplier={1.15}>
+              {tab === 'SAVED'
+                ? 'No saved gigs yet. Tap the heart on any gig to save it for later.'
+                : 'Nothing matches your filters. Tap Filters to broaden the search.'}
+            </RNText>
           </View>
-        ))}
-      </View>
-    </ScreenFrame>
-  );
-}
+        ) : (
+          visibleJobs.map((job, i) => (
+            <JobRow
+              key={job.id}
+              job={job}
+              isFirst={i === 0}
+              saved={!!saved[job.id]}
+              onSave={() => {
+                setSaved((s) => ({ ...s, [job.id]: !s[job.id] }));
+                toast(saved[job.id] ? 'Removed from saved.' : 'Saved for later.', 'success');
+              }}
+              onHide={() => {
+                setHidden((h) => ({ ...h, [job.id]: true }));
+                toast('Gig hidden from your feed.', 'default');
+              }}
+            />
+          ))
+        )}
+      </ScrollView>
 
-function chunkPairs<T>(arr: T[]): [T, T | undefined][] {
-  const out: [T, T | undefined][] = [];
-  for (let i = 0; i < arr.length; i += 2) {
-    out.push([arr[i], arr[i + 1]]);
-  }
-  return out;
-}
+      {/* Floating Filters pill */}
+      <FiltersFab onPress={() => setFiltersOpen(true)} />
 
-function Metric({
-  label,
-  value,
-  accent,
-}: {
-  label: string;
-  value: number;
-  accent?: string;
-}) {
-  const palette = useThemedPalette();
-  const styles = useThemedPaletteStyles(makeStyles);
-  return (
-    <View style={styles.metric}>
-      <RNText style={styles.metricLabel}>{label}</RNText>
-      <RNText
-        style={[
-          styles.metricValue,
-          accent ? { color: accent } : { color: palette.ink },
-        ]}
-        maxFontSizeMultiplier={1.1}
+      <Sheet
+        visible={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        eyebrow="GIG FILTERS"
+        title="Narrow your feed."
       >
-        {String(value).padStart(2, '0')}
-      </RNText>
+        <View style={styles.sheetSection}>
+          <RNText style={styles.sheetEyebrow} maxFontSizeMultiplier={1.1}>
+            CAMPAIGN TYPE
+          </RNText>
+          <View style={styles.sheetChipWrap}>
+            {TYPE_FILTERS.map((f) => {
+              const active = filter === f;
+              return (
+                <Pressable
+                  key={f}
+                  onPress={() => setFilter(f)}
+                  style={[
+                    styles.sheetChip,
+                    active && {
+                      backgroundColor: palette.ink,
+                      borderColor: palette.ink,
+                    },
+                  ]}
+                >
+                  <RNText
+                    style={[
+                      styles.sheetChipLabel,
+                      active && { color: palette.bone },
+                    ]}
+                    maxFontSizeMultiplier={1.1}
+                  >
+                    {f}
+                  </RNText>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <View style={styles.sheetFooter}>
+          <Pressable
+            onPress={() => {
+              setFilter('ALL');
+              toast('Filters reset.', 'default');
+            }}
+            style={styles.sheetReset}
+          >
+            <RNText style={styles.sheetResetLabel} maxFontSizeMultiplier={1.1}>
+              RESET
+            </RNText>
+          </Pressable>
+          <Pressable
+            onPress={() => setFiltersOpen(false)}
+            style={styles.sheetApply}
+          >
+            <RNText style={styles.sheetApplyLabel} maxFontSizeMultiplier={1.1}>
+              SHOW {visibleJobs.length} GIGS
+            </RNText>
+          </Pressable>
+        </View>
+      </Sheet>
     </View>
   );
 }
 
-// Pick readable fg/mute colors against the card's accent backdrop.
-function readableOn(hex: string) {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-  const isDark = luma < 145;
-  return {
-    fg: isDark ? staticPalette.bone : staticPalette.ink,
-    mute: isDark ? 'rgba(242,239,230,0.7)' : 'rgba(10,10,10,0.7)',
-    line: isDark ? 'rgba(242,239,230,0.18)' : 'rgba(10,10,10,0.14)',
-    isDark,
-  };
-}
+/* -------------------------------------------------------------------------
+ * Quick links row
+ * ----------------------------------------------------------------------- */
 
-function FeaturedJobCard({ job }: { job: Job }) {
+function QuickRow({
+  label,
+  count,
+  onPress,
+  last,
+}: {
+  label: string;
+  count?: number;
+  onPress: () => void;
+  last?: boolean;
+}) {
+  const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  const days = daysUntil(job.deadline);
-  const c = readableOn(job.accent);
-
   return (
-    <Tap
-      onPress={() => router.push(`/(modules)/jobs/${job.id}` as any)}
-      burstColor={c.isDark ? staticPalette.bone : staticPalette.ink}
-      variant="heavy"
-      style={[styles.jobCard, { backgroundColor: job.accent }]}
-    >
-      <View style={styles.jobInner}>
-        <View style={styles.jobTopRow}>
-          <RNText style={[styles.jobType, { color: c.fg }]} maxFontSizeMultiplier={1.1}>
-            {job.type}
-          </RNText>
-          {job.verified ? (
-            <View style={styles.verifiedDot}>
-              <View
-                style={[
-                  styles.verifiedDotInner,
-                  { backgroundColor: c.fg },
-                ]}
-              />
-              <RNText style={[styles.verifiedText, { color: c.fg }]}>
-                VERIFIED
-              </RNText>
-            </View>
-          ) : null}
-        </View>
-
-        <RNText
-          style={[styles.jobTitle, { color: c.fg }]}
-          numberOfLines={2}
-          adjustsFontSizeToFit
-          minimumFontScale={0.78}
-          maxFontSizeMultiplier={1.1}
-        >
-          {job.title}
+    <Tap onPress={onPress} burstColor={palette.acid}>
+      <View style={[styles.quickRow, !last && styles.quickRowBorder]}>
+        <RNText style={styles.quickRowLabel} maxFontSizeMultiplier={1.15}>
+          {label}
         </RNText>
-
-        <View style={styles.jobMetaRow}>
-          <RNText style={[styles.jobBrand, { color: c.fg }]} maxFontSizeMultiplier={1.15}>
-            {job.brand}
-          </RNText>
-          <View style={[styles.jobMetaDot, { backgroundColor: c.fg, opacity: 0.4 }]} />
-          <RNText
-            style={[styles.jobLocation, { color: c.mute }]}
-            numberOfLines={1}
-            maxFontSizeMultiplier={1.15}
-          >
-            {job.location}
-          </RNText>
-        </View>
-
-        <RNText
-          style={[styles.jobDescription, { color: c.mute }]}
-          numberOfLines={2}
-          maxFontSizeMultiplier={1.2}
-        >
-          {job.description}
-        </RNText>
-
-        <View style={[styles.jobFoot, { borderTopColor: c.line }]}>
-          <View style={styles.budgetBlock}>
-            <RNText style={[styles.budgetEyebrow, { color: c.mute }]}>BUDGET</RNText>
-            <RNText style={[styles.jobBudget, { color: c.fg }]} maxFontSizeMultiplier={1.1}>
-              ₹{formatBudget(job.budgetMin)}
-              <RNText style={[styles.budgetDash, { color: c.mute }]}> – </RNText>
-              ₹{formatBudget(job.budgetMax)}
+        {typeof count === 'number' && count > 0 ? (
+          <View style={styles.quickRowCount}>
+            <RNText style={styles.quickRowCountLabel} maxFontSizeMultiplier={1.1}>
+              {count}
             </RNText>
           </View>
-          <View style={styles.deadlineBlock}>
-            <RNText style={[styles.deadlineDays, { color: c.fg }]} maxFontSizeMultiplier={1.1}>
-              {days > 0 ? `${days}D` : 'CLOSED'}
-            </RNText>
-            <RNText style={[styles.deadlineLabel, { color: c.mute }]}>
-              {job.applicants} APPLIED
-            </RNText>
-          </View>
-        </View>
+        ) : null}
+        <Ionicons name="chevron-forward" size={18} color={palette.ink} style={{ opacity: 0.55 }} />
       </View>
     </Tap>
   );
 }
 
-function CompactJobCard({ job }: { job: Job }) {
+/* -------------------------------------------------------------------------
+ * Floating Filters pill
+ * ----------------------------------------------------------------------- */
+
+function FiltersFab({ onPress }: { onPress: () => void }) {
   const styles = useThemedPaletteStyles(makeStyles);
-  const days = daysUntil(job.deadline);
-  const c = readableOn(job.accent);
-
   return (
-    <Tap
-      onPress={() => router.push(`/(modules)/jobs/${job.id}` as any)}
-      burstColor={c.isDark ? staticPalette.bone : staticPalette.ink}
-      variant="heavy"
-      style={[styles.compactCard, { backgroundColor: job.accent }]}
+    <Pressable
+      onPress={onPress}
+      style={styles.fabWrap}
+      hitSlop={8}
+      unstable_pressDelay={0}
     >
-      <View style={styles.compactInner}>
-        <RNText
-          style={[styles.compactType, { color: c.mute }]}
-          numberOfLines={1}
-          maxFontSizeMultiplier={1.1}
-        >
-          {job.type}
+      <View style={styles.fab}>
+        <RNText style={styles.fabLabel} maxFontSizeMultiplier={1.1}>
+          Filters
         </RNText>
-
-        <RNText
-          style={[styles.compactTitle, { color: c.fg }]}
-          numberOfLines={3}
-          adjustsFontSizeToFit
-          minimumFontScale={0.7}
-          maxFontSizeMultiplier={1.1}
-        >
-          {job.title}
-        </RNText>
-
-        <RNText
-          style={[styles.compactBrand, { color: c.mute }]}
-          numberOfLines={1}
-          maxFontSizeMultiplier={1.15}
-        >
-          {job.brand}
-        </RNText>
-
-        <View style={[styles.compactDivider, { backgroundColor: c.line }]} />
-
-        <View style={styles.compactFoot}>
-          <RNText style={[styles.compactBudget, { color: c.fg }]} maxFontSizeMultiplier={1.1}>
-            ₹{formatBudget(job.budgetMin)}
-            <RNText style={[styles.compactBudgetPlus, { color: c.mute }]}>+</RNText>
-          </RNText>
-          <RNText style={[styles.compactDays, { color: c.fg }]} maxFontSizeMultiplier={1.1}>
-            {days > 0 ? `${days}D` : '—'}
-          </RNText>
-        </View>
       </View>
-    </Tap>
+    </Pressable>
   );
 }
+
+/* -------------------------------------------------------------------------
+ * Styles
+ * ----------------------------------------------------------------------- */
 
 const makeStyles = (palette: typeof staticPalette) =>
   StyleSheet.create({
-    heading: {
-      marginTop: 4,
-      gap: 0,
-    },
-    headingLine1: {
-      fontFamily: fonts.displayBold,
-      fontSize: 64,
-      lineHeight: 60,
-      letterSpacing: -3,
-      color: palette.ink,
-    },
-    headingLine2: {
-      fontFamily: fonts.displayBold,
-      fontSize: 64,
-      lineHeight: 60,
-      letterSpacing: -3,
-      color: palette.ink,
-    },
-    headingItalic: {
-      fontFamily: fonts.editorialItalic,
-      fontSize: 64,
-      lineHeight: 60,
-      letterSpacing: -1.4,
-      color: palette.ember,
-    },
-    metricsRow: {
-      marginTop: 28,
-      flexDirection: 'row',
-      alignItems: 'stretch',
-      borderTopWidth: 1,
-      borderBottomWidth: 1,
-      borderColor: palette.lineDark,
-      paddingVertical: 14,
-    },
-    metric: { flex: 1, gap: 6, alignItems: 'center' },
-    metricSep: { width: 1, backgroundColor: palette.line, marginHorizontal: 4 },
-    metricLabel: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.55,
-      letterSpacing: 1.6,
-    },
-    metricValue: {
-      fontFamily: fonts.displayBold,
-      fontSize: 34,
-      lineHeight: 36,
-      letterSpacing: -1,
-    },
+    root: { flex: 1, backgroundColor: palette.bone },
 
-    shortcuts: {
-      marginTop: 16,
-      gap: 10,
+    /* ── Header ── */
+    headerSafe: {
+      backgroundColor: palette.bone,
+      borderBottomWidth: 1,
+      borderBottomColor: palette.line,
     },
-    shortcut: {
-      borderRadius: 22,
-      paddingVertical: 18,
-      paddingHorizontal: 22,
+    header: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 12,
+      paddingHorizontal: 16,
+      paddingTop: 6,
+      paddingBottom: 12,
+      gap: 10,
     },
-    shortcutEyebrow: {
-      ...T.label,
-      color: staticPalette.ink,
-      opacity: 0.6,
-      letterSpacing: 1.6,
-    },
-    shortcutLabel: {
-      fontFamily: fonts.displayBold,
-      fontSize: 24,
-      lineHeight: 26,
-      letterSpacing: -0.8,
-      color: staticPalette.ink,
-      marginTop: 2,
-    },
-
-    filterBlock: {
-      marginTop: 32,
-    },
-    filterHead: {
+    searchBar: {
+      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
-      borderTopWidth: 1,
-      borderColor: palette.lineDark,
-      paddingTop: 14,
-      paddingBottom: 14,
-    },
-    filterEyebrow: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.55,
-      letterSpacing: 1.6,
-    },
-    filterScroll: { marginHorizontal: -12 },
-    filterRow: { gap: 8, paddingHorizontal: 12, paddingTop: 2, paddingBottom: 2 },
-
-    listHead: {
-      marginTop: 28,
-      borderTopWidth: 1,
-      borderColor: palette.lineDark,
-      paddingTop: 14,
-      flexDirection: 'row',
-      alignItems: 'flex-end',
-    },
-    listEyebrow: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.55,
-      letterSpacing: 1.6,
-      marginBottom: 6,
-    },
-    listTitle: {
-      fontFamily: fonts.editorialItalic,
-      fontSize: 36,
-      lineHeight: 38,
-      letterSpacing: -0.8,
-      color: palette.ink,
-    },
-
-    screenContent: { paddingHorizontal: 12, paddingBottom: 120 },
-    headerIconBtn: {
-      width: 38,
-      height: 38,
-      borderRadius: 19,
+      paddingHorizontal: 14,
+      height: 40,
+      borderRadius: 20,
       borderWidth: 1,
       borderColor: palette.line,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    searchBar: {
-      marginTop: 18,
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 10,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      borderRadius: 16,
-      borderWidth: 1,
-      borderColor: palette.lineDark,
       backgroundColor: palette.paper,
     },
     searchInput: {
       flex: 1,
       fontFamily: fonts.body,
-      fontSize: 15,
+      fontSize: 14,
       color: palette.ink,
       paddingVertical: 0,
+      includeFontPadding: false,
     },
-
-    list: { marginTop: 16, gap: 14 },
-    gridRow: { flexDirection: 'row', gap: 12, marginBottom: 0 },
-
-    jobCard: {
-      borderRadius: 24,
-      overflow: 'hidden',
-      shadowColor: '#000',
-      shadowOpacity: 0.12,
-      shadowRadius: 18,
-      shadowOffset: { width: 0, height: 8 },
-      elevation: 4,
-    },
-    jobInner: {
-      padding: 16,
-      gap: 12,
-    },
-    jobDescription: {
-      ...T.small,
-      color: palette.ink,
-      opacity: 0.65,
-      marginTop: 2,
-    },
-
-    compactCard: {
+    iconBtn: {
+      width: 40,
+      height: 40,
       borderRadius: 20,
-      overflow: 'hidden',
-      minHeight: 220,
-      shadowColor: '#000',
-      shadowOpacity: 0.1,
-      shadowRadius: 14,
-      shadowOffset: { width: 0, height: 6 },
-      elevation: 3,
+      borderWidth: 1,
+      borderColor: palette.line,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-    compactInner: { padding: 12, gap: 8, flex: 1 },
-    compactType: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.55,
-      letterSpacing: 1.4,
-      fontSize: 10,
+
+    /* ── Scroll ── */
+    scrollContent: { paddingBottom: 200 },
+
+    /* ── Quick links rows ── */
+    quickRows: {
+      paddingHorizontal: 20,
     },
-    compactTitle: {
+    quickRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 18,
+      gap: 10,
+    },
+    quickRowBorder: {
+      borderBottomWidth: 1,
+      borderBottomColor: palette.line,
+    },
+    quickRowLabel: {
+      flex: 1,
       fontFamily: fonts.displayBold,
       fontSize: 18,
-      lineHeight: 20,
-      letterSpacing: -0.5,
-      color: palette.ink,
-      marginTop: 2,
-    },
-    compactBrand: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.7,
-      letterSpacing: 1.2,
-      fontSize: 10,
-    },
-    compactDivider: {
-      height: 1,
-      backgroundColor: palette.line,
-      marginTop: 'auto',
-    },
-    compactFoot: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'baseline',
-    },
-    compactBudget: {
-      fontFamily: fonts.displayBold,
-      fontSize: 16,
       letterSpacing: -0.4,
       color: palette.ink,
     },
-    compactBudgetPlus: {
-      fontFamily: fonts.editorialItalic,
-      fontSize: 14,
-      color: palette.ink,
-      opacity: 0.55,
+    quickRowCount: {
+      paddingHorizontal: 9,
+      paddingVertical: 3,
+      borderRadius: 999,
+      backgroundColor: palette.acid,
     },
-    compactDays: {
-      fontFamily: fonts.displayBold,
-      fontSize: 14,
-      letterSpacing: -0.2,
+    quickRowCountLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 10,
+      letterSpacing: 0.8,
+      color: staticPalette.ink,
     },
-    jobTopRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
+
+    /* ── "Gigs you might like" + tabs ── */
+    feedHead: {
+      paddingHorizontal: 20,
+      paddingTop: 28,
+      paddingBottom: 14,
     },
-    jobType: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.7,
-      letterSpacing: 1.8,
-    },
-    verifiedDot: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 6,
-    },
-    verifiedDotInner: {
-      width: 6,
-      height: 6,
-      borderRadius: 3,
-    },
-    verifiedText: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.7,
-      letterSpacing: 1.6,
-    },
-    jobTitle: {
+    feedHeadTitle: {
       fontFamily: fonts.displayBold,
       fontSize: 26,
       lineHeight: 28,
-      letterSpacing: -0.8,
+      letterSpacing: -0.7,
       color: palette.ink,
     },
-    jobMetaRow: {
+    tabBar: {
+      flexDirection: 'row',
+      paddingHorizontal: 20,
+      gap: 18,
+      borderBottomWidth: 1,
+      borderBottomColor: palette.line,
+    },
+    tabItem: {
+      paddingVertical: 8,
+      paddingBottom: 12,
+    },
+    tabLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 13,
+      letterSpacing: 0.2,
+      color: palette.ink,
+      opacity: 0.55,
+    },
+    tabLabelActive: {
+      opacity: 1,
+    },
+    tabUnderline: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      height: 3,
+      backgroundColor: palette.ink,
+      borderRadius: 2,
+    },
+    helperRow: {
+      paddingHorizontal: 20,
+      paddingTop: 14,
+      paddingBottom: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: palette.line,
+    },
+    helperText: {
+      ...T.body,
+      color: palette.ink,
+      opacity: 0.65,
+      lineHeight: 19,
+    },
+
+    /* ── Empty ── */
+    empty: {
+      paddingHorizontal: 20,
+      paddingVertical: 48,
+      gap: 14,
+      alignItems: 'center',
+    },
+    emptyText: {
+      ...T.body,
+      color: palette.ink,
+      opacity: 0.65,
+      textAlign: 'center',
+      maxWidth: 280,
+    },
+
+    /* ── Floating Filters pill — ink fill, compact, centered ── */
+    fabWrap: {
+      position: 'absolute',
+      right: 16,
+      bottom: 24,
+      zIndex: 50,
+      elevation: 12,
+    },
+    fab: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 22,
+      height: 40,
+      minWidth: 92,
+      borderRadius: 20,
+      backgroundColor: palette.ink,
+      shadowColor: '#000',
+      shadowOpacity: 0.28,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 8 },
+      elevation: 12,
+    },
+    fabLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 12,
+      lineHeight: 14,
+      letterSpacing: 0.4,
+      color: palette.bone,
+      includeFontPadding: false,
+      textAlignVertical: 'center',
+      textAlign: 'center',
+    },
+
+    /* ── Filter sheet ── */
+    sheetSection: { gap: 12, paddingBottom: 12 },
+    sheetEyebrow: {
+      ...T.label,
+      color: palette.ink,
+      opacity: 0.6,
+    },
+    sheetChipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    sheetChip: {
+      paddingHorizontal: 14,
+      paddingVertical: 9,
+      borderRadius: 999,
+      borderWidth: 1,
+      borderColor: palette.line,
+      backgroundColor: 'transparent',
+    },
+    sheetChipLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 11,
+      letterSpacing: 1.4,
+      color: palette.ink,
+    },
+    sheetFooter: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 8,
+      gap: 10,
+      marginTop: 18,
     },
-    jobBrand: {
-      ...T.label,
+    sheetReset: {
+      paddingHorizontal: 18,
+      height: 48,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: palette.line,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sheetResetLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 12,
+      letterSpacing: 1.6,
       color: palette.ink,
-      letterSpacing: 1.4,
     },
-    jobMetaDot: {
-      width: 3,
-      height: 3,
-      borderRadius: 1.5,
-      backgroundColor: palette.ink,
-      opacity: 0.4,
-    },
-    jobLocation: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.55,
-      letterSpacing: 1.4,
+    sheetApply: {
       flex: 1,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: palette.ink,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-    jobFoot: {
-      marginTop: 4,
-      paddingTop: 14,
-      borderTopWidth: 1,
-      borderTopColor: palette.line,
-      flexDirection: 'row',
-      alignItems: 'flex-end',
-      justifyContent: 'space-between',
-    },
-    budgetBlock: { gap: 4, flex: 1 },
-    budgetEyebrow: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.5,
-      letterSpacing: 1.6,
-    },
-    jobBudget: {
-      fontFamily: fonts.displayBold,
-      fontSize: 22,
-      lineHeight: 24,
-      letterSpacing: -0.6,
-      color: palette.ink,
-    },
-    budgetDash: {
-      fontFamily: fonts.editorialItalic,
-      fontSize: 20,
-      letterSpacing: 0,
-      color: palette.ink,
-      opacity: 0.5,
-    },
-    deadlineBlock: { alignItems: 'flex-end', gap: 4 },
-    deadlineDays: {
-      fontFamily: fonts.displayBold,
-      fontSize: 22,
-      lineHeight: 24,
-      letterSpacing: -0.6,
-    },
-    deadlineLabel: {
-      ...T.label,
-      color: palette.ink,
-      opacity: 0.55,
-      letterSpacing: 1.6,
+    sheetApplyLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 12,
+      letterSpacing: 1.8,
+      color: palette.bone,
     },
   });

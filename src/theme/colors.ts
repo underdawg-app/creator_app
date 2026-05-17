@@ -6,7 +6,7 @@ const rawPalette = {
   boneSoft: '#E7E2D4',
   boneMuted: '#E0DCCC',
   paper: '#FFFFFF',
-  acid: '#D8FF3D',
+  acid: '#F70E0A',
   electric: '#2E5BFF',
   blush: '#FF6BB5',
   ember: '#FF5A1F',

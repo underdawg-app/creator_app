@@ -2,108 +2,59 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   View,
   StyleSheet,
-  ScrollView,
-  Text as RNText,
-  TextInput,
   Dimensions,
-  ActivityIndicator,
+  Text as RNText,
+  ScrollView,
+  RefreshControl,
+  FlatList,
+  ListRenderItem,
   Platform,
-  type LayoutChangeEvent,
+  TextInput,
+  Pressable,
+  Image as RNImage,
+  Animated as RNAnimated,
 } from 'react-native';
+
+// Height (in px) of the SearchBar + TabBar block that auto-hides on
+// scroll-down and re-shows on scroll-up. Plain RN Animated with
+// useNativeDriver:false — Android-safe.
+const SCROLLAWAY_HEIGHT = 96;
+const HIDE_THRESHOLD = 12;
+
+const HEADER_LOGO = require('@/objects/brand-wordmark.png');
+
+const IS_ANDROID = Platform.OS === 'android';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@/icons';
+
 import { router } from '@/navigation';
+import { Ionicons } from '@/icons';
 import { Image } from '@/components/ui/Image';
-import Animated, {
-  Easing,
-  Extrapolation,
-  interpolate,
-  runOnJS,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-  type SharedValue,
-} from 'react-native-reanimated';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import {
-  risingList,
-  trendingTags,
-  categoriesGrid,
   feedPosts,
+  challenges,
+  risingList,
+  categoriesGrid,
+  jobsSeed,
 } from '@/data/mock';
-import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
-import { Marquee } from '@/components/ui/Marquee';
 import { Tap } from '@/components/ui/Tap';
-import { TiltCard } from '@/components/ui/TiltCard';
-import { Chip } from '@/components/ui/Chip';
-import { ArrowMark, Asterisk } from '@/components/svg/Marks';
+import { useStore } from '@/store';
 import { BadgePill } from '@/components/ui/BadgePill';
+import { JobRow } from '@/components/jobs/JobRow';
 
 const { width } = Dimensions.get('window');
-const H_PADDING = 24;
-const GUTTER = 10;
-const CARD_WIDTH = (width - H_PADDING * 2 - GUTTER) / 2;
 
-const GRID_GAP = 2;
-const GRID_COLS = 3;
-const TILE_SIZE = (width - GRID_GAP * (GRID_COLS - 1)) / GRID_COLS;
-const TILE_BIG = TILE_SIZE * 2 + GRID_GAP;
-const PAGE_SIZE = 12;
-const POOL = feedPosts.filter((p) => !!p.image);
+type Post = (typeof feedPosts)[number];
+type Tab = 'FOR YOU' | 'FOLLOWING' | 'RISING';
+type FeedItem =
+  | { kind: 'post'; post: Post; key: string }
+  | { kind: 'gig'; job: (typeof jobsSeed)[number]; key: string }
+  | { kind: 'who'; key: string }
+  | { kind: 'challenge'; key: string };
 
-type GridTile = (typeof feedPosts)[number] & { key: string };
-
-function buildGridPage(seedOffset: number): GridTile[] {
-  if (POOL.length === 0) return [];
-  return Array.from({ length: PAGE_SIZE }, (_, i) => {
-    const src = POOL[(seedOffset + i) % POOL.length];
-    return { ...src, key: `${src.id}-${seedOffset + i}` };
-  });
-}
-
-function isVideoType(type: string) {
-  const t = type.toUpperCase();
-  return t.includes('VIDEO') || t.includes('LIVE') || t.includes('REEL');
-}
-
-/**
- * Stagger the grid into Instagram-style row groups: every group of 3 tiles
- * renders as one 2×2 feature tile + 2 stacked 1×1 tiles, alternating which
- * side the feature is on. Any trailing partial group renders as a flat row
- * of 1×1 tiles so nothing falls off the page.
- */
-type RowGroup =
-  | { type: 'feature'; side: 'left' | 'right'; tiles: GridTile[]; key: string }
-  | { type: 'flat'; tiles: GridTile[]; key: string };
-
-function groupGrid(tiles: GridTile[]): RowGroup[] {
-  const groups: RowGroup[] = [];
-  let featureCount = 0;
-  for (let i = 0; i < tiles.length; i += 3) {
-    const slice = tiles.slice(i, i + 3);
-    if (slice.length === 3) {
-      groups.push({
-        type: 'feature',
-        side: featureCount % 2 === 0 ? 'left' : 'right',
-        tiles: slice,
-        key: `g-${i}`,
-      });
-      featureCount += 1;
-    } else {
-      groups.push({ type: 'flat', tiles: slice, key: `g-${i}` });
-    }
-  }
-  return groups;
-}
-
-const CATEGORY_ICONS: Record<
-  string,
-  React.ComponentProps<typeof Ionicons>['name']
-> = {
+const CATEGORY_ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
   art: 'color-palette',
   music: 'musical-notes',
   film: 'film',
@@ -114,497 +65,801 @@ const CATEGORY_ICONS: Record<
   podcast: 'mic',
 };
 
-const CATEGORY_IMAGES: Record<string, any> = {
-  art:     require('@/objects/obj-1.png'),
-  music:   require('@/objects/obj-2.png'),
-  film:    require('@/objects/obj-3.png'),
-  dance:   require('@/objects/obj-4.png'),
-  poetry:  require('@/objects/obj-5.png'),
-  design:  require('@/objects/obj-6.png'),
-  fashion: require('@/objects/obj-7.png'),
-  podcast: require('@/objects/obj-8.png'),
+const CATEGORY_TO_POST_CATEGORY: Record<string, string[]> = {
+  art: ['VISUAL ART'],
+  music: ['MUSIC'],
+  film: ['FILM'],
+  dance: ['DANCE'],
+  poetry: ['POETRY'],
+  design: ['DESIGN'],
+  fashion: ['FASHION'],
+  podcast: ['PODCAST'],
 };
+
+// Stable FlatList helpers — module-scoped so memoized rows don't churn.
+const keyExtractor = (it: FeedItem) => it.key;
+const contentContainer = { paddingBottom: 160 };
+
+/* --------------------------------------------------------------------------
+ * Screen root — merged Feed + Explore
+ * ------------------------------------------------------------------------ */
 
 export default function Explore() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  const [q, setQ] = useState('');
-  const [activeTag, setActiveTag] = useState<string | null>(null);
-  const [grid, setGrid] = useState(() => buildGridPage(0));
-  const [loadingMore, setLoadingMore] = useState(false);
-  const loadingRef = useRef(false);
+  const [tab, setTab] = useState<Tab>('FOR YOU');
+  const [craft, setCraft] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const following = useStore((s) => s.following);
+  const toast = useStore((s) => s.toast);
 
-  const filtered = useMemo(() => {
-    const needle = q.trim().toLowerCase();
-    const tagNeedle = activeTag?.replace('#', '').toLowerCase() ?? '';
-    return risingList.filter((r) => {
-      const hay =
-        `${r.name} ${r.handle} ${r.type} ${r.city}`.toLowerCase();
-      if (needle && !hay.includes(needle)) return false;
-      if (tagNeedle && !hay.includes(tagNeedle)) return false;
-      return true;
+  const visiblePosts = useMemo(() => {
+    let list: Post[] = feedPosts;
+    if (tab === 'FOLLOWING') {
+      const handles = Object.keys(following).filter((h) => following[h]);
+      list = handles.length === 0 ? feedPosts.slice(0, 2) : feedPosts.filter((p) => handles.includes(p.handle));
+    } else if (tab === 'RISING') {
+      list = feedPosts.filter((p) => p.rising);
+    }
+    if (craft) {
+      const matches = CATEGORY_TO_POST_CATEGORY[craft] ?? [];
+      if (matches.length > 0) {
+        list = list.filter((p) => matches.includes(p.category));
+      }
+    }
+    return list;
+  }, [tab, following, craft]);
+
+  // Interleave posts with sponsored gigs and side widgets so the scroll
+  // never feels like an undifferentiated wall of media. The cadence is
+  // fixed so users can predict where ads land:
+  //   - every 3rd item: sponsored gig (rotates through jobsSeed)
+  //   - every 7th item: who-to-follow card
+  //   - every 11th item: live challenge card
+  const feedItems = useMemo<FeedItem[]>(() => {
+    const out: FeedItem[] = [];
+    let gigIndex = 0;
+    visiblePosts.forEach((post, i) => {
+      out.push({ kind: 'post', post, key: `p-${post.id}` });
+      const slot = i + 1;
+      if (slot % 3 === 0) {
+        const job = jobsSeed[gigIndex % jobsSeed.length];
+        out.push({ kind: 'gig', job, key: `g-${slot}-${job.id}` });
+        gigIndex += 1;
+      }
+      if (slot % 7 === 0) {
+        out.push({ kind: 'who', key: `w-${slot}` });
+      }
+      if (slot % 11 === 0) {
+        out.push({ kind: 'challenge', key: `c-${slot}` });
+      }
     });
-  }, [q, activeTag]);
+    return out;
+  }, [visiblePosts]);
 
-  // Track the in-flight load-more timer so it gets cancelled on unmount —
-  // otherwise setState fires on an unmounted component if the user navigates
-  // away during the simulated 350ms load.
-  const loadMoreTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const refreshTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => () => {
-    if (loadMoreTimer.current) clearTimeout(loadMoreTimer.current);
+    if (refreshTimer.current) clearTimeout(refreshTimer.current);
   }, []);
 
-  const loadMore = useCallback(() => {
-    if (loadingRef.current) return;
-    loadingRef.current = true;
-    setLoadingMore(true);
-    if (loadMoreTimer.current) clearTimeout(loadMoreTimer.current);
-    loadMoreTimer.current = setTimeout(() => {
-      setGrid((g) => [...g, ...buildGridPage(g.length)]);
-      setLoadingMore(false);
-      loadingRef.current = false;
-      loadMoreTimer.current = null;
-    }, 350);
-  }, []);
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    refreshTimer.current = setTimeout(() => {
+      setRefreshing(false);
+      toast('Feed refreshed.', 'default');
+      refreshTimer.current = null;
+    }, 900);
+  }, [toast]);
 
-  // Sticky-until-discovery state. The hero (kicker + title block) plus
-  // the search bar form a single absolute overlay pinned at the top.
-  // When the discovery section reaches the overlay's bottom, only the
-  // *title block* slides up out of view — the search bar follows it up
-  // and lands pinned at the top edge so the user can keep searching
-  // while browsing the grid.
-  const [headerH, setHeaderH] = useState(0);
-  const headerHv = useSharedValue(0);
-  const titleHv = useSharedValue(0);
-  const discoveryY = useSharedValue(Number.MAX_SAFE_INTEGER);
-  const scrollY = useSharedValue(0);
+  const [savedGigs, setSavedGigs] = useState<Record<string, boolean>>({});
+  const toggleGigSave = useCallback((id: string) => {
+    setSavedGigs((s) => {
+      const next = !s[id];
+      toast(next ? 'Saved for later.' : 'Removed from saved.', 'success');
+      return { ...s, [id]: next };
+    });
+  }, [toast]);
 
-  const onHeaderLayout = useCallback(
-    (e: LayoutChangeEvent) => {
-      const h = e.nativeEvent.layout.height;
-      setHeaderH(h);
-      headerHv.value = h;
-    },
-    [headerHv]
+  const renderItem: ListRenderItem<FeedItem> = useCallback(({ item }) => {
+    if (item.kind === 'post') return <PostCard post={item.post} />;
+    if (item.kind === 'gig') {
+      return (
+        <JobRow
+          job={item.job}
+          saved={!!savedGigs[item.job.id]}
+          onSave={() => toggleGigSave(item.job.id)}
+        />
+      );
+    }
+    if (item.kind === 'who') return <WhoToFollow />;
+    return <LiveChallengeCard />;
+  }, [savedGigs, toggleGigSave]);
+
+  const listHeader = (
+    <>
+      <BrowseByCraft active={craft} onChange={setCraft} />
+    </>
   );
 
-  const onTitleLayout = useCallback(
-    (e: LayoutChangeEvent) => {
-      titleHv.value = e.nativeEvent.layout.height;
+  // Auto-hide search+tabs on scroll. `hidden` is a stock RN Animated.Value
+  // (not reanimated) so the JS-thread animation is safe on Android.
+  // 0 = fully shown, 1 = fully hidden.
+  const hidden = useRef(new RNAnimated.Value(0)).current;
+  const lastYRef = useRef(0);
+  const isHiddenRef = useRef(false);
+  const animateTo = useCallback(
+    (toValue: number, duration: number) => {
+      RNAnimated.timing(hidden, {
+        toValue,
+        duration,
+        useNativeDriver: false,
+      }).start();
+      isHiddenRef.current = toValue === 1;
     },
-    [titleHv]
+    [hidden],
   );
-
-  const onDiscoveryLayout = useCallback(
-    (e: LayoutChangeEvent) => {
-      discoveryY.value = e.nativeEvent.layout.y;
-    },
-    [discoveryY]
-  );
-
-  const triggerLoadMore = useCallback(() => {
-    loadMore();
-  }, [loadMore]);
-
-  const onAnimatedScroll = useAnimatedScrollHandler({
-    onScroll: (e) => {
-      scrollY.value = e.contentOffset.y;
-      const distanceFromEnd =
-        e.contentSize.height - e.layoutMeasurement.height - e.contentOffset.y;
-      if (distanceFromEnd < 600) {
-        runOnJS(triggerLoadMore)();
+  const onScroll = useCallback(
+    (e: any) => {
+      const y = e.nativeEvent.contentOffset.y;
+      const dy = y - lastYRef.current;
+      lastYRef.current = y;
+      if (y <= 0) {
+        if (isHiddenRef.current) animateTo(0, 180);
+        return;
+      }
+      if (dy > HIDE_THRESHOLD && !isHiddenRef.current) {
+        animateTo(1, 220);
+      } else if (dy < -HIDE_THRESHOLD && isHiddenRef.current) {
+        animateTo(0, 200);
       }
     },
+    [animateTo],
+  );
+  const animatedHeight = hidden.interpolate({
+    inputRange: [0, 1],
+    outputRange: [SCROLLAWAY_HEIGHT, 0],
   });
-
-  const headerAnimStyle = useAnimatedStyle(() => {
-    if (headerHv.value === 0 || titleHv.value === 0) {
-      return { transform: [{ translateY: 0 }] };
-    }
-    const threshold = discoveryY.value - headerHv.value;
-    const ty = interpolate(
-      scrollY.value,
-      [threshold, threshold + titleHv.value],
-      [0, -titleHv.value],
-      Extrapolation.CLAMP
-    );
-    return { transform: [{ translateY: ty }] };
+  const animatedOpacity = hidden.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
   });
 
   return (
     <View style={styles.root}>
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <SkiaWaveField
-          width={width}
-          height={320}
-          color="rgba(10,10,10,0.04)"
-          lines={12}
-          amplitude={10}
-          frequency={0.02}
-          speed={0.22}
-          strokeWidth={1}
-        />
-      </View>
-
-      <SafeAreaView edges={['top']} style={styles.safe}>
-        <View style={styles.scrollHost}>
-          <Animated.ScrollView
-            onScroll={onAnimatedScroll}
-            // Throttle scroll callbacks at half the rate on Android. The
-            // animated header pin still tracks the finger smoothly because
-            // the worklet runs on UI thread, but the JS work per scroll frame
-            // (load-more checks, parallax triggers) is halved.
-            scrollEventThrottle={Platform.OS === 'android' ? 32 : 16}
-            showsVerticalScrollIndicator={false}
-            removeClippedSubviews={Platform.OS === 'android'}
-            overScrollMode={Platform.OS === 'android' ? 'never' : 'auto'}
-            contentContainerStyle={{
-              paddingTop: headerH,
-              paddingBottom: 140,
-            }}
-          >
-            {/* Trending pill row */}
-            <View style={styles.trendRow}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.trendContent}
-          >
-            {trendingTags.map((t) => (
-              <Chip
-                key={t}
-                label={t}
-                active={activeTag === t}
-                onPress={() => setActiveTag(activeTag === t ? null : t)}
-                accent={palette.acid}
-              />
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Category grid — BROWSE BY CRAFT */}
-        <View style={styles.section}>
-          <View style={styles.sectionHead}>
-            <RNText style={styles.sectionKicker} maxFontSizeMultiplier={1.15}>
-              — BROWSE BY CRAFT
-            </RNText>
-            <RNText style={styles.sectionCount} maxFontSizeMultiplier={1.15}>
-              {categoriesGrid.length} CRAFTS
-            </RNText>
-          </View>
-          <View style={styles.catGrid}>
-            {categoriesGrid.map((c, i) => (
-              <Tap
-                key={c.key}
-                onPress={() => setQ(c.label.toLowerCase())}
-                burstColor={c.accent}
-                style={{ width: CARD_WIDTH }}
-              >
-                <TiltCard
-                  style={[styles.catCard, { backgroundColor: c.accent }] as any}
-                  maxTilt={4}
-                >
-                  {CATEGORY_IMAGES[c.key] ? (
-                    <CatCardImage source={CATEGORY_IMAGES[c.key]} scrollY={scrollY} index={i} />
-                  ) : null}
-                  <View style={styles.catFoot}>
-                    <RNText
-                      style={styles.catLabel}
-                      numberOfLines={1}
-                      adjustsFontSizeToFit
-                      minimumFontScale={0.75}
-                      maxFontSizeMultiplier={1.1}
-                    >
-                      {c.label}
-                    </RNText>
-                    <ArrowMark size={14} color={staticPalette.ink} strokeWidth={1.8} />
-                  </View>
-                </TiltCard>
-              </Tap>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.strip}>
-          <View style={styles.hairline} />
-          <Marquee
-            items={['RISING THIS WEEK', 'NO GATEKEEPING', 'NO PAY TO PLAY', 'JUST GOOD WORK']}
-            speed={40}
-            separator="   ·   "
-            textStyle={{
-              fontFamily: fonts.displayBold,
-              color: palette.ink,
-              opacity: 0.85,
-              fontSize: 18,
-              lineHeight: 22,
-              letterSpacing: -0.4,
-              includeFontPadding: false,
-            }}
-            style={{ height: 26 }}
-          />
-          <View style={styles.hairline} />
-        </View>
-
-        {/* Discovery grid — Instagram-style infinite feed */}
-        <View style={styles.discoverHead} onLayout={onDiscoveryLayout}>
-          <RNText style={styles.sectionKicker} maxFontSizeMultiplier={1.15}>
-            — DISCOVER · FOR YOU
-          </RNText>
-          <RNText style={styles.sectionCount} maxFontSizeMultiplier={1.15}>
-            ENDLESS
-          </RNText>
-        </View>
-        <View style={styles.gridWrap}>
-          {groupGrid(grid).map((group) => {
-            if (group.type === 'flat') {
-              return (
-                <View key={group.key} style={styles.flatRow}>
-                  {group.tiles.map((t) => (
-                    <GridTileView
-                      key={t.key}
-                      tile={t}
-                      size={TILE_SIZE}
-                      styles={styles}
-                    />
-                  ))}
-                </View>
-              );
-            }
-            const [feature, s1, s2] = group.tiles;
-            const stack = (
-              <View style={styles.stack}>
-                <GridTileView tile={s1} size={TILE_SIZE} styles={styles} />
-                <GridTileView tile={s2} size={TILE_SIZE} styles={styles} />
-              </View>
-            );
-            const big = (
-              <GridTileView
-                key={`f-${feature.key}`}
-                tile={feature}
-                size={TILE_BIG}
-                feature
-                styles={styles}
-              />
-            );
-            return (
-              <View key={group.key} style={styles.featureRow}>
-                {group.side === 'left' ? big : stack}
-                {group.side === 'left' ? stack : big}
-              </View>
-            );
-          })}
-        </View>
-            <View style={styles.gridFoot}>
-              {loadingMore ? (
-                <ActivityIndicator color={palette.ink} />
-              ) : (
-                <RNText style={styles.gridFootText} maxFontSizeMultiplier={1.15}>
-                  KEEP SCROLLING · MORE BELOW
-                </RNText>
-              )}
-            </View>
-          </Animated.ScrollView>
-
-          {/* Sticky hero overlay — pinned at top, slides off when the
-              discovery section reaches the viewport edge. */}
-          <Animated.View
-            pointerEvents="box-none"
-            onLayout={onHeaderLayout}
-            style={[styles.stickyHeader, headerAnimStyle]}
-          >
-            {/* Title block — slides up out of view when the discovery
-                section reaches the overlay's bottom. */}
-            <View onLayout={onTitleLayout}>
-              <View style={styles.topRow}>
-                <View style={styles.kickerRow}>
-                  <Asterisk size={11} color={palette.ink} strokeWidth={1.4} />
-                  <RNText style={styles.kicker} maxFontSizeMultiplier={1.15}>
-                    BROWSE · CRAFT
-                  </RNText>
-                </View>
-                <Tap
-                  onPress={() => setActiveTag(null)}
-                  style={styles.iconBtn}
-                  burstColor={palette.acid}
-                >
-                  <Ionicons name="options-outline" size={18} color={palette.ink} />
-                </Tap>
-              </View>
-
-              <View style={styles.heroBlock}>
-                <RNText
-                  style={styles.heroTitle}
-                  numberOfLines={2}
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.75}
-                  maxFontSizeMultiplier={1.1}
-                >
-                  find your
-                  <RNText style={styles.heroItalic}> people.</RNText>
-                </RNText>
-                <RNText style={styles.heroSub} maxFontSizeMultiplier={1.2}>
-                  seven thousand creators. zero gatekeepers. search a name, a
-                  city, or a sound.
-                </RNText>
-              </View>
-            </View>
-
-            {/* Search bar — stays pinned. As the title block translates
-                up, the whole overlay translates with it, so the search
-                lands at the top edge with a small inset for breathing
-                room. */}
-            <View style={styles.searchWrap}>
-              <View style={styles.search}>
-                <Ionicons name="search" size={18} color={palette.ink} />
-                <TextInput
-                  style={styles.searchInput}
-                  placeholder="SEARCH CREATORS, TAGS, SOUNDS…"
-                  placeholderTextColor={palette.mute}
-                  value={q}
-                  onChangeText={setQ}
-                  autoCapitalize="none"
-                  maxFontSizeMultiplier={1.2}
-                />
-                {q.length > 0 ? (
-                  <Tap onPress={() => setQ('')}>
-                    <Ionicons name="close-circle" size={18} color={palette.ink} />
-                  </Tap>
-                ) : null}
-              </View>
-            </View>
-          </Animated.View>
-        </View>
+      <SafeAreaView edges={['top']} style={styles.headerSafe}>
+        <HeaderBar />
+        <RNAnimated.View
+          style={{ height: animatedHeight, opacity: animatedOpacity, overflow: 'hidden' }}
+        >
+          <SearchBar />
+          <TabBar active={tab} onChange={setTab} />
+        </RNAnimated.View>
       </SafeAreaView>
+
+      <FlatList
+        data={feedItems}
+        keyExtractor={keyExtractor}
+        renderItem={renderItem}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={
+          <View style={styles.empty}>
+            <RNText style={styles.emptyText}>
+              Nothing here yet. Follow someone or switch tabs to fill it up.
+            </RNText>
+          </View>
+        }
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={palette.ink} />
+        }
+        ItemSeparatorComponent={Separator}
+        contentContainerStyle={contentContainer}
+        showsVerticalScrollIndicator={false}
+        removeClippedSubviews={IS_ANDROID}
+        initialNumToRender={6}
+        maxToRenderPerBatch={IS_ANDROID ? 4 : 8}
+        updateCellsBatchingPeriod={IS_ANDROID ? 60 : 50}
+        windowSize={IS_ANDROID ? 7 : 11}
+        overScrollMode={IS_ANDROID ? 'never' : 'auto'}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+      />
     </View>
   );
 }
 
-function CatCardImage({
-  source,
-  scrollY,
-  index,
-}: {
-  source: any;
-  scrollY: SharedValue<number>;
-  index: number;
-}) {
-  const idle = useSharedValue(0);
+/* --------------------------------------------------------------------------
+ * Header & top tabs
+ * ------------------------------------------------------------------------ */
 
-  React.useEffect(() => {
-    idle.value = withRepeat(
-      withTiming(1, { duration: 2600 + index * 280, easing: Easing.inOut(Easing.sin) }),
-      -1,
-      true,
-    );
-  }, []);
+const Separator = React.memo(function Separator() {
+  const styles = useThemedPaletteStyles(makeStyles);
+  return <View style={styles.separator} />;
+});
 
-  const animStyle = useAnimatedStyle(() => {
-    const floatY = (idle.value - 0.5) * 7;
-    const scrollY_ = scrollY.value * -0.01;
-    return {
-      transform: [{ translateY: floatY + scrollY_ }],
-    };
-  });
+function HeaderBar() {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  const toast = useStore((s) => s.toast);
 
   return (
-    <Animated.View
-      style={[{ position: 'absolute', right: 0, top: 12, width: '68%', height: '72%' }, animStyle]}
-    >
-      <Image source={source} style={{ width: '100%', height: '100%' }} contentFit="contain" />
-    </Animated.View>
+    <View style={styles.header}>
+      <Tap
+        onPress={() => router.push('/(modules)/notifications')}
+        style={styles.iconBtn}
+        burstColor={palette.acid}
+      >
+        <Ionicons name="notifications-outline" size={18} color={palette.ink} />
+        <View style={styles.notifDot} />
+      </Tap>
+      <View style={styles.headerCenter}>
+        <RNImage
+          source={HEADER_LOGO}
+          style={styles.headerLogo}
+          resizeMode="contain"
+        />
+      </View>
+      <Tap
+        onPress={() => router.push('/(tabs)/inbox')}
+        style={styles.iconBtn}
+        burstColor={palette.acid}
+      >
+        <Ionicons name="chatbubble-outline" size={18} color={palette.ink} />
+      </Tap>
+    </View>
   );
 }
 
-type StyleMap = ReturnType<typeof makeStyles>;
-
-function GridTileView({
-  tile,
-  size,
-  feature,
-  styles,
-}: {
-  tile: GridTile;
-  size: number;
-  feature?: boolean;
-  styles: StyleMap;
-}) {
+function SearchBar() {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  const [query, setQuery] = useState('');
   return (
-    <Tap
-      onPress={() =>
-        router.push(
-          `/(modules)/portfolio/public-preview?handle=${tile.handle}` as any
-        )
-      }
-      burstColor={tile.color}
-      style={[styles.tile, { width: size, height: size, backgroundColor: tile.bg }]}
+    <View style={styles.searchWrap}>
+      <Ionicons name="search-outline" size={16} color={palette.mute} />
+      <TextInput
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Search creators, tags, gigs..."
+        placeholderTextColor={palette.mute}
+        style={styles.searchInput}
+        autoCapitalize="none"
+        autoCorrect={false}
+      />
+      {query.length > 0 ? (
+        <Pressable onPress={() => setQuery('')} hitSlop={10}>
+          <Ionicons name="close-circle" size={16} color={palette.mute} />
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  const tabs: Tab[] = ['FOR YOU', 'FOLLOWING', 'RISING'];
+  return (
+    <View style={styles.tabBar}>
+      {tabs.map((t) => (
+        <Tap
+          key={t}
+          onPress={() => onChange(t)}
+          style={[styles.tabItem, active === t && styles.tabItemActive]}
+          burstColor={palette.acid}
+        >
+          <RNText
+            style={[styles.tabLabel, active === t && styles.tabLabelActive]}
+            maxFontSizeMultiplier={1.1}
+          >
+            {t}
+          </RNText>
+          {active === t ? <View style={styles.tabUnderline} /> : null}
+        </Tap>
+      ))}
+    </View>
+  );
+}
+
+/* --------------------------------------------------------------------------
+ * Stories strip
+ * ------------------------------------------------------------------------ */
+
+function StoriesStrip() {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  const toast = useStore((s) => s.toast);
+  const profile = useStore((s) => s.profile);
+
+  const posts = feedPosts.slice(0, 9);
+  const STORY_COLOR = palette.blush;
+  const stories = [
+    {
+      key: 'me',
+      name: 'You',
+      initial: profile.name.slice(0, 1).toUpperCase(),
+      color: STORY_COLOR,
+      avatar: null as string | null,
+      add: true,
+    },
+    ...posts.map((p) => ({
+      key: p.handle,
+      name: p.creator.split(' ')[0],
+      initial: p.creator.slice(0, 1).toUpperCase(),
+      color: STORY_COLOR,
+      avatar: (p as any).avatar ?? null,
+      add: false,
+    })),
+  ];
+
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={styles.storiesRow}
     >
-      {tile.image ? (
-        <Image
-          source={{ uri: tile.image }}
-          style={StyleSheet.absoluteFill as any}
-          contentFit="cover"
-          transition={180}
-          placeholder={{ blurhash: 'L6H2EC=PM+yV0g-mq.wG9c010J}I' }}
-          targetWidth={size}
-        />
-      ) : null}
+      {stories.map((s) => (
+        <Tap
+          key={s.key}
+          onPress={() =>
+            s.add
+              ? toast('Story capture coming soon.', 'default')
+              : toast(`Viewing ${s.name}'s story.`, 'default')
+          }
+          style={styles.storyCol}
+          burstColor={s.color}
+        >
+          <View style={[styles.storyRing, { borderColor: s.color }]}>
+            <View style={[styles.storyAvatar, { backgroundColor: s.color }]}>
+              {s.avatar ? (
+                <Image
+                  source={{ uri: s.avatar }}
+                  style={StyleSheet.absoluteFill as any}
+                  contentFit="cover"
+                  transition={180}
+                  targetWidth={54}
+                />
+              ) : (
+                <RNText style={styles.storyInitial} maxFontSizeMultiplier={1.1}>
+                  {s.initial}
+                </RNText>
+              )}
+            </View>
+            {s.add ? (
+              <View style={styles.storyAdd}>
+                <Ionicons name="add" size={14} color={palette.bone} />
+              </View>
+            ) : null}
+          </View>
+          <RNText style={styles.storyName} numberOfLines={1} maxFontSizeMultiplier={1.15}>
+            {s.name}
+          </RNText>
+        </Tap>
+      ))}
+    </ScrollView>
+  );
+}
 
-      {isVideoType(tile.type) ? (
-        <View style={styles.tileBadge}>
-          <Ionicons name="play" size={feature ? 14 : 12} color={staticPalette.bone} />
+/* --------------------------------------------------------------------------
+ * Browse by Craft — large horizontal cards, not pill chips
+ * ------------------------------------------------------------------------ */
+
+function BrowseByCraft({
+  active,
+  onChange,
+}: {
+  active: string | null;
+  onChange: (k: string | null) => void;
+}) {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+
+  return (
+    <View style={styles.craftSection}>
+      <View style={styles.craftHead}>
+        <View style={styles.craftHeadLeft}>
+          <View style={[styles.craftDot, { backgroundColor: palette.ink }]} />
+          <RNText style={styles.craftKicker} maxFontSizeMultiplier={1.15}>
+            BROWSE BY CRAFT
+          </RNText>
         </View>
-      ) : null}
-
-      {feature ? (
-        <>
-          <View style={styles.tileScrim} pointerEvents="none" />
-          <View style={styles.tileMeta}>
-            <RNText
-              style={styles.tileMetaCategory}
-              numberOfLines={1}
-              maxFontSizeMultiplier={1.1}
-            >
-              {tile.category}
+        {active ? (
+          <Tap onPress={() => onChange(null)} burstColor={palette.acid}>
+            <RNText style={styles.craftClear} maxFontSizeMultiplier={1.15}>
+              CLEAR
             </RNText>
-            <RNText
-              style={styles.tileMetaCreator}
-              numberOfLines={1}
-              maxFontSizeMultiplier={1.1}
+          </Tap>
+        ) : (
+          <RNText style={styles.craftCount} maxFontSizeMultiplier={1.15}>
+            {categoriesGrid.length} CRAFTS
+          </RNText>
+        )}
+      </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.craftRow}
+      >
+        <Tap
+          onPress={() => onChange(null)}
+          burstColor={palette.acid}
+          style={[
+            styles.craftPill,
+            active === null && {
+              backgroundColor: palette.acid,
+              borderColor: palette.ink,
+            },
+          ]}
+        >
+          <RNText
+            style={[styles.craftPillLabel, { color: palette.ink }]}
+            numberOfLines={1}
+            maxFontSizeMultiplier={1.1}
+          >
+            All
+          </RNText>
+        </Tap>
+        {categoriesGrid.map((c) => {
+          const isActive = active === c.key;
+          return (
+            <Tap
+              key={c.key}
+              onPress={() => onChange(isActive ? null : c.key)}
+              burstColor={c.accent}
+              style={[
+                styles.craftPill,
+                isActive && { backgroundColor: c.accent, borderColor: palette.ink },
+              ]}
             >
-              {tile.handle}
+              <RNText
+                style={[styles.craftPillLabel, { color: palette.ink }]}
+                numberOfLines={1}
+                maxFontSizeMultiplier={1.1}
+              >
+                {c.label}
+              </RNText>
+            </Tap>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
+/* --------------------------------------------------------------------------
+ * Post card — same engagement model as the old Feed, lifted in
+ * ------------------------------------------------------------------------ */
+
+const PostCard = React.memo(PostCardImpl);
+
+function PostCardImpl({ post }: { post: Post }) {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  const toast = useStore((s) => s.toast);
+  const liked = useStore((s) => !!s.likes[post.id]);
+  const saved = useStore((s) => !!s.saves[post.id]);
+  const following = useStore((s) => !!s.following[post.handle]);
+  const toggleLike = useStore((s) => s.toggleLike);
+  const toggleSave = useStore((s) => s.toggleSave);
+  const toggleFollow = useStore((s) => s.toggleFollow);
+
+  const likes = post.likes + (liked ? 1 : 0);
+
+  return (
+    <View style={styles.post}>
+      <View style={styles.postHead}>
+        <View style={[styles.avatar, { backgroundColor: post.color }]}>
+          {post.avatar ? (
+            <Image
+              source={{ uri: post.avatar }}
+              style={StyleSheet.absoluteFill as any}
+              contentFit="cover"
+              transition={180}
+              targetWidth={42}
+            />
+          ) : (
+            <RNText style={styles.avatarText} maxFontSizeMultiplier={1.1}>
+              {post.creator.slice(0, 1)}
+            </RNText>
+          )}
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <View style={styles.nameRow}>
+            <RNText
+              style={styles.postName}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.85}
+              maxFontSizeMultiplier={1.15}
+            >
+              {post.creator}
+            </RNText>
+            {post.rising ? (
+              <View style={styles.verified}>
+                <Ionicons name="checkmark" size={10} color={staticPalette.bone} />
+              </View>
+            ) : null}
+          </View>
+          <RNText style={styles.postMeta} numberOfLines={1} maxFontSizeMultiplier={1.15}>
+            {post.handle} · {post.location} · {post.postedAgo}
+          </RNText>
+        </View>
+        <Tap
+          onPress={() => {
+            toggleFollow(post.handle);
+          }}
+          style={[
+            styles.followBtn,
+            following && { backgroundColor: palette.ink, borderColor: palette.ink },
+          ]}
+          burstColor={palette.acid}
+        >
+          <RNText
+            style={[styles.followLabel, following && { color: palette.bone }]}
+            maxFontSizeMultiplier={1.1}
+          >
+            {following ? 'FOLLOWING' : 'FOLLOW'}
+          </RNText>
+        </Tap>
+      </View>
+
+      <Tap onPress={() => toast('Post detail opening…', 'default')} burstColor={post.color}>
+        <View style={[styles.media, { backgroundColor: post.bg }]}>
+          {post.image ? (
+            <Image
+              source={{ uri: post.image }}
+              style={StyleSheet.absoluteFill as any}
+              contentFit="cover"
+              transition={240}
+              placeholder={{ blurhash: 'L6H2EC=PM+yV0g-mq.wG9c010J}I' }}
+              targetWidth={width}
+            />
+          ) : null}
+          <View style={styles.mediaScrim} pointerEvents="none" />
+          {isVideo(post.type) ? (
+            <View style={styles.playBadge}>
+              <Ionicons name="play" size={20} color={palette.ink} />
+            </View>
+          ) : null}
+          <View style={styles.mediaBottomRow}>
+            <RNText style={styles.mediaType} numberOfLines={1} maxFontSizeMultiplier={1.1}>
+              {post.type}
+            </RNText>
+            <RNText style={styles.mediaLocation} numberOfLines={1} maxFontSizeMultiplier={1.1}>
+              {post.location}
             </RNText>
           </View>
-        </>
-      ) : null}
+        </View>
+      </Tap>
+
+      <View style={styles.engage}>
+        <Tap
+          onPress={() => toggleLike(post.id)}
+          burstColor={post.color}
+          variant="heavy"
+          style={styles.engageBtn}
+        >
+          <Ionicons
+            name={liked ? 'heart' : 'heart-outline'}
+            size={18}
+            color={liked ? palette.ember : palette.ink}
+          />
+          <RNText style={styles.engageCount} maxFontSizeMultiplier={1.15}>
+            {compact(likes)}
+          </RNText>
+        </Tap>
+        <Tap
+          onPress={() => toast('Comments opening…', 'default')}
+          burstColor={post.color}
+          style={styles.engageBtn}
+        >
+          <Ionicons name="chatbubble-outline" size={17} color={palette.ink} />
+          <RNText style={styles.engageCount} maxFontSizeMultiplier={1.15}>
+            {compact(post.comments)}
+          </RNText>
+        </Tap>
+        <Tap
+          onPress={() => toast('Reposted.', 'success')}
+          burstColor={post.color}
+          style={styles.engageBtn}
+        >
+          <Ionicons name="repeat" size={18} color={palette.ink} />
+          <RNText style={styles.engageCount} maxFontSizeMultiplier={1.15}>
+            {compact(post.reposts)}
+          </RNText>
+        </Tap>
+        <View style={{ flex: 1 }} />
+        <Tap
+          onPress={() => toggleSave(post.id)}
+          burstColor={post.color}
+          style={styles.engageIconBtn}
+        >
+          <Ionicons
+            name={saved ? 'bookmark' : 'bookmark-outline'}
+            size={17}
+            color={saved ? palette.acid : palette.ink}
+          />
+        </Tap>
+        <Tap
+          onPress={() => toast('Share sheet opened.', 'default')}
+          burstColor={post.color}
+          style={styles.engageIconBtn}
+        >
+          <Ionicons name="share-outline" size={17} color={palette.ink} />
+        </Tap>
+      </View>
+
+      <View style={styles.captionBlock}>
+        <RNText style={styles.captionLine} maxFontSizeMultiplier={1.2}>
+          <RNText style={styles.captionHandle}>{post.handle}</RNText>
+          <RNText> {post.title} · </RNText>
+          <RNText style={styles.captionNote}>{post.note}</RNText>
+        </RNText>
+      </View>
+    </View>
+  );
+}
+
+function isVideo(type: string) {
+  return type.toUpperCase().includes('VIDEO') || type.toUpperCase().includes('LIVE');
+}
+
+function compact(n: number) {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1).replace(/\.0$/, '')}K`;
+  return n.toString();
+}
+
+/* --------------------------------------------------------------------------
+ * Who-to-follow widget — kept from the old feed
+ * ------------------------------------------------------------------------ */
+
+function WhoToFollow() {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  const toggleFollow = useStore((s) => s.toggleFollow);
+  const following = useStore((s) => s.following);
+  const toast = useStore((s) => s.toast);
+  const pick = risingList.slice(0, 3);
+
+  const ringColors = [palette.acid, palette.electric, palette.blush];
+
+  return (
+    <View style={styles.widget}>
+      <View style={styles.widgetHead}>
+        <RNText style={styles.widgetKicker} maxFontSizeMultiplier={1.15}>
+          WHO TO FOLLOW
+        </RNText>
+        <Tap onPress={() => toast('See all rising creators.', 'default')} burstColor={palette.ink}>
+          <RNText style={styles.widgetAction} maxFontSizeMultiplier={1.15}>
+            SEE ALL
+          </RNText>
+        </Tap>
+      </View>
+      {pick.map((r, i) => {
+        const active = !!following[r.handle];
+        return (
+          <View key={r.handle} style={styles.widgetRow}>
+            <View style={[styles.widgetAvatar, { backgroundColor: ringColors[i % ringColors.length] }]}>
+              <RNText style={styles.widgetAvatarText}>{r.name.slice(0, 1)}</RNText>
+            </View>
+            <View style={{ flex: 1 }}>
+              <RNText
+                style={styles.widgetName}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.85}
+                maxFontSizeMultiplier={1.15}
+              >
+                {r.name}
+              </RNText>
+              <RNText style={styles.widgetMeta} numberOfLines={1} maxFontSizeMultiplier={1.15}>
+                {r.handle} · {r.type} · {r.city}
+              </RNText>
+            </View>
+            <Tap
+              onPress={() => {
+                toggleFollow(r.handle);
+              }}
+              style={[
+                styles.widgetFollow,
+                active && { backgroundColor: palette.ink, borderColor: palette.ink },
+              ]}
+              burstColor={palette.acid}
+            >
+              <RNText
+                style={[styles.widgetFollowLabel, active && { color: palette.bone }]}
+                maxFontSizeMultiplier={1.1}
+              >
+                {active ? 'FOLLOWING' : 'FOLLOW'}
+              </RNText>
+            </Tap>
+          </View>
+        );
+      })}
+    </View>
+  );
+}
+
+function LiveChallengeCard() {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  const c = challenges[0];
+
+  return (
+    <Tap
+      onPress={() => router.push(`/(modules)/community/challenges/${c.id}` as any)}
+      burstColor={c.color}
+      style={styles.challenge}
+    >
+      <View style={[styles.challengeStripe, { backgroundColor: c.color }]} />
+      <View style={styles.challengeBody}>
+        <View style={styles.challengeMetaRow}>
+          <View style={[styles.challengeLiveDot, { backgroundColor: c.color }]} />
+          <RNText style={styles.challengeKicker} maxFontSizeMultiplier={1.1}>
+            LIVE CHALLENGE
+          </RNText>
+          <RNText style={styles.challengeDot}>·</RNText>
+          <RNText style={styles.challengeDays} maxFontSizeMultiplier={1.1}>
+            {c.daysLeft}D LEFT
+          </RNText>
+        </View>
+        <RNText
+          style={styles.challengeTag}
+          numberOfLines={1}
+          maxFontSizeMultiplier={1.1}
+        >
+          {c.tag}
+        </RNText>
+        <RNText style={styles.challengePrompt} numberOfLines={2} maxFontSizeMultiplier={1.15}>
+          {c.prompt}
+        </RNText>
+        <RNText style={styles.challengeFootMeta} maxFontSizeMultiplier={1.1}>
+          {c.entries} entries · {c.prize}
+        </RNText>
+      </View>
+      <Ionicons name="chevron-forward" size={18} color={palette.ink} />
     </Tap>
   );
 }
 
+/* --------------------------------------------------------------------------
+ * Styles
+ * ------------------------------------------------------------------------ */
+
 const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bone },
-  safe: { flex: 1, backgroundColor: palette.bone },
-  scrollHost: { flex: 1, position: 'relative', overflow: 'hidden' },
-  stickyHeader: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: palette.bone,
-    paddingBottom: 4,
-    zIndex: 10,
-    elevation: 6,
-  },
 
-  topRow: {
-    paddingHorizontal: H_PADDING,
-    paddingTop: 6,
-    paddingBottom: 2,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  /* ─── Header (no left create button — that lives in the bottom FAB now) ── */
+  headerSafe: {
+    backgroundColor: palette.bone,
+    borderBottomWidth: 1,
+    borderBottomColor: palette.line,
   },
-  kickerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  kicker: { ...T.label, color: palette.ink, opacity: 0.7 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 12,
+  },
+  headerCenter: {
+    width: 200,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'visible',
+  },
+  headerLogo: {
+    position: 'absolute',
+    alignSelf: 'center',
+    top: -38,
+    width: 160,
+    height: 120,
+  },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   iconBtn: {
     width: 36,
     height: 36,
@@ -614,221 +869,377 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
-  heroBlock: { paddingHorizontal: H_PADDING, marginTop: 14 },
-  heroTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 52,
-    lineHeight: 52,
-    letterSpacing: -2.4,
-    color: palette.ink,
-  },
-  heroItalic: {
-    fontFamily: fonts.editorialItalic,
-    color: palette.electric,
-  },
-  heroSub: {
-    ...T.body,
-    color: palette.ink,
-    opacity: 0.72,
-    marginTop: 10,
-    maxWidth: 360,
+  notifDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: palette.ember,
+    borderWidth: 1.5,
+    borderColor: palette.bone,
   },
 
+  /* ─── Search bar above the tabs ── */
   searchWrap: {
-    paddingHorizontal: H_PADDING,
-    paddingTop: 18,
-    paddingBottom: 14,
-  },
-  search: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingHorizontal: 14,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: palette.ink,
+    backgroundColor: palette.paper,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    height: 52,
-    paddingHorizontal: 18,
-    borderRadius: 26,
-    borderWidth: 1,
-    borderColor: palette.line,
-    backgroundColor: palette.paper,
   },
   searchInput: {
     flex: 1,
-    fontFamily: fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 1.6,
+    fontFamily: fonts.body,
+    fontSize: 14,
     color: palette.ink,
     paddingVertical: 0,
   },
 
-  trendRow: { paddingTop: 10, paddingBottom: 4 },
-  trendContent: { gap: 8, paddingHorizontal: H_PADDING },
-
-  section: {
-    paddingTop: 28,
-    paddingBottom: 4,
-  },
-  sectionHead: {
-    paddingHorizontal: H_PADDING,
+  /* ─── Top segmented tabs ── */
+  tabBar: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  sectionKicker: { ...T.label, color: palette.ink, opacity: 0.6 },
-  sectionCount: { ...T.micro, color: palette.ink, opacity: 0.55 },
-  sectionTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 36,
-    lineHeight: 38,
-    letterSpacing: -1.4,
-    color: palette.ink,
-    marginTop: 12,
-    paddingHorizontal: H_PADDING,
-  },
-
-  catGrid: {
-    marginTop: 14,
-    paddingHorizontal: H_PADDING,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: GUTTER,
-  },
-  catCard: {
-    height: 80,
-    borderRadius: 14,
-    padding: 10,
-    overflow: 'hidden',
-    position: 'relative',
-    justifyContent: 'flex-end',
-  },
-  catFoot: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  catLabel: {
-    fontFamily: fonts.displayBold,
-    fontSize: 16,
-    letterSpacing: -0.5,
-    lineHeight: 18,
-    color: staticPalette.ink,
-    flexShrink: 1,
-  },
-
-  strip: { marginTop: 22, gap: 10, backgroundColor: palette.bone, paddingVertical: 10 },
-  hairline: { height: 1, backgroundColor: palette.line },
-
-  risingList: { marginTop: 18, paddingHorizontal: H_PADDING },
-  risingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-    paddingVertical: 16,
-    borderTopWidth: 1,
-    borderTopColor: palette.line,
-  },
-  risingIdx: {
-    fontFamily: fonts.displayBold,
-    fontSize: 22,
-    color: palette.ink,
-    letterSpacing: -0.8,
-    width: 34,
-  },
-  risingBody: { flex: 1, gap: 4 },
-  risingName: {
-    fontFamily: fonts.displayBold,
-    fontSize: 20,
-    color: palette.ink,
-    letterSpacing: -0.5,
-  },
-  risingMeta: { ...T.micro, color: palette.mute },
-  empty: {
-    paddingVertical: 40,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: palette.line,
-  },
-  emptyText: {
-    ...T.body,
-    color: palette.ink,
-    opacity: 0.6,
-    textAlign: 'center',
-    maxWidth: 280,
-  },
-
-  discoverHead: {
-    paddingHorizontal: H_PADDING,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 36,
-    paddingBottom: 14,
-  },
-  gridWrap: {
-    gap: GRID_GAP,
-  },
-  featureRow: {
-    flexDirection: 'row',
-    gap: GRID_GAP,
-  },
-  flatRow: {
-    flexDirection: 'row',
-    gap: GRID_GAP,
-  },
-  stack: {
-    width: TILE_SIZE,
-    gap: GRID_GAP,
-  },
-  tile: {
-    overflow: 'hidden',
-    position: 'relative',
-  },
-  tileBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: 'rgba(10,10,10,0.55)',
-    alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 20,
+    gap: 18,
   },
-  tileScrim: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(10,10,10,0.4)',
-  },
-  tileMeta: {
-    position: 'absolute',
-    left: 12,
-    right: 12,
-    bottom: 12,
-    gap: 4,
-  },
-  tileMetaCategory: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 9,
-    letterSpacing: 1.6,
-    color: staticPalette.bone,
-    opacity: 0.85,
-    textTransform: 'uppercase',
-  },
-  tileMetaCreator: {
-    fontFamily: fonts.displayBold,
-    fontSize: 16,
-    letterSpacing: -0.4,
-    color: staticPalette.bone,
-  },
-  gridFoot: {
-    paddingVertical: 24,
+  tabItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 10,
     alignItems: 'center',
-    justifyContent: 'center',
   },
-  gridFootText: {
-    ...T.micro,
+  tabItemActive: {},
+  tabLabel: {
+    ...T.label,
     color: palette.ink,
     opacity: 0.45,
   },
+  tabLabelActive: { opacity: 1 },
+  tabUnderline: {
+    height: 3,
+    width: '100%',
+    backgroundColor: palette.acid,
+    marginTop: 6,
+    borderRadius: 2,
+  },
 
+  /* ─── Stories strip ── */
+  storiesRow: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  storyCol: { alignItems: 'center', gap: 6, width: 64 },
+  storyRing: {
+    width: 62,
+    height: 62,
+    borderRadius: 31,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  storyAvatar: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  storyInitial: { fontFamily: fonts.displayBold, fontSize: 22, color: staticPalette.ink },
+  storyAdd: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: palette.ink,
+    borderWidth: 2,
+    borderColor: palette.bone,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  storyName: { ...T.micro, color: palette.ink, opacity: 0.75, maxWidth: 64 },
+
+  /* ─── Browse by craft — big horizontal cards ── */
+  craftSection: {
+    paddingTop: 6,
+    paddingBottom: 18,
+    borderTopWidth: 1,
+    borderTopColor: palette.line,
+  },
+  craftHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 18,
+    paddingBottom: 12,
+  },
+  craftHeadLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  craftDot: { width: 8, height: 8, borderRadius: 4 },
+  craftKicker: { ...T.labelLarge, color: palette.ink },
+  craftCount: { ...T.micro, color: palette.ink, opacity: 0.55 },
+  craftClear: { ...T.label, color: palette.electric },
+  craftRow: { paddingHorizontal: 16, gap: 8, alignItems: 'center' },
+  craftPill: {
+    height: 36,
+    paddingHorizontal: 18,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    borderColor: palette.ink,
+    backgroundColor: palette.paper,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  craftPillLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+    letterSpacing: -0.2,
+  },
+
+  /* ─── Post ── */
+  separator: { height: 1, backgroundColor: palette.line, marginHorizontal: 0 },
+  post: { paddingHorizontal: 16, paddingVertical: 14, gap: 12 },
+  postHead: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  avatarText: { fontFamily: fonts.displayBold, fontSize: 18, color: staticPalette.ink },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  postName: {
+    fontFamily: fonts.displayBold,
+    fontSize: 16,
+    letterSpacing: -0.3,
+    color: palette.ink,
+    flexShrink: 1,
+  },
+  verified: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#2E5BFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  postMeta: { ...T.micro, color: palette.ink, opacity: 0.55 },
+  followBtn: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 999,
+    backgroundColor: palette.paper,
+    borderWidth: 1,
+    borderColor: palette.ink,
+  },
+  followLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 1.4,
+    color: palette.ink,
+  },
+
+  captionBlock: { paddingTop: 2 },
+  captionLine: {
+    fontFamily: fonts.body,
+    fontSize: 14,
+    lineHeight: 19,
+    color: palette.ink,
+  },
+  captionHandle: {
+    fontFamily: fonts.bodyBold,
+    color: palette.ink,
+  },
+  captionNote: {
+    fontFamily: fonts.editorial,
+    color: palette.ink,
+    opacity: 0.78,
+  },
+
+  media: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: 18,
+    overflow: 'hidden',
+    position: 'relative',
+    justifyContent: 'flex-end',
+    padding: 14,
+  },
+  mediaScrim: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(10,10,10,0.22)',
+  },
+  playBadge: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginLeft: -28,
+    marginTop: -28,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: palette.bone,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  mediaBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+  },
+  mediaType: { ...T.micro, color: palette.bone, opacity: 0.95, flexShrink: 1 },
+  mediaLocation: { ...T.micro, color: palette.bone, opacity: 0.85 },
+
+  engage: { flexDirection: 'row', alignItems: 'center', gap: 18, marginTop: 2 },
+  engageBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 },
+  engageIconBtn: { padding: 4 },
+  engageCount: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 0.4,
+    color: staticPalette.ink,
+  },
+
+  /* ─── Widgets ── */
+  widget: {
+    marginHorizontal: 16,
+    marginVertical: 10,
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: palette.line,
+    backgroundColor: palette.paper,
+    gap: 12,
+  },
+  widgetHead: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  widgetKicker: { ...T.label, color: palette.ink, opacity: 0.65 },
+  widgetAction: { ...T.label, color: palette.electric },
+  widgetRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  widgetAvatar: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  widgetAvatarText: { fontFamily: fonts.displayBold, fontSize: 16, color: staticPalette.ink },
+  widgetName: {
+    fontFamily: fonts.displayBold,
+    fontSize: 14,
+    letterSpacing: -0.2,
+    color: palette.ink,
+  },
+  widgetMeta: { ...T.micro, color: palette.ink, opacity: 0.55, marginTop: 2 },
+  widgetFollow: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: palette.paper,
+    borderWidth: 1,
+    borderColor: palette.ink,
+  },
+  widgetFollowLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 1.4,
+    color: palette.ink,
+  },
+
+  challenge: {
+    marginHorizontal: 16,
+    marginVertical: 8,
+    borderRadius: 14,
+    backgroundColor: palette.paper,
+    borderWidth: 1,
+    borderColor: palette.line,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 14,
+    gap: 12,
+    overflow: 'hidden',
+  },
+  challengeStripe: {
+    width: 4,
+    alignSelf: 'stretch',
+  },
+  challengeBody: {
+    flex: 1,
+    paddingVertical: 12,
+    paddingLeft: 12,
+    gap: 4,
+  },
+  challengeMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  challengeLiveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  challengeKicker: {
+    ...T.label,
+    color: palette.ink,
+    opacity: 0.7,
+    letterSpacing: 1.6,
+  },
+  challengeDot: { color: palette.ink, opacity: 0.45, fontSize: 12 },
+  challengeDays: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.4,
+    color: palette.ink,
+    opacity: 0.7,
+  },
+  challengeTag: {
+    fontFamily: fonts.displayBold,
+    fontSize: 17,
+    letterSpacing: -0.4,
+    color: palette.ink,
+  },
+  challengePrompt: {
+    fontFamily: fonts.editorial,
+    fontSize: 13,
+    lineHeight: 18,
+    color: palette.ink,
+    opacity: 0.78,
+  },
+  challengeFootMeta: {
+    ...T.micro,
+    color: palette.ink,
+    opacity: 0.55,
+    marginTop: 2,
+  },
+
+  empty: { padding: 40, alignItems: 'center' },
+  emptyText: {
+    ...T.body,
+    color: palette.ink,
+    opacity: 0.55,
+    textAlign: 'center',
+    maxWidth: 300,
+  },
 });

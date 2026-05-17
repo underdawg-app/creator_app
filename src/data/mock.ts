@@ -22,7 +22,7 @@ export const welcomeSlides = [
     editorial: 'the ones nobody signed.',
     description:
       'Underdawgs is the operating system for the next generation of creators — before anyone else believes.',
-    accent: '#D8FF3D',
+    accent: '#2E5BFF',
     bg: '#0A0A0A',
     fg: '#F2EFE6',
   },
@@ -33,9 +33,9 @@ export const welcomeSlides = [
     editorial: 'a four-layer system.',
     description:
       'Discover. Monetize. Amplify. Manage. One platform that stays with you through every stage of your career.',
-    accent: '#2E5BFF',
-    bg: '#F2EFE6',
-    fg: '#0A0A0A',
+    accent: '#F70E0A',
+    bg: '#0A0A0A',
+    fg: '#F2EFE6',
   },
   {
     kanji: '03',
@@ -44,7 +44,7 @@ export const welcomeSlides = [
     editorial: 'we back the underdawg.',
     description:
       'Our algorithm rewards quality, consistency and rising potential — not just vanity metrics.',
-    accent: '#FF6BB5',
+    accent: '#9C988A',
     bg: '#0A0A0A',
     fg: '#F2EFE6',
   },

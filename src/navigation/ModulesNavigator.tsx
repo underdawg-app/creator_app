@@ -42,6 +42,7 @@ import ChallengeReel from '@/screens/modules/community/challenges/ChallengeReel'
 
 import InboxThread from '@/screens/modules/inbox/InboxThread';
 import CameraScreen from '@/screens/modules/camera/Camera';
+import NotificationsIndex from '@/screens/modules/notifications/NotificationsIndex';
 
 import PortfolioIndex from '@/screens/modules/portfolio/PortfolioIndex';
 import PortfolioEdit from '@/screens/modules/portfolio/PortfolioEdit';
@@ -95,6 +96,7 @@ export default function ModulesNavigator() {
         freezeOnBlur: true,
       }}
     >
+      <Stack.Screen name="NotificationsIndex" component={NotificationsIndex} />
       <Stack.Screen name="SettingsIndex" component={SettingsIndex} />
       <Stack.Screen name="SettingsAccount" component={SettingsAccount} />
       <Stack.Screen name="SettingsNotifications" component={SettingsNotifications} />

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Self-contained replacement for the Theme.BootSplash window background.
+  Used by @style/BootTheme as android:windowBackground so the launch window
+  shows our brand logo on a solid color before MainActivity inflates any
+  React Native view. No dependency on react-native-bootsplash native lib.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:drawable="@color/bootsplash_background" />
+  <item android:gravity="center">
+    <bitmap
+      android:src="@drawable/splashscreen_logo"
+      android:gravity="center" />
+  </item>
+</layer-list>

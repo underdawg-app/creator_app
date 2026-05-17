@@ -121,7 +121,7 @@ export default function CreatorType() {
               fontFamily: fonts.displayBold,
               fontSize: 70,
               lineHeight: 68,
-              color: palette.blush,
+              color: selectedMeta?.color ?? palette.blush,
               letterSpacing: -2.8,
             }}
           />
@@ -161,8 +161,8 @@ export default function CreatorType() {
           </View>
           <MagneticButton
             label="NEXT"
-            background={staticPalette.acid}
-            foreground={staticPalette.ink}
+            background={palette.ink}
+            foreground={palette.bone}
             size="lg"
             disabled={isPlaying}
             onPress={handleNext}

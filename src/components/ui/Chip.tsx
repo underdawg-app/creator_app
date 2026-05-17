@@ -1,11 +1,5 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, Text as RNText } from 'react-native';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import React from 'react';
+import { StyleSheet, Text as RNText, View } from 'react-native';
 import { palette as staticPalette } from '@/theme/colors';
 import {
   useTheme,
@@ -28,34 +22,15 @@ export function Chip({ label, active, onPress, accent = staticPalette.acid, inve
   const palette = useThemedPalette();
   const { scheme } = useTheme();
   const styles = useThemedPaletteStyles(makeStyles);
-  const p = useSharedValue(active ? 1 : 0);
 
-  useEffect(() => {
-    p.value = withTiming(active ? 1 : 0, { duration: 160, easing: Easing.out(Easing.quad) });
-  }, [active]);
-
-  // Inactive chips keep a transparent fill so they don't collide with the
-  // page surface — on dark themes, palette.paper sits at nearly the same
-  // value as the background and the pill silhouette disappeared. The
-  // border color flips with the active scheme (and the caller's `inverse`
-  // flag) so the outline is always legible.
   const onDarkSurface =
     (scheme === 'dark' && !inverse) || (scheme === 'light' && inverse);
   const idleBorder = onDarkSurface
     ? 'rgba(242,239,230,0.38)'
     : 'rgba(10,10,10,0.32)';
-  const idleSurface = 'transparent';
-
-  // Scale is the only animated property — colors are JS-driven so they
-  // flip instantly when `active` changes (worklets occasionally cache
-  // captured JS values across renders, which made the active accent
-  // sometimes fail to apply on the first toggle).
-  const scaleStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: 1 - p.value * 0.015 }],
-  }));
 
   const colorStyle = {
-    backgroundColor: active ? accent : idleSurface,
+    backgroundColor: active ? accent : 'transparent',
     borderColor: active ? accent : idleBorder,
   };
 
@@ -67,12 +42,11 @@ export function Chip({ label, active, onPress, accent = staticPalette.acid, inve
 
   return (
     <Tap onPress={onPress ?? (() => {})} burstColor={accent}>
-      <Animated.View
+      <View
         style={[
           styles.chip,
           size === 'sm' ? styles.chipSm : styles.chipMd,
           colorStyle,
-          scaleStyle,
         ]}
       >
         <RNText
@@ -86,7 +60,7 @@ export function Chip({ label, active, onPress, accent = staticPalette.acid, inve
         >
           {label}
         </RNText>
-      </Animated.View>
+      </View>
     </Tap>
   );
 }

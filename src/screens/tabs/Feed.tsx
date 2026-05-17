@@ -9,7 +9,10 @@ import {
   FlatList,
   ListRenderItem,
   Platform,
+  Image as RNImage,
 } from 'react-native';
+
+const BRAND_LOGO = require('@/objects/brand-wordmark.png');
 
 const IS_ANDROID = Platform.OS === 'android';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,7 +29,6 @@ import {
 } from '@/data/mock';
 import { Tap } from '@/components/ui/Tap';
 import { useStore } from '@/store';
-import { BrandSignet } from '@/components/svg/Wordmark';
 import { BadgePill } from '@/components/ui/BadgePill';
 import { Chip } from '@/components/ui/Chip';
 
@@ -159,46 +161,28 @@ function HeaderBar() {
 
   return (
     <View style={styles.header}>
-      <View style={styles.headerLeft}>
-        <Tap
-          onPress={() => router.push('/(tabs)/create')}
-          style={styles.createBtn}
-          burstColor={palette.ink}
-          variant="heavy"
-        >
-          <Ionicons name="add" size={22} color={staticPalette.ink} />
-        </Tap>
-        <View style={styles.brandLockup}>
-          <BrandSignet size={20} color={palette.ink} accent={palette.acid} />
-          <RNText style={styles.wordmark} maxFontSizeMultiplier={1.1}>
-            UNDERDAWGS
-          </RNText>
-        </View>
+      <Tap
+        onPress={() => router.push('/(modules)/notifications')}
+        style={styles.iconBtn}
+        burstColor={palette.acid}
+      >
+        <Ionicons name="notifications-outline" size={18} color={palette.ink} />
+        <View style={styles.dot} />
+      </Tap>
+      <View style={styles.brandLockup}>
+        <RNImage
+          source={BRAND_LOGO}
+          style={styles.brandLogo}
+          resizeMode="contain"
+        />
       </View>
-      <View style={styles.headerRight}>
-        <Tap
-          onPress={() => router.push('/(modules)/art')}
-          style={styles.iconBtn}
-          burstColor={palette.ink}
-        >
-          <Ionicons name="color-palette-outline" size={18} color={palette.ink} />
-        </Tap>
-        <Tap
-          onPress={() => toast('3 new notifications.', 'default')}
-          style={styles.iconBtn}
-          burstColor={palette.acid}
-        >
-          <Ionicons name="notifications-outline" size={18} color={palette.ink} />
-          <View style={styles.dot} />
-        </Tap>
-        <Tap
-          onPress={() => router.push('/(tabs)/inbox')}
-          style={styles.iconBtn}
-          burstColor={palette.acid}
-        >
-          <Ionicons name="chatbubble-outline" size={18} color={palette.ink} />
-        </Tap>
-      </View>
+      <Tap
+        onPress={() => router.push('/(tabs)/inbox')}
+        style={styles.iconBtn}
+        burstColor={palette.acid}
+      >
+        <Ionicons name="chatbubble-outline" size={18} color={palette.ink} />
+      </Tap>
     </View>
   );
 }
@@ -701,12 +685,19 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  brandLockup: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  wordmark: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 14,
-    letterSpacing: 2.8,
-    color: palette.ink,
+  brandLockup: {
+    width: 130,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'visible',
+  },
+  brandLogo: {
+    position: 'absolute',
+    left: 0,
+    top: -32,
+    width: 130,
+    height: 100,
   },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   iconBtn: {

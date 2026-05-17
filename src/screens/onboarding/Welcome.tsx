@@ -44,6 +44,8 @@ const slideObjects = [
   require('@/objects/obj-3.png'),
 ];
 
+const BRAND_LOGO = require('@/objects/brand-wordmark.png');
+
 const { width, height } = Dimensions.get('window');
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<any>);
@@ -108,10 +110,11 @@ export default function Welcome() {
       <SafeAreaView edges={['top']} style={styles.topSafe}>
         <View style={styles.topRow}>
           <View style={styles.brand}>
-            <View style={[styles.dot, { backgroundColor: slide.accent }]} />
-            <RNText style={[styles.wordmarkSm, { color: slide.fg }]}>
-              UNDERDAWGS
-            </RNText>
+            <Image
+              source={BRAND_LOGO}
+              style={styles.brandLogo}
+              contentFit="contain"
+            />
           </View>
           <Pressable
             onPress={() => router.replace('/(onboarding)/auth')}
@@ -396,12 +399,18 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingTop: 6,
     paddingBottom: 10,
   },
-  brand: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  dot: { width: 10, height: 10, borderRadius: 5 },
-  wordmarkSm: {
-    fontFamily: fonts.displayBold,
-    fontSize: 15,
-    letterSpacing: -0.4,
+  brand: {
+    width: 130,
+    height: 36,
+    justifyContent: 'center',
+    overflow: 'visible',
+  },
+  brandLogo: {
+    position: 'absolute',
+    left: -8,
+    top: -32,
+    width: 130,
+    height: 100,
   },
   skipBtn: {
     flexDirection: 'row',

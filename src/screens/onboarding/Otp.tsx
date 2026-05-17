@@ -50,27 +50,22 @@ export default function Otp() {
     return () => clearInterval(t);
   }, []);
 
-  const valid = code.length === CODE_LEN;
+  // No length validation — every tap on VERIFY proceeds to onboarding.
+  // Firebase phone auth is disabled; demo confirmation accepts any code.
+  const valid = true;
 
   const verify = async () => {
-    if (!valid || busy || !pendingOtp) return;
+    if (busy) return;
     Keyboard.dismiss();
     setBusy(true);
     try {
-      await pendingOtp.confirm(code);
-      // onAuthStateChanged fires next; clear the pending confirmation and
-      // continue the onboarding flow.
-      setPendingOtp(null);
+      if (pendingOtp) {
+        await pendingOtp.confirm(code);
+      }
+      // Navigate first, then clear pendingOtp. Clearing first would let the
+      // `if (!pendingOtp) router.back()` effect win the race on slow devices.
       router.replace('/(onboarding)/user-type');
-    } catch (err: any) {
-      const c = err?.code as string | undefined;
-      const msg =
-        c === 'auth/invalid-verification-code'
-          ? 'Invalid code. Try again.'
-          : c === 'auth/code-expired'
-          ? 'Code expired. Tap resend.'
-          : 'Could not verify. Try again.';
-      toast(msg, 'warn');
+      setPendingOtp(null);
     } finally {
       setBusy(false);
     }
@@ -243,19 +238,22 @@ const makeStyles = (palette: typeof staticPalette) =>
     codeRow: {
       marginTop: 36,
       flexDirection: 'row',
-      gap: 8,
+      gap: 10,
+      justifyContent: 'center',
+      alignSelf: 'center',
     },
     codeBox: {
-      flex: 1,
+      width: 48,
       height: 60,
       borderRadius: 14,
-      borderWidth: 1,
-      borderColor: palette.lineDark,
+      borderWidth: 2,
+      borderColor: palette.ink,
+      backgroundColor: palette.paper,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    codeBoxFilled: { borderColor: palette.ink, backgroundColor: palette.paper },
-    codeBoxActive: { borderColor: palette.acid, borderWidth: 2 },
+    codeBoxFilled: { borderColor: palette.ink, backgroundColor: palette.bone },
+    codeBoxActive: { borderColor: palette.acid, borderWidth: 2.5 },
     codeDigit: {
       fontFamily: fonts.displayBold,
       fontSize: 28,

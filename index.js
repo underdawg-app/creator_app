@@ -18,4 +18,11 @@ if (!__DEV__) {
   LogBox.ignoreAllLogs(true);
 }
 
+// Native MainActivity asks for "main" (getMainComponentName() in
+// MainActivity.kt). Without this registration the bridge throws
+// "Invariant Violation: 'main' has not been registered" the moment
+// React Native tries to render the root view in release builds.
+// The legacy "Underdawgs" registration is kept for any host code that
+// might still reference it.
+AppRegistry.registerComponent('main', () => App);
 AppRegistry.registerComponent('Underdawgs', () => App);

@@ -39,6 +39,7 @@ import { Asterisk, RuleDot } from '@/components/svg/Marks';
 const { width, height } = Dimensions.get('window');
 
 const heroObject = require('@/objects/obj-7.png');
+const enterLogo = require('@/objects/brand-splash.png');
 
 const ENTER_DURATION = 2800;
 
@@ -244,8 +245,8 @@ export default function Complete() {
               </View>
               <MagneticButton
                 label="ENTER"
-                background={staticPalette.ink}
-                foreground={staticPalette.acid}
+                background={staticPalette.paper}
+                foreground={staticPalette.ink}
                 size="lg"
                 disabled={entering}
                 onPress={handleEnter}
@@ -293,9 +294,6 @@ export default function Complete() {
  *                                           magenta counter-glow, black fill.
  *   5. Subtitle strip                     — "ENTERING FEED" with ticks.
  * ----------------------------------------------------------------------- */
-const WORD = 'UNDERDAWGS';
-const LETTERS = WORD.split('');
-
 // Halve+ the ball count on Android. Each ball is a separate Animated.View
 // with its own useAnimatedStyle worklet running every frame; cutting from 90
 // to 36 reduces per-frame worklet evals and native-view transform updates by
@@ -309,7 +307,7 @@ const NEON: string[] = [
   staticPalette.electric, // blue   #2E5BFF
   staticPalette.acid,     // green  #D8FF3D
   staticPalette.ember,    // orange #FF5A1F
-  '#FF003C',              // red
+  '#F70E0A',              // red
   '#FFE600',              // yellow
 ];
 
@@ -342,18 +340,15 @@ function createBank(): ParticleBank {
 }
 
 /* --------------------------------------------------------------------------
- * Word collider geometry — sized so UNDERDAWGS fits on phones and the
- * collider hugs the visible glyph bounds reasonably tightly.
+ * Logo collider geometry — the brand wordmark image sits center; balls
+ * bounce off a square AABB hugging the visible glyph bounds.
  * ----------------------------------------------------------------------- */
-const WORD_FONT_SIZE = Math.min(Math.floor(width * 0.115), 56);
-// space-grotesk display-bold sits around 0.6× advance per glyph at this
-// letter-spacing. Slight padding so balls visually rest on the glyph edges.
-const WORD_W = WORD_FONT_SIZE * 0.62 * LETTERS.length;
-const WORD_H = WORD_FONT_SIZE * 1.05;
-const RECT_X = width / 2 - WORD_W / 2;
-const RECT_Y = height / 2 - WORD_H / 2;
-const RECT_W = WORD_W;
-const RECT_H = WORD_H;
+const LOGO_SIZE = Math.min(Math.floor(width * 0.62), 320);
+const COLLIDER = LOGO_SIZE * 0.78;
+const RECT_X = width / 2 - COLLIDER / 2;
+const RECT_Y = height / 2 - COLLIDER / 2;
+const RECT_W = COLLIDER;
+const RECT_H = COLLIDER;
 
 function EnterOverlay({
   phase,
@@ -505,11 +500,13 @@ function EnterOverlay({
         <Ball key={i} index={i} bank={bank} tick={tick} />
       ))}
 
-      {/* UNDERDAWGS — plain white solid wordmark */}
+      {/* Brand wordmark image — replaces the old UNDERDAWGS text */}
       <Animated.View style={[overlayStyles.wordWrap, wordWrapStyle]}>
-        <RNText allowFontScaling={false} style={overlayStyles.word}>
-          {WORD}
-        </RNText>
+        <Image
+          source={enterLogo}
+          style={{ width: LOGO_SIZE, height: LOGO_SIZE }}
+          contentFit="contain"
+        />
       </Animated.View>
 
       {/* Subtitle */}
@@ -633,15 +630,6 @@ const overlayStyles = StyleSheet.create({
     bottom: 0,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  word: {
-    fontFamily: fonts.displayBold,
-    fontSize: WORD_FONT_SIZE,
-    letterSpacing: -1.2,
-    textTransform: 'uppercase',
-    textAlign: 'center',
-    includeFontPadding: false,
-    color: '#FFFFFF',
   },
   subLabelWrap: {
     position: 'absolute',

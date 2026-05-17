@@ -4,7 +4,16 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
 import { View, Text, StyleSheet, StatusBar } from 'react-native';
-import BootSplash from 'react-native-bootsplash';
+// Bootsplash JS import disabled — its NativeRNBootSplash spec uses
+// `TurboModuleRegistry.getEnforcing(...)` which THROWS at import time when
+// the native module is missing, and we've disabled bootsplash's Android
+// autolink (see react-native.config.js) because its `setOnExitAnimationListener`
+// lambda crashes on Android 9-11. Native splash logo still shows via the
+// BootTheme declared in AndroidManifest.
+const BootSplash = {
+  hide: async (_?: { fade?: boolean }) => {},
+  isVisible: async () => false,
+};
 import { ThemeProvider, useTheme } from '@/theme/ThemeContext';
 import { TransitionProvider } from '@/components/transitions/TransitionProvider';
 import { ToastHost } from '@/components/ui/Toast';
@@ -80,7 +89,12 @@ function RootShell() {
               ref={navigationRef}
               linking={linking}
               onReady={() => {
-                BootSplash.hide({ fade: true }).catch(() => {});
+                // On Android the native bootsplash module is autolink-disabled
+                // (see react-native.config.js). Wrap in try/catch so a missing
+                // native module never bubbles into the JS bridge.
+                try {
+                  BootSplash.hide({ fade: true }).catch(() => {});
+                } catch {}
               }}
             >
               <RootNavigator />

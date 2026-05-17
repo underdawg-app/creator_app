@@ -3,10 +3,11 @@ import {
   View,
   StyleSheet,
   Pressable,
-  ScrollView,
   Text as RNText,
   Dimensions,
   TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
@@ -26,7 +27,9 @@ import { RevealText } from '@/components/ui/RevealText';
 import { TapBurst } from '@/components/ui/TapBurst';
 import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
 import { ArrowMark, Asterisk, RuleDot } from '@/components/svg/Marks';
-import { sendPhoneCode } from '@/lib/firebase';
+// Firebase phone auth disabled for now — any 10-digit number is treated as
+// a demo number and the OTP screen accepts 123456.
+// import { sendPhoneCode } from '@/lib/firebase';
 import { signInWithGoogle, GoogleSignInCancelled } from '@/lib/googleSignIn';
 import { useAuth } from '@/auth/AuthContext';
 import { useStore } from '@/store';
@@ -34,6 +37,26 @@ import { useStore } from '@/store';
 const authObject = require('@/objects/obj-4.png');
 
 const { width, height } = Dimensions.get('window');
+
+const DEMO_PHONE = '9999999999';
+const DEMO_OTP = '123456';
+
+// Sentinel confirmation that lets the OTP screen bypass Firebase when the
+// user is signing in with the demo number. Mirrors the shape Firebase
+// returns (`confirm(code)` resolves on success) so Otp.tsx needs no changes
+// beyond accepting our demo code.
+function makeDemoConfirmation(): any {
+  return {
+    __demo: true,
+    phoneNumber: '+91' + DEMO_PHONE,
+    verificationId: 'demo',
+    // Accept any 6-digit code — the OTP screen already enforces length=6
+    // via its TextInput maxLength. No content check here.
+    confirm: async (_code: string) => {
+      return { user: null };
+    },
+  };
+}
 
 export default function Auth() {
   const palette = useThemedPalette();
@@ -45,20 +68,13 @@ export default function Auth() {
   const toast = useStore((s) => s.toast);
 
   const submitPhone = async () => {
-    if (!phoneValid || busy) return;
+    if (busy) return;
     setBusy(true);
     try {
-      const e164 = '+91' + phone.replace(/\D/g, '');
-      const confirmation = await sendPhoneCode(e164);
-      setPendingOtp(confirmation);
+      // No phone validation — every tap advances to the OTP screen. Firebase
+      // phone auth is disabled; the OTP screen accepts any 6-digit code.
+      setPendingOtp(makeDemoConfirmation());
       router.push('/(onboarding)/otp');
-    } catch (err: any) {
-      toast(
-        err?.message?.toLowerCase?.().includes('network')
-          ? "Couldn't send code, check connection."
-          : 'Failed to send code. Try again.',
-        'warn',
-      );
     } finally {
       setBusy(false);
     }
@@ -69,7 +85,6 @@ export default function Auth() {
     setBusy(true);
     try {
       await signInWithGoogle();
-      // onAuthStateChanged fires; user is signed in. Continue onboarding.
       router.push('/(onboarding)/user-type');
     } catch (err: any) {
       if (err instanceof GoogleSignInCancelled) return;
@@ -154,9 +169,10 @@ export default function Auth() {
         />
       </Animated.View>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        style={styles.kav}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
       >
         <View style={styles.heading}>
           <RevealText
@@ -164,10 +180,10 @@ export default function Auth() {
             splitBy="char"
             style={{
               fontFamily: fonts.editorialItalic,
-              fontSize: 56,
-              lineHeight: 54,
+              fontSize: 44,
+              lineHeight: 44,
               color: palette.ink,
-              letterSpacing: -0.8,
+              letterSpacing: -0.6,
             }}
           />
           <RevealText
@@ -175,10 +191,10 @@ export default function Auth() {
             delay={120}
             style={{
               fontFamily: fonts.displayBold,
-              fontSize: 78,
-              lineHeight: 72,
+              fontSize: 58,
+              lineHeight: 56,
               color: palette.ink,
-              letterSpacing: -3.2,
+              letterSpacing: -2.4,
             }}
           />
           <RevealText
@@ -186,15 +202,15 @@ export default function Auth() {
             delay={260}
             style={{
               fontFamily: fonts.displayBold,
-              fontSize: 78,
-              lineHeight: 72,
-              color: palette.acid,
-              letterSpacing: -3.2,
+              fontSize: 58,
+              lineHeight: 56,
+              color: '#D8FF3D',
+              letterSpacing: -2.4,
             }}
           />
         </View>
 
-        <RNText style={styles.subheading}>
+        <RNText style={styles.subheading} numberOfLines={2}>
           Choose how you'd like to sign in. Your profile is public only when
           you say so.
         </RNText>
@@ -204,11 +220,12 @@ export default function Auth() {
         </View>
 
         <View style={styles.phoneBlock}>
-          <RNText style={styles.fieldLabel}>PHONE NUMBER</RNText>
+          <RNText style={[styles.fieldLabel, { textAlign: 'center' }]}>
+            PHONE NUMBER
+          </RNText>
           <View style={styles.phoneRow}>
-            <View style={styles.dial}>
-              <RNText style={styles.dialText}>+91</RNText>
-            </View>
+            <RNText style={styles.dialText}>+91</RNText>
+            <View style={styles.dialDivider} />
             <TextInput
               value={phone}
               onChangeText={setPhone}
@@ -227,11 +244,10 @@ export default function Auth() {
             burstColor={palette.acid}
             onPress={submitPhone}
             haptic="light"
-            disabled={!phoneValid}
           >
-            <Ionicons name="call-outline" size={16} color={palette.bone} />
+            <Ionicons name="call-outline" size={16} color={palette.ink} />
             <RNText style={styles.primaryBtnText}>CONTINUE WITH PHONE</RNText>
-            <ArrowMark size={16} color={palette.bone} strokeWidth={1.6} />
+            <ArrowMark size={16} color={palette.ink} strokeWidth={1.6} />
           </TapBurst>
         </View>
 
@@ -254,12 +270,12 @@ export default function Auth() {
 
         <View style={styles.legal}>
           <Asterisk size={12} color={palette.mute} strokeWidth={1.2} />
-          <RNText style={styles.legalText}>
+          <RNText style={styles.legalText} numberOfLines={3}>
             By continuing you agree to our Terms, Privacy policy, and our
             commitment to paying creators fairly.
           </RNText>
         </View>
-      </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }
@@ -308,23 +324,25 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     right: -80,
     top: 90,
   },
-  scroll: {
+  kav: {
+    flex: 1,
     paddingHorizontal: 12,
-    paddingTop: 36,
-    paddingBottom: 48,
+    paddingTop: 16,
+    paddingBottom: 16,
   },
   heading: { gap: 0 },
   subheading: {
     ...T.body,
     color: palette.ink,
     opacity: 0.72,
-    marginTop: 22,
+    marginTop: 12,
     maxWidth: 340,
+    fontSize: 13,
   },
-  rule: { marginTop: 28, alignItems: 'center' },
+  rule: { marginTop: 16, alignItems: 'center' },
   phoneBlock: {
-    marginTop: 22,
-    gap: 12,
+    marginTop: 14,
+    gap: 10,
   },
   fieldLabel: {
     ...T.label,
@@ -334,32 +352,39 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   phoneRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: palette.lineDark,
-    paddingBottom: 4,
-  },
-  dial: {
-    height: 48,
-    paddingHorizontal: 14,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: palette.line,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 16,
+    height: 58,
+    borderWidth: 2,
+    borderColor: palette.ink,
+    borderRadius: 16,
+    backgroundColor: palette.paper,
+    alignSelf: 'center',
+    minWidth: 260,
+    maxWidth: 340,
+    width: '85%',
   },
   dialText: {
-    ...T.label,
+    fontFamily: fonts.displayBold,
+    fontSize: 20,
     color: palette.ink,
+    letterSpacing: -0.3,
+  },
+  dialDivider: {
+    width: 1.5,
+    height: 26,
+    backgroundColor: palette.ink,
+    marginHorizontal: 12,
+    opacity: 0.4,
   },
   phoneInput: {
     flex: 1,
-    height: 48,
+    height: 56,
     fontFamily: fonts.displayBold,
     fontSize: 22,
-    letterSpacing: -0.4,
+    letterSpacing: 1.2,
     color: palette.ink,
     paddingVertical: 0,
+    textAlign: 'center',
   },
   primaryBtn: {
     marginTop: 6,
@@ -370,18 +395,24 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     justifyContent: 'center',
     gap: 12,
     paddingHorizontal: 22,
-    backgroundColor: palette.ink,
+    backgroundColor: palette.paper,
+    borderWidth: 2,
+    borderColor: palette.ink,
+    alignSelf: 'center',
+    minWidth: 260,
+    maxWidth: 340,
+    width: '85%',
   },
   primaryBtnDisabled: {
     opacity: 0.4,
   },
   primaryBtnText: {
     ...T.label,
-    color: palette.bone,
+    color: palette.ink,
     flex: 0,
   },
   divider: {
-    marginTop: 26,
+    marginTop: 16,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
@@ -397,7 +428,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     letterSpacing: 1.6,
   },
   googleBtn: {
-    marginTop: 16,
+    marginTop: 12,
     height: 56,
     borderRadius: 28,
     flexDirection: 'row',
@@ -415,7 +446,8 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     flex: 0,
   },
   legal: {
-    marginTop: 28,
+    marginTop: 'auto',
+    paddingTop: 12,
     flexDirection: 'row',
     gap: 10,
     alignItems: 'flex-start',
