@@ -45,9 +45,11 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string/>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Underdawgs needs access to your photos so you can choose a profile picture.</string>
+	<string>Underdawgs needs access to your photos so you can post images and videos.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Underdawgs needs camera access so you can take a profile picture.</string>
+	<string>Underdawgs needs camera access so you can capture photos and videos.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Underdawgs needs microphone access so you can record audio with your videos.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

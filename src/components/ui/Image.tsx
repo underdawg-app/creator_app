@@ -161,7 +161,7 @@ function ImageInner({
   );
 
   return (
-    <View style={style} pointerEvents="none">
+    <View style={[style, styles.clip]} pointerEvents="none">
       {blurhash && !loaded ? (
         <Blurhash
           blurhash={blurhash}
@@ -180,6 +180,10 @@ function ImageInner({
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  clip: { overflow: 'hidden' },
+});
 
 // Memo on stable props — re-rendering an image because the parent re-rendered
 // is the most common Android scroll jank trigger we saw in the audit.

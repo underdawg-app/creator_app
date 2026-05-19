@@ -3,6 +3,7 @@ import {
   View,
   StyleSheet,
   Text as RNText,
+  TextInput,
   ScrollView,
   Dimensions,
 } from 'react-native';
@@ -13,48 +14,28 @@ import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import { ScreenFrame } from '@/components/ui/ScreenFrame';
 import { ModuleHeader } from '@/components/ui/ModuleHeader';
-import { Section } from '@/components/ui/Section';
 import { Tap } from '@/components/ui/Tap';
-import { MagneticButton } from '@/components/ui/MagneticButton';
 import { TiltCard } from '@/components/ui/TiltCard';
 import { ProductIcon } from '@/components/svg/ProductIcon';
 import { Image } from '@/components/ui/Image';
 import { Marquee } from '@/components/ui/Marquee';
+import { MagneticButton } from '@/components/ui/MagneticButton';
 import { useStore } from '@/store';
+import type {
+  StoreHeadingFontKey,
+  StoreBodyFontKey,
+  StoreAccentKey,
+  StoreLayoutKey,
+  StoreBackgroundMode,
+  StoreSectionType,
+} from '@/store';
 import { productTypes } from '@/data/mock';
 
-const { width } = Dimensions.get('window');
-const SCREEN_PADDING = 12;
-const CONTENT_W = width - SCREEN_PADDING * 2;
+const { width: SCREEN_W } = Dimensions.get('window');
 
-/* -------------------------------------------------------------------------
- * Customization options
- * ----------------------------------------------------------------------- */
-
-type AccentKey = 'acid' | 'electric' | 'blush' | 'ember' | 'ink';
-type FontKey = 'display' | 'editorial' | 'mono';
-type LayoutKey = 'grid' | 'stack' | 'mag';
-type BgMode = 'image' | 'video' | 'color';
-
-const ACCENTS: { key: AccentKey; label: string }[] = [
-  { key: 'acid', label: 'ACID' },
-  { key: 'electric', label: 'ELECTRIC' },
-  { key: 'blush', label: 'BLUSH' },
-  { key: 'ember', label: 'EMBER' },
-  { key: 'ink', label: 'MONO' },
-];
-
-const FONT_OPTIONS: { key: FontKey; label: string; sample: string; family: string }[] = [
-  { key: 'display', label: 'DISPLAY', sample: 'Aa', family: fonts.displayBold },
-  { key: 'editorial', label: 'EDITORIAL', sample: 'Aa', family: fonts.editorialItalic },
-  { key: 'mono', label: 'BODY', sample: 'Aa', family: fonts.bodyBold },
-];
-
-const LAYOUT_OPTIONS: { key: LayoutKey; label: string }[] = [
-  { key: 'grid', label: 'GRID' },
-  { key: 'stack', label: 'STACK' },
-  { key: 'mag', label: 'MAG' },
-];
+/* =========================================================================
+ * Option catalogs (the things the creator can pick from)
+ * ======================================================================= */
 
 const COVER_OPTIONS = [
   'https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=900&q=80&auto=format&fit=crop',
@@ -70,1209 +51,84 @@ const LOGO_OPTIONS = [
   'https://images.unsplash.com/photo-1614851099175-e5b30eb6f696?w=200&q=80&auto=format&fit=crop',
 ];
 
-const DESIGN_LIBRARY = [
-  'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=400&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1531913764164-f85c52e6e654?w=400&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1574169208507-84376144848b?w=400&q=80&auto=format&fit=crop',
+const COLOR_BG_OPTIONS = ['#0A0A0A', '#F2EFE6', '#D8FF3D', '#2E5BFF', '#FF6BB5', '#FF5A1F'];
+
+const ACCENTS: { key: StoreAccentKey; label: string; hex: string }[] = [
+  { key: 'acid', label: 'ACID', hex: '#D8FF3D' },
+  { key: 'electric', label: 'ELECTRIC', hex: '#2E5BFF' },
+  { key: 'blush', label: 'BLUSH', hex: '#FF6BB5' },
+  { key: 'ember', label: 'EMBER', hex: '#FF5A1F' },
+  { key: 'ink', label: 'INK', hex: '#0A0A0A' },
 ];
 
-const MOCKUP_GALLERY = [
-  'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=400&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1622445275576-721325763afe?w=400&q=80&auto=format&fit=crop',
+const HEADING_FONTS: { key: StoreHeadingFontKey; label: string; family: string }[] = [
+  { key: 'archivo-black', label: 'ARCHIVO BLACK', family: fonts.displayBold },
+  { key: 'archivo-extrabold', label: 'ARCHIVO X-BOLD', family: fonts.displayHeavy },
+  { key: 'archivo-black-italic', label: 'ARCHIVO ITALIC', family: fonts.displayBoldItalic },
+  { key: 'anton', label: 'ANTON', family: fonts.display },
+  { key: 'instrument-italic', label: 'INSTRUMENT', family: fonts.editorialItalic },
+  { key: 'space-bold', label: 'SPACE BOLD', family: fonts.bodyBold },
 ];
 
-const STORE_PAGES = [
-  { key: 'about', label: 'ABOUT', icon: 'information-circle-outline' as const },
-  { key: 'contact', label: 'CONTACT', icon: 'mail-outline' as const },
-  { key: 'faq', label: 'FAQ', icon: 'help-circle-outline' as const },
-  { key: 'shipping', label: 'SHIPPING', icon: 'cube-outline' as const },
+const BODY_FONTS: { key: StoreBodyFontKey; label: string; family: string }[] = [
+  { key: 'space-regular', label: 'SPACE GROTESK', family: fonts.body },
+  { key: 'space-medium', label: 'SPACE MEDIUM', family: fonts.bodyMedium },
+  { key: 'space-bold', label: 'SPACE BOLD', family: fonts.bodyBold },
+  { key: 'instrument-regular', label: 'INSTRUMENT', family: fonts.editorial },
 ];
 
-/* -------------------------------------------------------------------------
- * Screen
- * ----------------------------------------------------------------------- */
+const LAYOUTS: { key: StoreLayoutKey; label: string; desc: string }[] = [
+  { key: 'grid', label: 'GRID', desc: '2-column tile grid · default' },
+  { key: 'stack', label: 'STACK', desc: 'Horizontal rows · skimmable' },
+  { key: 'mag', label: 'MAG', desc: 'Editorial magazine layout' },
+];
 
-export default function MerchStudio() {
-  const palette = useThemedPalette();
-  const styles = useThemedPaletteStyles(makeStyles);
-  const products = useStore((s) => s.products);
-  const profile = useStore((s) => s.profile);
-  const orders = useStore((s) => s.merchOrders);
-  const toast = useStore((s) => s.toast);
-  const toggleProductPublished = useStore((s) => s.toggleProductPublished);
+const SECTION_META: Record<
+  StoreSectionType,
+  {
+    label: string;
+    icon: keyof typeof IconNames;
+    sub: string;
+  }
+> = {
+  marquee: { label: 'MARQUEE', icon: 'megaphone-outline', sub: 'Scrolling text strip' },
+  hero: { label: 'HERO', icon: 'image-outline', sub: 'Background + title + CTA' },
+  featured: { label: 'FEATURED', icon: 'star-outline', sub: 'One large product card' },
+  grid: { label: 'GRID', icon: 'grid-outline', sub: 'All products' },
+  about: { label: 'ABOUT', icon: 'information-circle-outline', sub: 'About-the-store copy' },
+  contact: { label: 'CONTACT', icon: 'mail-outline', sub: 'Email + socials' },
+  faq: { label: 'FAQ', icon: 'help-circle-outline', sub: 'Q & A list' },
+  shipping: { label: 'SHIPPING', icon: 'cube-outline', sub: 'Shipping info card' },
+  footer: { label: 'FOOTER', icon: 'ellipsis-horizontal-outline', sub: 'Logo + copyright' },
+};
 
-  /* ---------- live customization state ---------- */
-  const [accentKey, setAccentKey] = useState<AccentKey>('acid');
-  const [fontKey, setFontKey] = useState<FontKey>('display');
-  const [layoutKey, setLayoutKey] = useState<LayoutKey>('grid');
-  const [coverIdx, setCoverIdx] = useState(0);
-  const [logoIdx, setLogoIdx] = useState(0);
-  const [bgMode, setBgMode] = useState<BgMode>('image');
-  const [storeName, setStoreName] = useState(
-    `${profile.handle.replace('@', '').toUpperCase()}.STORE`
-  );
-  const [pagesOn, setPagesOn] = useState<Record<string, boolean>>({
-    about: true,
-    contact: true,
-    faq: false,
-    shipping: true,
-  });
-  const [siteOn, setSiteOn] = useState(true);
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [generating, setGenerating] = useState(false);
+const IconNames = {
+  'megaphone-outline': true,
+  'image-outline': true,
+  'star-outline': true,
+  'grid-outline': true,
+  'information-circle-outline': true,
+  'mail-outline': true,
+  'help-circle-outline': true,
+  'cube-outline': true,
+  'ellipsis-horizontal-outline': true,
+};
 
-  const accent =
-    accentKey === 'acid'
-      ? palette.acid
-      : accentKey === 'electric'
-      ? palette.electric
-      : accentKey === 'blush'
-      ? palette.blush
-      : accentKey === 'ember'
-      ? palette.ember
-      : palette.ink;
-  const accentFg = accentKey === 'acid' ? palette.ink : palette.bone;
+type TabKey = 'brand' | 'type' | 'layout' | 'sections' | 'products' | 'pages' | 'domain';
 
-  const titleFamily =
-    fontKey === 'display'
-      ? fonts.displayBold
-      : fontKey === 'editorial'
-      ? fonts.editorialItalic
-      : fonts.bodyBold;
+const TABS: { key: TabKey; label: string }[] = [
+  { key: 'brand', label: 'BRAND' },
+  { key: 'type', label: 'TYPE' },
+  { key: 'layout', label: 'LAYOUT' },
+  { key: 'sections', label: 'SECTIONS' },
+  { key: 'products', label: 'PRODUCTS' },
+  { key: 'pages', label: 'PAGES' },
+  { key: 'domain', label: 'DOMAIN' },
+];
 
-  const revenue = products.reduce(
-    (a, p) => a + p.sold * (p.baseCost + p.margin),
-    0
-  );
-  const unitsSold = products.reduce((a, p) => a + p.sold, 0);
-
-  const handle = profile.handle.replace('@', '');
-  const siteUrl = `${handle}.underdawg.store`;
-
-  /* products user can add (not yet in their line) */
-  const ownedTypes = useMemo(
-    () => new Set(products.map((p) => p.type.toUpperCase())),
-    [products]
-  );
-  const availableTypes = productTypes.filter(
-    (t) => !ownedTypes.has(t.name.toUpperCase())
-  );
-
-  const togglePage = (k: string) =>
-    setPagesOn((s) => ({ ...s, [k]: !s[k] }));
-
-  const generateMockups = () => {
-    setGenerating(true);
-    toast('Generating mockups…');
-    setTimeout(() => {
-      setGenerating(false);
-      toast('4 new mockups ready', 'default');
-    }, 1400);
-  };
-
-  const publish = () => toast('Store changes published', 'default');
-  const preview = () => router.push('/(modules)/merch/store');
-
-  return (
-    <ScreenFrame
-      header={
-        <ModuleHeader
-          eyebrow="YOUR STUDIO"
-          title="MERCH STUDIO"
-          right={
-            <Tap scale={1}
-              style={styles.previewBtn}
-              onPress={preview}
-              burstColor={accent}
-            >
-              <Ionicons name="eye-outline" size={16} color={palette.ink} />
-            </Tap>
-          }
-        />
-      }
-    >
-      {/* ===================================================================
-       *  LIVE PREVIEW — reflects every customization choice
-       * ================================================================= */}
-      <Tap scale={1} onPress={preview} burstColor={accent}>
-        <TiltCard style={styles.previewWrap} maxTilt={0}>
-          <View style={[styles.previewCard, { backgroundColor: staticPalette.ink }]}>
-            {bgMode === 'image' ? (
-              <Image
-                source={{ uri: COVER_OPTIONS[coverIdx] }}
-                style={StyleSheet.absoluteFill as any}
-                contentFit="cover"
-                transition={250}
-                targetWidth={CONTENT_W}
-              />
-            ) : bgMode === 'video' ? (
-              <View
-                style={[
-                  StyleSheet.absoluteFill,
-                  { backgroundColor: staticPalette.ink, alignItems: 'center', justifyContent: 'center' },
-                ]}
-              >
-                <Ionicons name="play-circle" size={48} color={staticPalette.bone} />
-                <RNText style={[styles.previewVideoLabel, { color: staticPalette.bone }]}>
-                  VIDEO BACKGROUND
-                </RNText>
-              </View>
-            ) : (
-              <View
-                style={[StyleSheet.absoluteFill, { backgroundColor: accent }]}
-              />
-            )}
-
-            {/* Gradient scrim */}
-            <View style={styles.previewScrim} pointerEvents="none" />
-
-            {/* Top bar */}
-            <View style={styles.previewTopBar}>
-              <View style={[styles.previewLiveDot, { backgroundColor: accent }]} />
-              <RNText style={styles.previewLiveText} numberOfLines={1}>
-                LIVE · {products.length} PRODUCTS
-              </RNText>
-              <View style={{ flex: 1 }} />
-              <RNText style={styles.previewUrl} numberOfLines={1}>
-                {siteUrl}
-              </RNText>
-            </View>
-
-            {/* Bottom — logo + store name + product mini tiles */}
-            <View style={styles.previewBottom}>
-              <View style={styles.previewBrandRow}>
-                <View style={[styles.previewLogo, { borderColor: accent }]}>
-                  <Image
-                    source={{ uri: LOGO_OPTIONS[logoIdx] }}
-                    style={styles.previewLogoImg}
-                    contentFit="cover"
-                    targetWidth={48}
-                  />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <RNText
-                    style={[
-                      styles.previewStoreName,
-                      { fontFamily: titleFamily, color: staticPalette.bone },
-                    ]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.55}
-                  >
-                    {storeName}
-                  </RNText>
-                  <RNText style={[styles.previewHandle, { color: accent }]} numberOfLines={1}>
-                    @{handle} · SHIPS WORLDWIDE
-                  </RNText>
-                </View>
-              </View>
-
-              {/* Mini product tiles — layout switches with layoutKey */}
-              <View style={styles.previewMiniRow}>
-                {products.slice(0, 3).map((p, i) => {
-                  const isHero = layoutKey === 'mag' && i === 0;
-                  return (
-                    <View
-                      key={p.id}
-                      style={[
-                        styles.previewMiniTile,
-                        {
-                          backgroundColor: p.bg,
-                          flex: isHero ? 2 : 1,
-                          height: layoutKey === 'stack' ? 42 : 56,
-                        },
-                      ]}
-                    >
-                      <ProductIcon type={p.type} size={isHero ? 28 : 22} color={p.fg} />
-                    </View>
-                  );
-                })}
-              </View>
-            </View>
-          </View>
-        </TiltCard>
-      </Tap>
-
-      <View style={styles.previewFootRow}>
-        <View style={[styles.previewFootDot, { backgroundColor: accent }]} />
-        <RNText style={[styles.previewFootText, { color: palette.ink }]} numberOfLines={1}>
-          LIVE PREVIEW · TAP TO OPEN
-        </RNText>
-        <View style={[styles.previewFootDot, { backgroundColor: accent }]} />
-      </View>
-
-      {/* ===== STATUS TICKER ===== */}
-      <View style={[styles.marqueeStrip, { backgroundColor: staticPalette.ink }]}>
-        <Marquee
-          items={[
-            'STORE LIVE',
-            'UNDERDAWG SS26',
-            'GET DISCOVERED',
-            'GET PAID',
-            'EDIT ANYTIME',
-            'YOU ARE UNDERDAWG',
-          ]}
-          textStyle={{
-            fontFamily: fonts.displayBold,
-            fontSize: 22,
-            lineHeight: 44,
-            letterSpacing: -0.6,
-            color: staticPalette.bone,
-          }}
-          speed={48}
-          separator="   ·   "
-          style={{ height: 44, backgroundColor: staticPalette.ink }}
-        />
-      </View>
-
-      {/* ===== METRICS — 4 IN ONE ROW ===== */}
-      <View style={styles.metricsRow}>
-        <SlimMetric label="REVENUE" value={`₹${compact(revenue)}`} accentColor={accent} />
-        <View style={[styles.metricDivider, { backgroundColor: palette.line }]} />
-        <SlimMetric label="ORDERS" value={String(orders.length)} accentColor={palette.electric} />
-        <View style={[styles.metricDivider, { backgroundColor: palette.line }]} />
-        <SlimMetric label="UNITS" value={compact(unitsSold)} accentColor={palette.blush} />
-        <View style={[styles.metricDivider, { backgroundColor: palette.line }]} />
-        <SlimMetric label="PRODUCTS" value={String(products.length)} accentColor={palette.ember} />
-      </View>
-
-      {/* ===== PRIMARY ACTIONS ===== */}
-      <View style={styles.ctaCol}>
-        <MagneticButton staticPress
-          label="PUBLISH STORE"
-          size="lg"
-          background={staticPalette.ink}
-          foreground={accent}
-          onPress={publish}
-          style={{ alignSelf: 'stretch' }}
-        />
-        <View style={styles.ctaSecondaryRow}>
-          <SecondaryAction
-            icon="eye-outline"
-            label="PREVIEW"
-            tint={accent}
-            tintFg={accentKey === 'acid' ? staticPalette.ink : staticPalette.bone}
-            onPress={preview}
-          />
-          <SecondaryAction
-            icon="share-outline"
-            label="SHARE"
-            tint={palette.electric}
-            tintFg={staticPalette.bone}
-            onPress={() => toast('Share link copied')}
-          />
-          <SecondaryAction
-            icon="save-outline"
-            label="DRAFT"
-            tint={palette.blush}
-            tintFg={staticPalette.bone}
-            onPress={() => toast('Saved as draft')}
-          />
-        </View>
-      </View>
-
-      {/* ===================================================================
-       *  STOREFRONT — cover + logo + name
-       * ================================================================= */}
-      <Section eyebrow="STOREFRONT · COVER + LOGO" title="set the scene.">
-        {/* Background mode toggle */}
-        <View style={styles.modeRow}>
-          {(['image', 'video', 'color'] as BgMode[]).map((m) => {
-            const active = bgMode === m;
-            return (
-              <Tap scale={1}
-                key={m}
-                onPress={() => setBgMode(m)}
-                burstColor={accent}
-                style={[
-                  styles.modeChip,
-                  active && { backgroundColor: staticPalette.ink, borderColor: staticPalette.ink },
-                  !active && { borderColor: palette.line },
-                ]}
-              >
-                <Ionicons
-                  name={
-                    m === 'image'
-                      ? 'image-outline'
-                      : m === 'video'
-                      ? 'videocam-outline'
-                      : 'color-fill-outline'
-                  }
-                  size={13}
-                  color={active ? staticPalette.bone : palette.ink}
-                />
-                <RNText
-                  style={[
-                    styles.modeChipLabel,
-                    { color: active ? staticPalette.bone : palette.ink },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {m === 'image' ? 'IMAGE' : m === 'video' ? 'VIDEO' : 'COLOR'}
-                </RNText>
-              </Tap>
-            );
-          })}
-        </View>
-
-        {/* Cover row */}
-        <RNText style={[styles.controlLabel, { color: palette.ink }]} numberOfLines={1}>
-          COVER · {bgMode === 'image' ? 'PICK OR UPLOAD' : bgMode === 'video' ? 'UPLOAD VIDEO' : 'BRAND COLOR'}
-        </RNText>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.coverScroll}
-          style={{ marginHorizontal: -SCREEN_PADDING }}
-        >
-          {bgMode === 'image' ? (
-            <>
-              <Tap scale={1}
-                style={[styles.dropTile, { borderColor: palette.line }]}
-                onPress={() => toast('Upload from camera roll')}
-                burstColor={accent}
-              >
-                <Ionicons name="cloud-upload-outline" size={20} color={palette.ink} />
-                <RNText style={[styles.dropTileLabel, { color: palette.ink }]} numberOfLines={1}>
-                  DRAG · DROP
-                </RNText>
-                <RNText style={[styles.dropTileSub, { color: palette.ink, opacity: 0.55 }]}>
-                  PNG · JPG · 4K
-                </RNText>
-              </Tap>
-              {COVER_OPTIONS.map((uri, i) => {
-                const active = i === coverIdx;
-                return (
-                  <Tap scale={1}
-                    key={uri}
-                    onPress={() => setCoverIdx(i)}
-                    burstColor={accent}
-                  >
-                    <View
-                      style={[
-                        styles.coverTile,
-                        active && { borderColor: accent, borderWidth: 3 },
-                        !active && { borderColor: palette.line, borderWidth: 1 },
-                      ]}
-                    >
-                      <Image
-                        source={{ uri }}
-                        style={StyleSheet.absoluteFill as any}
-                        contentFit="cover"
-                        targetWidth={140}
-                      />
-                      {active ? (
-                        <View
-                          style={[styles.coverActiveBadge, { backgroundColor: accent }]}
-                        >
-                          <Ionicons name="checkmark" size={12} color={palette.ink} />
-                        </View>
-                      ) : null}
-                    </View>
-                  </Tap>
-                );
-              })}
-            </>
-          ) : bgMode === 'video' ? (
-            <Tap scale={1}
-              style={[styles.videoDrop, { borderColor: palette.line }]}
-              onPress={() => toast('Upload video — coming soon')}
-              burstColor={accent}
-            >
-              <Ionicons name="videocam-outline" size={26} color={palette.ink} />
-              <RNText style={[styles.dropTileLabel, { color: palette.ink }]} numberOfLines={1}>
-                DROP A LOOP
-              </RNText>
-              <RNText style={[styles.dropTileSub, { color: palette.ink, opacity: 0.55 }]}>
-                MP4 · 10S MAX · MUTED
-              </RNText>
-            </Tap>
-          ) : (
-            <View style={styles.coverColorRow}>
-              {ACCENTS.map((a) => {
-                const c =
-                  a.key === 'acid'
-                    ? palette.acid
-                    : a.key === 'electric'
-                    ? palette.electric
-                    : a.key === 'blush'
-                    ? palette.blush
-                    : a.key === 'ember'
-                    ? palette.ember
-                    : palette.ink;
-                const active = accentKey === a.key;
-                return (
-                  <Tap scale={1}
-                    key={a.key}
-                    onPress={() => setAccentKey(a.key)}
-                    burstColor={c}
-                  >
-                    <View
-                      style={[
-                        styles.coverColorTile,
-                        { backgroundColor: c, borderColor: active ? palette.ink : 'transparent' },
-                      ]}
-                    >
-                      {active ? (
-                        <Ionicons
-                          name="checkmark"
-                          size={16}
-                          color={a.key === 'acid' ? staticPalette.ink : staticPalette.bone}
-                        />
-                      ) : null}
-                    </View>
-                  </Tap>
-                );
-              })}
-            </View>
-          )}
-        </ScrollView>
-
-        {/* Logo row */}
-        <RNText
-          style={[styles.controlLabel, { color: palette.ink, marginTop: 18 }]}
-          numberOfLines={1}
-        >
-          LOGO · YOUR MARK
-        </RNText>
-        <View style={styles.logoRow}>
-          <Tap scale={1}
-            style={[styles.logoDrop, { borderColor: palette.line }]}
-            onPress={() => toast('Upload logo')}
-            burstColor={accent}
-          >
-            <Ionicons name="add" size={26} color={palette.ink} />
-            <RNText style={[styles.dropTileSub, { color: palette.ink, opacity: 0.6 }]} numberOfLines={1}>
-              UPLOAD
-            </RNText>
-          </Tap>
-          {LOGO_OPTIONS.map((uri, i) => {
-            const active = i === logoIdx;
-            return (
-              <Tap scale={1}
-                key={uri}
-                onPress={() => setLogoIdx(i)}
-                burstColor={accent}
-              >
-                <View
-                  style={[
-                    styles.logoTile,
-                    active
-                      ? { borderColor: accent, borderWidth: 3 }
-                      : { borderColor: palette.line, borderWidth: 1 },
-                  ]}
-                >
-                  <Image
-                    source={{ uri }}
-                    style={StyleSheet.absoluteFill as any}
-                    contentFit="cover"
-                    targetWidth={80}
-                  />
-                </View>
-              </Tap>
-            );
-          })}
-        </View>
-
-        {/* Store name input (display only) */}
-        <RNText
-          style={[styles.controlLabel, { color: palette.ink, marginTop: 18 }]}
-          numberOfLines={1}
-        >
-          STORE NAME
-        </RNText>
-        <Tap scale={1}
-          style={[styles.fieldRow, { borderColor: palette.line }]}
-          onPress={() =>
-            setStoreName((s) =>
-              s.endsWith('.STORE') ? s.replace('.STORE', '.SHOP') : `${s.split('.')[0]}.STORE`
-            )
-          }
-          burstColor={accent}
-        >
-          <Ionicons name="text-outline" size={16} color={palette.ink} />
-          <RNText
-            style={[styles.fieldText, { color: palette.ink }]}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.7}
-          >
-            {storeName}
-          </RNText>
-          <Ionicons name="pencil" size={14} color={palette.ink} />
-        </Tap>
-      </Section>
-
-      {/* ===================================================================
-       *  BRAND — color, font, card style
-       * ================================================================= */}
-      <Section eyebrow="BRAND · COLOR + TYPE" title="make it yours.">
-        <RNText style={[styles.controlLabel, { color: palette.ink }]} numberOfLines={1}>
-          ACCENT COLOR
-        </RNText>
-        <View style={styles.swatchRow}>
-          {ACCENTS.map((a) => {
-            const c =
-              a.key === 'acid'
-                ? palette.acid
-                : a.key === 'electric'
-                ? palette.electric
-                : a.key === 'blush'
-                ? palette.blush
-                : a.key === 'ember'
-                ? palette.ember
-                : palette.ink;
-            const active = accentKey === a.key;
-            return (
-              <Tap scale={1} key={a.key} onPress={() => setAccentKey(a.key)} burstColor={c}>
-                <View
-                  style={[
-                    styles.swatch,
-                    {
-                      backgroundColor: c,
-                      borderColor: active ? palette.ink : 'transparent',
-                    },
-                  ]}
-                >
-                  {active ? (
-                    <Ionicons
-                      name="checkmark"
-                      size={16}
-                      color={a.key === 'acid' ? staticPalette.ink : staticPalette.bone}
-                    />
-                  ) : null}
-                </View>
-                <RNText
-                  style={[styles.swatchLabel, { color: palette.ink, opacity: active ? 1 : 0.55 }]}
-                  numberOfLines={1}
-                >
-                  {a.label}
-                </RNText>
-              </Tap>
-            );
-          })}
-        </View>
-
-        <RNText
-          style={[styles.controlLabel, { color: palette.ink, marginTop: 22 }]}
-          numberOfLines={1}
-        >
-          DISPLAY FONT
-        </RNText>
-        <View style={styles.fontRow}>
-          {FONT_OPTIONS.map((f) => {
-            const active = fontKey === f.key;
-            return (
-              <Tap scale={1}
-                key={f.key}
-                onPress={() => setFontKey(f.key)}
-                burstColor={accent}
-                style={{ flex: 1 }}
-              >
-                <View
-                  style={[
-                    styles.fontCard,
-                    active
-                      ? { backgroundColor: staticPalette.ink, borderColor: staticPalette.ink }
-                      : { backgroundColor: palette.paper, borderColor: palette.line },
-                  ]}
-                >
-                  <RNText
-                    style={{
-                      fontFamily: f.family,
-                      fontSize: 38,
-                      lineHeight: 40,
-                      letterSpacing: -1.4,
-                      color: active ? accent : palette.ink,
-                    }}
-                    allowFontScaling={false}
-                  >
-                    {f.sample}
-                  </RNText>
-                  <RNText
-                    style={[
-                      styles.fontCardLabel,
-                      { color: active ? staticPalette.bone : palette.ink },
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {f.label}
-                  </RNText>
-                </View>
-              </Tap>
-            );
-          })}
-        </View>
-
-        <RNText
-          style={[styles.controlLabel, { color: palette.ink, marginTop: 22 }]}
-          numberOfLines={1}
-        >
-          PRODUCT LAYOUT
-        </RNText>
-        <View style={styles.fontRow}>
-          {LAYOUT_OPTIONS.map((l) => {
-            const active = layoutKey === l.key;
-            return (
-              <Tap scale={1}
-                key={l.key}
-                onPress={() => setLayoutKey(l.key)}
-                burstColor={accent}
-                style={{ flex: 1 }}
-              >
-                <View
-                  style={[
-                    styles.layoutCard,
-                    active
-                      ? { backgroundColor: staticPalette.ink, borderColor: staticPalette.ink }
-                      : { backgroundColor: palette.paper, borderColor: palette.line },
-                  ]}
-                >
-                  <LayoutDiagram
-                    kind={l.key}
-                    color={active ? accent : palette.ink}
-                  />
-                  <RNText
-                    style={[
-                      styles.fontCardLabel,
-                      { color: active ? staticPalette.bone : palette.ink },
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {l.label}
-                  </RNText>
-                </View>
-              </Tap>
-            );
-          })}
-        </View>
-      </Section>
-
-      {/* ===================================================================
-       *  PRODUCTS — manage your line
-       * ================================================================= */}
-      <Section
-        eyebrow={`PRODUCTS · ${products.length} LIVE`}
-        title="your line."
-        action={{
-          label: pickerOpen ? 'CLOSE' : 'ADD',
-          onPress: () => setPickerOpen((s) => !s),
-        }}
-      >
-        <View style={styles.productGrid}>
-          {products.map((p) => (
-            <Tap scale={1}
-              key={p.id}
-              onPress={() => router.push('/(modules)/merch/store')}
-              burstColor={p.color}
-              style={{ flexBasis: '48%' }}
-            >
-              <TiltCard
-                style={[styles.productCard, { backgroundColor: p.bg }] as any}
-                maxTilt={0}
-              >
-                <View style={styles.productTopRow}>
-                  <View style={[styles.productAccentBar, { backgroundColor: p.color }]} />
-                  <View style={{ flex: 1 }} />
-                  <Tap scale={1}
-                    style={[styles.productMenu, { backgroundColor: 'rgba(10,10,10,0.18)' }]}
-                    onPress={() => toggleProductPublished(p.id)}
-                    burstColor={p.color}
-                  >
-                    <Ionicons
-                      name={p.published ? 'eye-outline' : 'eye-off-outline'}
-                      size={12}
-                      color={p.fg}
-                    />
-                  </Tap>
-                </View>
-                <View style={styles.productIcon}>
-                  <ProductIcon type={p.type} size={56} color={p.fg} />
-                </View>
-                <View>
-                  <RNText
-                    style={[styles.productName, { color: p.fg }]}
-                    numberOfLines={1}
-                    adjustsFontSizeToFit
-                    minimumFontScale={0.75}
-                  >
-                    {p.name}
-                  </RNText>
-                  <RNText style={[styles.productMeta, { color: p.fg }]} numberOfLines={1}>
-                    {p.type} · ₹{p.baseCost + p.margin}
-                  </RNText>
-                  <View style={styles.productFootRow}>
-                    <View style={[styles.productSoldDot, { backgroundColor: p.color }]} />
-                    <RNText style={[styles.productSold, { color: p.fg }]} numberOfLines={1}>
-                      {p.sold} SOLD
-                    </RNText>
-                  </View>
-                </View>
-              </TiltCard>
-            </Tap>
-          ))}
-
-          <Tap scale={1}
-            onPress={() => router.push('/(modules)/merch/create')}
-            burstColor={accent}
-            style={{ flexBasis: '48%' }}
-          >
-            <View style={[styles.productAddCard, { borderColor: palette.line }]}>
-              <View style={[styles.productAddIcon, { backgroundColor: staticPalette.ink }]}>
-                <Ionicons name="add" size={22} color={accent} />
-              </View>
-              <RNText style={[styles.productAddLabel, { color: palette.ink }]} numberOfLines={1}>
-                NEW PRODUCT
-              </RNText>
-              <RNText style={[styles.productAddSub, { color: palette.ink, opacity: 0.6 }]} numberOfLines={1}>
-                FROM SCRATCH
-              </RNText>
-            </View>
-          </Tap>
-        </View>
-
-        {pickerOpen ? (
-          <View style={[styles.pickerWrap, { backgroundColor: palette.paper, borderColor: palette.line }]}>
-            <RNText style={[styles.pickerKicker, { color: palette.ink }]} numberOfLines={1}>
-              PICK PRODUCT TYPE · ADD TO STORE
-            </RNText>
-            <View style={styles.pickerGrid}>
-              {productTypes.map((pt) => {
-                const owned = ownedTypes.has(pt.name.toUpperCase());
-                return (
-                  <Tap scale={1}
-                    key={pt.key}
-                    onPress={() => {
-                      router.push('/(modules)/merch/create');
-                      setPickerOpen(false);
-                    }}
-                    burstColor={accent}
-                    disabled={owned}
-                    style={{ flexBasis: '31%' }}
-                  >
-                    <View
-                      style={[
-                        styles.pickerTile,
-                        owned
-                          ? { backgroundColor: staticPalette.ink, opacity: 0.85 }
-                          : { backgroundColor: accent },
-                      ]}
-                    >
-                      <ProductIcon
-                        type={pt.name}
-                        size={30}
-                        color={
-                          owned ? staticPalette.bone : accentKey === 'acid' ? staticPalette.ink : staticPalette.bone
-                        }
-                      />
-                      <RNText
-                        style={[
-                          styles.pickerLabel,
-                          {
-                            color: owned ? staticPalette.bone : accentKey === 'acid' ? staticPalette.ink : staticPalette.bone,
-                          },
-                        ]}
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.7}
-                      >
-                        {pt.name}
-                      </RNText>
-                      <RNText
-                        style={[
-                          styles.pickerCost,
-                          {
-                            color: owned ? staticPalette.bone : accentKey === 'acid' ? staticPalette.ink : staticPalette.bone,
-                            opacity: owned ? 0.6 : 0.75,
-                          },
-                        ]}
-                        numberOfLines={1}
-                      >
-                        {owned ? 'IN STORE' : `₹${pt.baseCost}`}
-                      </RNText>
-                    </View>
-                  </Tap>
-                );
-              })}
-            </View>
-            <RNText style={[styles.pickerHint, { color: palette.ink, opacity: 0.55 }]}>
-              {availableTypes.length} more product types available.
-            </RNText>
-          </View>
-        ) : null}
-      </Section>
-
-      {/* ===================================================================
-       *  DESIGNS — your artwork library
-       * ================================================================= */}
-      <Section
-        eyebrow={`DESIGNS · ${DESIGN_LIBRARY.length} IN LIBRARY`}
-        title="your artwork."
-        action={{ label: 'UPLOAD', onPress: () => toast('Upload design') }}
-      >
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.designScroll}
-          style={{ marginHorizontal: -SCREEN_PADDING }}
-        >
-          <Tap scale={1}
-            style={[styles.designDrop, { borderColor: palette.line }]}
-            onPress={() => toast('Drop a PNG, SVG, or AI file')}
-            burstColor={accent}
-          >
-            <Ionicons name="cloud-upload-outline" size={26} color={palette.ink} />
-            <RNText style={[styles.dropTileLabel, { color: palette.ink }]} numberOfLines={1}>
-              DRAG · DROP
-            </RNText>
-            <RNText style={[styles.dropTileSub, { color: palette.ink, opacity: 0.55 }]} numberOfLines={1}>
-              PNG · SVG · AI
-            </RNText>
-          </Tap>
-          {DESIGN_LIBRARY.map((uri, i) => (
-            <Tap scale={1}
-              key={uri}
-              onPress={() => toast(`Design ${i + 1} selected`)}
-              burstColor={accent}
-            >
-              <View style={[styles.designTile, { borderColor: palette.line }]}>
-                <Image
-                  source={{ uri }}
-                  style={StyleSheet.absoluteFill as any}
-                  contentFit="cover"
-                  targetWidth={140}
-                />
-                <View style={styles.designTileFoot}>
-                  <RNText style={styles.designTileLabel} numberOfLines={1}>
-                    DSGN-{String(i + 1).padStart(2, '0')}
-                  </RNText>
-                </View>
-              </View>
-            </Tap>
-          ))}
-        </ScrollView>
-      </Section>
-
-      {/* ===================================================================
-       *  AI MOCKUPS
-       * ================================================================= */}
-      <Section
-        eyebrow="AI MOCKUPS · LATEST RUN"
-        title="see it on product."
-        action={{
-          label: generating ? '…' : 'REGEN',
-          onPress: generateMockups,
-        }}
-      >
-        <View style={styles.mockupGrid}>
-          {MOCKUP_GALLERY.map((uri, i) => (
-            <Tap scale={1}
-              key={uri}
-              onPress={() => toast('Use this mockup')}
-              burstColor={accent}
-              style={{ flexBasis: '48%' }}
-            >
-              <View style={[styles.mockupTile, { backgroundColor: palette.paper, borderColor: palette.line }]}>
-                <Image
-                  source={{ uri }}
-                  style={StyleSheet.absoluteFill as any}
-                  contentFit="cover"
-                  targetWidth={(CONTENT_W - 10) / 2}
-                />
-                <View style={[styles.mockupBadge, { backgroundColor: staticPalette.ink }]}>
-                  <Ionicons name="sparkles" size={10} color={accent} />
-                  <RNText style={[styles.mockupBadgeText, { color: staticPalette.bone }]} numberOfLines={1}>
-                    AI
-                  </RNText>
-                </View>
-                <View style={styles.mockupFoot}>
-                  <RNText style={styles.mockupFootText} numberOfLines={1}>
-                    VARIANT 0{i + 1}
-                  </RNText>
-                </View>
-              </View>
-            </Tap>
-          ))}
-        </View>
-        <Tap scale={1}
-          onPress={generateMockups}
-          burstColor={accent}
-          style={[styles.generateRow, { backgroundColor: staticPalette.ink }]}
-        >
-          <Ionicons
-            name={generating ? 'hourglass' : 'sparkles'}
-            size={14}
-            color={accent}
-          />
-          <RNText style={[styles.generateRowLabel, { color: accent }]} numberOfLines={1}>
-            {generating ? 'GENERATING…' : 'GENERATE NEW MOCKUPS'}
-          </RNText>
-          <Ionicons name="arrow-forward" size={14} color={accent} />
-        </Tap>
-      </Section>
-
-      {/* ===================================================================
-       *  CHANNELS — where store lives
-       * ================================================================= */}
-      <Section eyebrow="WHERE IT LIVES" title="channels.">
-        <Tap scale={1} onPress={() => router.push('/(modules)/merch/store')} burstColor={accent}>
-          <View style={[styles.channelRow, { backgroundColor: staticPalette.ink, borderColor: staticPalette.ink }]}>
-            <View style={[styles.channelIcon, { backgroundColor: accent }]}>
-              <Ionicons
-                name="storefront"
-                size={16}
-                color={accentKey === 'acid' ? staticPalette.ink : staticPalette.bone}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <RNText style={[styles.channelTitle, { color: staticPalette.bone }]} numberOfLines={1}>
-                IN-APP STORE
-              </RNText>
-              <RNText style={[styles.channelUrl, { color: accent }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
-                underdawg.com/{handle}/store
-              </RNText>
-            </View>
-            <View style={[styles.channelStatusOn, { backgroundColor: accent }]}>
-              <RNText
-                style={[
-                  styles.channelStatusText,
-                  { color: accentKey === 'acid' ? staticPalette.ink : staticPalette.bone },
-                ]}
-                numberOfLines={1}
-              >
-                ON
-              </RNText>
-            </View>
-          </View>
-        </Tap>
-
-        <Tap scale={1}
-          onPress={() => setSiteOn((s) => !s)}
-          burstColor={palette.electric}
-        >
-          <View
-            style={[
-              styles.channelRow,
-              {
-                backgroundColor: palette.paper,
-                borderColor: siteOn ? palette.electric : palette.line,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.channelIcon,
-                { backgroundColor: siteOn ? palette.electric : palette.line },
-              ]}
-            >
-              <Ionicons
-                name="globe-outline"
-                size={16}
-                color={siteOn ? palette.bone : palette.ink}
-              />
-            </View>
-            <View style={{ flex: 1 }}>
-              <RNText style={[styles.channelTitle, { color: palette.ink }]} numberOfLines={1}>
-                STANDALONE SITE
-              </RNText>
-              <RNText
-                style={[styles.channelUrl, { color: palette.electric, opacity: siteOn ? 1 : 0.5 }]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.7}
-              >
-                {siteUrl}
-              </RNText>
-            </View>
-            <View
-              style={[
-                styles.toggleTrack,
-                { backgroundColor: siteOn ? palette.electric : palette.line },
-              ]}
-            >
-              <View
-                style={[
-                  styles.toggleThumb,
-                  {
-                    backgroundColor: palette.bone,
-                    alignSelf: siteOn ? 'flex-end' : 'flex-start',
-                  },
-                ]}
-              />
-            </View>
-          </View>
-        </Tap>
-      </Section>
-
-      {/* ===================================================================
-       *  PAGES — about / contact / faq / shipping toggles
-       * ================================================================= */}
-      <Section eyebrow="STORE PAGES" title="extra content.">
-        <View style={styles.pageGrid}>
-          {STORE_PAGES.map((p) => {
-            const on = pagesOn[p.key];
-            return (
-              <Tap scale={1}
-                key={p.key}
-                onPress={() => togglePage(p.key)}
-                burstColor={accent}
-                style={{ flexBasis: '48%' }}
-              >
-                <View
-                  style={[
-                    styles.pageTile,
-                    {
-                      backgroundColor: on ? staticPalette.ink : palette.paper,
-                      borderColor: on ? staticPalette.ink : palette.line,
-                    },
-                  ]}
-                >
-                  <Ionicons
-                    name={p.icon}
-                    size={18}
-                    color={on ? accent : palette.ink}
-                  />
-                  <RNText
-                    style={[
-                      styles.pageLabel,
-                      { color: on ? staticPalette.bone : palette.ink },
-                    ]}
-                    numberOfLines={1}
-                  >
-                    {p.label}
-                  </RNText>
-                  <View
-                    style={[
-                      styles.pageStatus,
-                      {
-                        backgroundColor: on ? accent : 'transparent',
-                        borderColor: on ? accent : palette.line,
-                      },
-                    ]}
-                  >
-                    <RNText
-                      style={[
-                        styles.pageStatusText,
-                        {
-                          color: on
-                            ? accentKey === 'acid'
-                              ? staticPalette.ink
-                              : staticPalette.bone
-                            : palette.ink,
-                          opacity: on ? 1 : 0.5,
-                        },
-                      ]}
-                      numberOfLines={1}
-                    >
-                      {on ? 'ON' : 'OFF'}
-                    </RNText>
-                  </View>
-                </View>
-              </Tap>
-            );
-          })}
-        </View>
-      </Section>
-
-      {/* ===================================================================
-       *  DOMAIN + ADVANCED
-       * ================================================================= */}
-      <Section eyebrow="DOMAIN + ADVANCED">
-        <Tap scale={1}
-          onPress={() => toast('Custom domain — coming soon')}
-          burstColor={accent}
-        >
-          <View style={[styles.advRow, { borderColor: palette.line }]}>
-            <Ionicons name="link-outline" size={16} color={palette.ink} />
-            <View style={{ flex: 1 }}>
-              <RNText style={[styles.advTitle, { color: palette.ink }]} numberOfLines={1}>
-                Custom domain
-              </RNText>
-              <RNText style={[styles.advSub, { color: palette.ink, opacity: 0.6 }]} numberOfLines={1}>
-                Connect your own URL · free SSL
-              </RNText>
-            </View>
-            <Ionicons name="chevron-forward" size={14} color={palette.ink} />
-          </View>
-        </Tap>
-        <Tap scale={1}
-          onPress={() => router.push('/(modules)/merch/orders')}
-          burstColor={palette.electric}
-        >
-          <View style={[styles.advRow, { borderColor: palette.line }]}>
-            <Ionicons name="cart-outline" size={16} color={palette.ink} />
-            <View style={{ flex: 1 }}>
-              <RNText style={[styles.advTitle, { color: palette.ink }]} numberOfLines={1}>
-                Orders
-              </RNText>
-              <RNText style={[styles.advSub, { color: palette.ink, opacity: 0.6 }]} numberOfLines={1}>
-                {orders.length} lifetime · {orders.filter((o) => o.status === 'PRINTING').length} in production
-              </RNText>
-            </View>
-            <Ionicons name="chevron-forward" size={14} color={palette.ink} />
-          </View>
-        </Tap>
-        <Tap scale={1}
-          onPress={() => toast('Shipping zones — coming soon')}
-          burstColor={palette.blush}
-        >
-          <View style={[styles.advRow, { borderColor: palette.line }]}>
-            <Ionicons name="airplane-outline" size={16} color={palette.ink} />
-            <View style={{ flex: 1 }}>
-              <RNText style={[styles.advTitle, { color: palette.ink }]} numberOfLines={1}>
-                Shipping + tax
-              </RNText>
-              <RNText style={[styles.advSub, { color: palette.ink, opacity: 0.6 }]} numberOfLines={1}>
-                Zones, rates, duties handled for you
-              </RNText>
-            </View>
-            <Ionicons name="chevron-forward" size={14} color={palette.ink} />
-          </View>
-        </Tap>
-        <Tap scale={1}
-          onPress={() => toast('Payouts — coming soon')}
-          burstColor={palette.ember}
-        >
-          <View style={[styles.advRow, { borderColor: palette.line, borderBottomWidth: 0 }]}>
-            <Ionicons name="wallet-outline" size={16} color={palette.ink} />
-            <View style={{ flex: 1 }}>
-              <RNText style={[styles.advTitle, { color: palette.ink }]} numberOfLines={1}>
-                Payouts
-              </RNText>
-              <RNText style={[styles.advSub, { color: palette.ink, opacity: 0.6 }]} numberOfLines={1}>
-                Weekly · auto to your bank
-              </RNText>
-            </View>
-            <Ionicons name="chevron-forward" size={14} color={palette.ink} />
-          </View>
-        </Tap>
-      </Section>
-
-      {/* ===== PUBLISH ===== */}
-      <View style={styles.publishWrap}>
-        <MagneticButton staticPress
-          label="PUBLISH CHANGES"
-          size="lg"
-          background={accent}
-          foreground={accentKey === 'acid' ? staticPalette.ink : staticPalette.bone}
-          onPress={publish}
-          style={{ alignSelf: 'stretch' }}
-        />
-        <RNText style={[styles.publishHint, { color: palette.ink, opacity: 0.55 }]} numberOfLines={2}>
-          Changes go live in seconds. Old version stays cached for 1h in case
-          you change your mind.
-        </RNText>
-      </View>
-    </ScreenFrame>
-  );
-}
-
-/* -----------------------------------------------------------------------
- * Compact-number helper + slim 4-up metric tile
- * --------------------------------------------------------------------- */
+/* =========================================================================
+ * Helpers
+ * ======================================================================= */
 
 function compact(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
@@ -1280,855 +136,2809 @@ function compact(n: number): string {
   return String(n);
 }
 
-function SecondaryAction({
-  icon,
-  label,
-  tint,
-  tintFg,
-  onPress,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  tint: string;
-  tintFg: string;
-  onPress: () => void;
-}) {
+function timeAgo(ts: number): string {
+  const diff = Math.max(0, Date.now() - ts);
+  const s = Math.floor(diff / 1000);
+  if (s < 60) return 'just now';
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.floor(h / 24);
+  return `${d}d ago`;
+}
+
+/* =========================================================================
+ * Screen
+ * ======================================================================= */
+
+export default function MerchStudio() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  return (
-    <Tap scale={1}
-      style={[styles.ctaSecondary, { borderColor: palette.line, backgroundColor: palette.paper }]}
-      onPress={onPress}
-      burstColor={tint}
-    >
-      <View style={[styles.ctaSecondaryIcon, { backgroundColor: tint }]}>
-        <Ionicons name={icon} size={12} color={tintFg} />
+
+  /* ---------- store reads ---------- */
+  const profile = useStore((s) => s.profile);
+  const products = useStore((s) => s.products);
+  const orders = useStore((s) => s.merchOrders);
+  const toast = useStore((s) => s.toast);
+
+  /* customization */
+  const sc = useStore((s) => s.storeCustomization);
+  const setStoreField = useStore((s) => s.setStoreField);
+  const reorderStoreSection = useStore((s) => s.reorderStoreSection);
+  const toggleStoreSection = useStore((s) => s.toggleStoreSection);
+  const updateStoreSection = useStore((s) => s.updateStoreSection);
+  const addCustomCategory = useStore((s) => s.addCustomCategory);
+  const removeCustomCategory = useStore((s) => s.removeCustomCategory);
+  const resetStoreCustomization = useStore((s) => s.resetStoreCustomization);
+  const publishStore = useStore((s) => s.publishStore);
+  const toggleProductPublished = useStore((s) => s.toggleProductPublished);
+  const updateProduct = useStore((s) => s.updateProduct);
+  const removeProduct = useStore((s) => s.removeProduct);
+  const confetti = useStore((s) => s.confetti);
+
+  /* ---------- local ui state ---------- */
+  const [tab, setTab] = useState<TabKey>('brand');
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatCost, setNewCatCost] = useState('');
+  const [newFaqQ, setNewFaqQ] = useState('');
+  const [newFaqA, setNewFaqA] = useState('');
+
+  /* ---------- derived ---------- */
+  const accent = useMemo(
+    () => ACCENTS.find((a) => a.key === sc.accent)?.hex ?? palette.acid,
+    [sc.accent, palette.acid],
+  );
+  const accentFg = sc.accent === 'acid' ? staticPalette.ink : staticPalette.bone;
+
+  const headingFamily =
+    HEADING_FONTS.find((h) => h.key === sc.headingFont)?.family ?? fonts.displayBold;
+  const bodyFamily = BODY_FONTS.find((b) => b.key === sc.bodyFont)?.family ?? fonts.body;
+
+  const revenue = products.reduce((a, p) => a + p.sold * (p.baseCost + p.margin), 0);
+  const unitsSold = products.reduce((a, p) => a + p.sold, 0);
+
+  const handle = profile.handle.replace('@', '');
+  const siteUrl = `${handle}.underdawg.store`;
+  const visibleSections = sc.sections.filter((s) => s.enabled).length;
+
+  /* ---------- actions ---------- */
+  const openLive = () => router.push('/(modules)/merch/store');
+  const publish = () => {
+    publishStore();
+    confetti();
+    toast('Store published · live in seconds', 'default');
+  };
+
+  const addNewCategory = () => {
+    const name = newCatName.trim();
+    const cost = Number(newCatCost) || 0;
+    if (!name) {
+      toast('Category name required', 'warn');
+      return;
+    }
+    const key = `custom-${name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`;
+    addCustomCategory({ key, name: name.toUpperCase(), baseCost: cost });
+    setNewCatName('');
+    setNewCatCost('');
+    toast(`Added "${name.toUpperCase()}"`, 'default');
+  };
+
+  const addFaqItem = () => {
+    const q = newFaqQ.trim();
+    const a = newFaqA.trim();
+    if (!q || !a) {
+      toast('Both question and answer required', 'warn');
+      return;
+    }
+    const faq = sc.sections.find((sx) => sx.type === 'faq');
+    if (!faq) return;
+    updateStoreSection(faq.id, { items: [...(faq.items || []), { q, a }] });
+    setNewFaqQ('');
+    setNewFaqA('');
+  };
+
+  /* =====================================================================
+   *  Tab panels
+   * =================================================================== */
+
+  const renderBrand = () => (
+    <View style={{ gap: 20 }}>
+      <Field label="STORE NAME">
+        <TextInput
+          style={[styles.input, { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink }]}
+          value={sc.storeName}
+          onChangeText={(v) => setStoreField('storeName', v)}
+          placeholder="YOURNAME.STORE"
+          placeholderTextColor={palette.mute}
+          autoCapitalize="characters"
+          maxFontSizeMultiplier={1.2}
+        />
+      </Field>
+
+      <Field label="TAGLINE">
+        <TextInput
+          style={[styles.input, { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink }]}
+          value={sc.tagline}
+          onChangeText={(v) => setStoreField('tagline', v)}
+          placeholder="For the ones still climbing."
+          placeholderTextColor={palette.mute}
+          maxFontSizeMultiplier={1.2}
+        />
+      </Field>
+
+      <Field label="ACCENT COLOR">
+        <View style={styles.swatchRow}>
+          {ACCENTS.map((a) => {
+            const active = sc.accent === a.key;
+            return (
+              <Tap
+                scale={1}
+                key={a.key}
+                onPress={() => setStoreField('accent', a.key)}
+                burstColor={a.hex}
+                style={[
+                  styles.swatch,
+                  {
+                    backgroundColor: a.hex,
+                    borderColor: active ? palette.ink : 'transparent',
+                  },
+                ]}
+              >
+                {active ? (
+                  <Ionicons
+                    name="checkmark"
+                    size={14}
+                    color={a.key === 'acid' ? staticPalette.ink : staticPalette.bone}
+                  />
+                ) : null}
+              </Tap>
+            );
+          })}
+        </View>
+      </Field>
+
+      <Field label="LOGO">
+        <View style={styles.logoRow}>
+          {LOGO_OPTIONS.map((uri) => {
+            const active = sc.logo === uri;
+            return (
+              <Tap
+                scale={1}
+                key={uri}
+                onPress={() => setStoreField('logo', uri)}
+                burstColor={accent}
+                style={[
+                  styles.logoTile,
+                  { borderColor: active ? accent : palette.line },
+                ]}
+              >
+                <Image source={{ uri }} style={styles.logoImg} contentFit="cover" />
+              </Tap>
+            );
+          })}
+          <Tap
+            scale={1}
+            onPress={() => toast('Upload from camera roll')}
+            burstColor={accent}
+            style={[styles.logoUpload, { borderColor: palette.line }]}
+          >
+            <Ionicons name="cloud-upload-outline" size={20} color={palette.ink} />
+            <RNText style={[styles.logoUploadLabel, { color: palette.ink }]}>UPLOAD</RNText>
+          </Tap>
+        </View>
+      </Field>
+
+      <Field label="BACKGROUND MODE">
+        <View style={styles.modeRow}>
+          {(['image', 'video', 'color'] as StoreBackgroundMode[]).map((m) => {
+            const active = sc.backgroundMode === m;
+            return (
+              <Tap
+                scale={1}
+                key={m}
+                onPress={() => setStoreField('backgroundMode', m)}
+                burstColor={accent}
+                style={[
+                  styles.modeChip,
+                  active
+                    ? { backgroundColor: staticPalette.ink, borderColor: staticPalette.ink }
+                    : { borderColor: palette.line },
+                ]}
+              >
+                <Ionicons
+                  name={
+                    m === 'image' ? 'image-outline' : m === 'video' ? 'videocam-outline' : 'color-fill-outline'
+                  }
+                  size={13}
+                  color={active ? staticPalette.bone : palette.ink}
+                />
+                <RNText
+                  style={[
+                    styles.modeLabel,
+                    { color: active ? staticPalette.bone : palette.ink },
+                  ]}
+                >
+                  {m.toUpperCase()}
+                </RNText>
+              </Tap>
+            );
+          })}
+        </View>
+      </Field>
+
+      <Field
+        label={
+          sc.backgroundMode === 'image'
+            ? 'COVER IMAGE'
+            : sc.backgroundMode === 'video'
+            ? 'COVER VIDEO'
+            : 'BACKGROUND COLOR'
+        }
+      >
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={{ marginHorizontal: -16 }}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+        >
+          {sc.backgroundMode === 'color'
+            ? COLOR_BG_OPTIONS.map((c) => {
+                const active = sc.backgroundValue === c;
+                return (
+                  <Tap
+                    scale={1}
+                    key={c}
+                    onPress={() => setStoreField('backgroundValue', c)}
+                    burstColor={accent}
+                    style={[
+                      styles.coverColor,
+                      {
+                        backgroundColor: c,
+                        borderColor: active ? accent : palette.line,
+                      },
+                    ]}
+                  >
+                    {active ? (
+                      <Ionicons
+                        name="checkmark"
+                        size={18}
+                        color={c === '#0A0A0A' ? staticPalette.bone : staticPalette.ink}
+                      />
+                    ) : null}
+                  </Tap>
+                );
+              })
+            : sc.backgroundMode === 'video'
+            ? (
+                <Tap
+                  scale={1}
+                  onPress={() => toast('Upload video — coming soon')}
+                  burstColor={accent}
+                  style={[styles.coverTile, { borderColor: palette.line }]}
+                >
+                  <Ionicons name="cloud-upload-outline" size={22} color={palette.ink} />
+                  <RNText style={[styles.coverUploadLabel, { color: palette.ink }]}>UPLOAD VIDEO</RNText>
+                </Tap>
+              )
+            : COVER_OPTIONS.map((uri) => {
+                const active = sc.backgroundValue === uri;
+                return (
+                  <Tap
+                    scale={1}
+                    key={uri}
+                    onPress={() => setStoreField('backgroundValue', uri)}
+                    burstColor={accent}
+                    style={[
+                      styles.coverTile,
+                      { borderColor: active ? accent : palette.line },
+                    ]}
+                  >
+                    <Image source={{ uri }} style={styles.coverImg} contentFit="cover" />
+                  </Tap>
+                );
+              })}
+        </ScrollView>
+      </Field>
+    </View>
+  );
+
+  const renderType = () => (
+    <View style={{ gap: 20 }}>
+      <Field label="HEADING FONT">
+        <View style={styles.fontGrid}>
+          {HEADING_FONTS.map((h) => {
+            const active = sc.headingFont === h.key;
+            return (
+              <Tap
+                scale={1}
+                key={h.key}
+                onPress={() => setStoreField('headingFont', h.key)}
+                burstColor={accent}
+                style={[
+                  styles.fontTile,
+                  {
+                    borderColor: active ? accent : palette.line,
+                    backgroundColor: active ? staticPalette.ink : palette.paper,
+                  },
+                ]}
+              >
+                <RNText
+                  style={[
+                    styles.fontSample,
+                    {
+                      fontFamily: h.family,
+                      color: active ? staticPalette.bone : palette.ink,
+                    },
+                  ]}
+                >
+                  Ag
+                </RNText>
+                <RNText
+                  style={[
+                    styles.fontLabel,
+                    { color: active ? accent : palette.ink, opacity: active ? 1 : 0.6 },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {h.label}
+                </RNText>
+              </Tap>
+            );
+          })}
+        </View>
+      </Field>
+
+      <Field label="BODY FONT">
+        <View style={styles.fontGrid}>
+          {BODY_FONTS.map((b) => {
+            const active = sc.bodyFont === b.key;
+            return (
+              <Tap
+                scale={1}
+                key={b.key}
+                onPress={() => setStoreField('bodyFont', b.key)}
+                burstColor={accent}
+                style={[
+                  styles.fontTile,
+                  {
+                    borderColor: active ? accent : palette.line,
+                    backgroundColor: active ? staticPalette.ink : palette.paper,
+                  },
+                ]}
+              >
+                <RNText
+                  style={[
+                    styles.fontSample,
+                    {
+                      fontFamily: b.family,
+                      fontSize: 30,
+                      color: active ? staticPalette.bone : palette.ink,
+                    },
+                  ]}
+                >
+                  Aa
+                </RNText>
+                <RNText
+                  style={[
+                    styles.fontLabel,
+                    { color: active ? accent : palette.ink, opacity: active ? 1 : 0.6 },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {b.label}
+                </RNText>
+              </Tap>
+            );
+          })}
+        </View>
+      </Field>
+
+      <View style={[styles.typePreview, { borderColor: palette.line }]}>
+        <RNText style={[styles.typePreviewKicker, { color: accent }]}>PREVIEW</RNText>
+        <RNText
+          style={{
+            fontFamily: headingFamily,
+            fontSize: 42,
+            lineHeight: 42,
+            letterSpacing: -1.6,
+            color: palette.ink,
+            textTransform: 'uppercase',
+            marginTop: 4,
+          }}
+        >
+          {sc.storeName}
+        </RNText>
+        <RNText
+          style={{
+            fontFamily: bodyFamily,
+            fontSize: 15,
+            lineHeight: 22,
+            color: palette.ink,
+            opacity: 0.7,
+            marginTop: 8,
+          }}
+        >
+          {sc.tagline}
+        </RNText>
       </View>
-      <RNText style={[styles.ctaSecondaryLabel, { color: palette.ink }]} numberOfLines={1}>
+    </View>
+  );
+
+  const renderLayout = () => (
+    <View style={{ gap: 16 }}>
+      {LAYOUTS.map((l) => {
+        const active = sc.layout === l.key;
+        return (
+          <Tap
+            scale={1}
+            key={l.key}
+            onPress={() => setStoreField('layout', l.key)}
+            burstColor={accent}
+            style={[
+              styles.layoutCard,
+              {
+                borderColor: active ? accent : palette.line,
+                backgroundColor: active ? staticPalette.ink : palette.paper,
+              },
+            ]}
+          >
+            <View style={[styles.layoutDiagram, { backgroundColor: active ? '#1a1a1a' : palette.bg }]}>
+              {l.key === 'grid' ? (
+                <View style={styles.diagramGrid}>
+                  <View style={[styles.diagramTile, { backgroundColor: accent }]} />
+                  <View style={[styles.diagramTile, { backgroundColor: accent, opacity: 0.6 }]} />
+                  <View style={[styles.diagramTile, { backgroundColor: accent, opacity: 0.6 }]} />
+                  <View style={[styles.diagramTile, { backgroundColor: accent, opacity: 0.4 }]} />
+                </View>
+              ) : l.key === 'stack' ? (
+                <View style={{ gap: 4, padding: 8 }}>
+                  {[1, 0.7, 0.5, 0.3].map((o, i) => (
+                    <View
+                      key={i}
+                      style={{ height: 12, backgroundColor: accent, opacity: o, borderRadius: 2 }}
+                    />
+                  ))}
+                </View>
+              ) : (
+                <View style={{ padding: 8, gap: 4 }}>
+                  <View style={{ height: 28, backgroundColor: accent, borderRadius: 3 }} />
+                  <View style={{ flexDirection: 'row', gap: 4 }}>
+                    <View style={{ flex: 1, height: 18, backgroundColor: accent, opacity: 0.6, borderRadius: 3 }} />
+                    <View style={{ flex: 1, height: 18, backgroundColor: accent, opacity: 0.4, borderRadius: 3 }} />
+                  </View>
+                </View>
+              )}
+            </View>
+            <View style={{ flex: 1, marginLeft: 14 }}>
+              <RNText
+                style={[
+                  styles.layoutLabel,
+                  { color: active ? staticPalette.bone : palette.ink },
+                ]}
+              >
+                {l.label}
+              </RNText>
+              <RNText
+                style={[
+                  styles.layoutDesc,
+                  { color: active ? staticPalette.bone : palette.ink, opacity: 0.7 },
+                ]}
+                numberOfLines={2}
+              >
+                {l.desc}
+              </RNText>
+            </View>
+            {active ? <Ionicons name="checkmark-circle" size={20} color={accent} /> : null}
+          </Tap>
+        );
+      })}
+    </View>
+  );
+
+  const renderSections = () => (
+    <View>
+      <RNText style={[styles.helperText, { color: palette.ink }]}>
+        Reorder sections with the arrows. Toggle visibility with the eye. {visibleSections} of {sc.sections.length}{' '}
+        live.
+      </RNText>
+
+      <View style={styles.sectionList}>
+        {sc.sections.map((sx, i) => {
+          const meta = SECTION_META[sx.type];
+          const first = i === 0;
+          const last = i === sc.sections.length - 1;
+          return (
+            <View
+              key={sx.id}
+              style={[
+                styles.sectionRow,
+                { borderColor: palette.line, opacity: sx.enabled ? 1 : 0.45 },
+              ]}
+            >
+              <RNText style={[styles.sectionNum, { color: palette.ink }]}>
+                {String(i + 1).padStart(2, '0')}
+              </RNText>
+              <View style={styles.sectionIcon}>
+                <Ionicons name={meta.icon as any} size={16} color={palette.ink} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <RNText style={[styles.sectionLabel, { color: palette.ink }]} numberOfLines={1}>
+                  {meta.label}
+                </RNText>
+                <RNText
+                  style={[styles.sectionSub, { color: palette.ink, opacity: 0.55 }]}
+                  numberOfLines={1}
+                >
+                  {sx.enabled ? '· VISIBLE' : '· HIDDEN'} {meta.sub}
+                </RNText>
+              </View>
+              <Tap
+                scale={1}
+                onPress={() => !first && reorderStoreSection(sx.id, 'up')}
+                burstColor={accent}
+                style={[
+                  styles.sectionBtn,
+                  { borderColor: palette.line, opacity: first ? 0.2 : 1 },
+                ]}
+              >
+                <Ionicons name="chevron-up" size={14} color={palette.ink} />
+              </Tap>
+              <Tap
+                scale={1}
+                onPress={() => !last && reorderStoreSection(sx.id, 'down')}
+                burstColor={accent}
+                style={[
+                  styles.sectionBtn,
+                  { borderColor: palette.line, opacity: last ? 0.2 : 1 },
+                ]}
+              >
+                <Ionicons name="chevron-down" size={14} color={palette.ink} />
+              </Tap>
+              <Tap
+                scale={1}
+                onPress={() => toggleStoreSection(sx.id)}
+                burstColor={accent}
+                style={[
+                  styles.sectionBtn,
+                  {
+                    borderColor: palette.line,
+                    backgroundColor: sx.enabled ? accent : 'transparent',
+                  },
+                ]}
+              >
+                <Ionicons
+                  name={sx.enabled ? 'eye-outline' : 'eye-off-outline'}
+                  size={14}
+                  color={sx.enabled ? accentFg : palette.ink}
+                />
+              </Tap>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+
+  const renderProducts = () => {
+    const featuredSection = sc.sections.find((sx) => sx.type === 'featured');
+    const featuredId = featuredSection?.featuredProductId || products[0]?.id;
+    return (
+      <View style={{ gap: 18 }}>
+        <Field label={`YOUR PRODUCTS (${products.length})`}>
+          {products.length === 0 ? (
+            <RNText style={[styles.helperText, { color: palette.ink, opacity: 0.5 }]}>
+              No products yet. Tap CREATE NEW PRODUCT below to add your first.
+            </RNText>
+          ) : (
+            <View style={{ gap: 10 }}>
+              {products.map((p) => (
+                <ProductEditor
+                  key={p.id}
+                  product={p}
+                  isFeatured={p.id === featuredId}
+                  accent={accent}
+                  accentFg={accentFg}
+                  palette={palette}
+                  styles={styles}
+                  onTogglePublished={() => toggleProductPublished(p.id)}
+                  onMarginChange={(v) => updateProduct(p.id, { margin: v })}
+                  onCostChange={(v) => updateProduct(p.id, { baseCost: v })}
+                  onSetFeatured={() => {
+                    if (featuredSection) {
+                      updateStoreSection(featuredSection.id, { featuredProductId: p.id });
+                      toast(`Featured: ${p.name}`, 'default');
+                    }
+                  }}
+                  onRemove={() => {
+                    removeProduct(p.id);
+                    toast(`Removed "${p.name}"`, 'default');
+                  }}
+                />
+              ))}
+            </View>
+          )}
+        </Field>
+
+        <Tap
+          scale={1}
+          onPress={() => router.push('/(modules)/merch/create')}
+          burstColor={accent}
+          style={[styles.bigLink, { borderColor: accent, backgroundColor: accent + '10' }]}
+        >
+          <Ionicons name="add-circle-outline" size={18} color={accent} />
+          <RNText style={[styles.bigLinkLabel, { color: palette.ink }]}>CREATE NEW PRODUCT</RNText>
+          <Ionicons name="arrow-forward" size={16} color={palette.ink} />
+        </Tap>
+
+        <Field label="DEFAULT CATEGORIES">
+          <View style={styles.catGrid}>
+            {productTypes.map((t) => (
+              <View key={t.key} style={[styles.catChip, { borderColor: palette.line }]}>
+                <RNText style={[styles.catLabel, { color: palette.ink }]}>{t.name}</RNText>
+                <RNText style={[styles.catCost, { color: palette.ink, opacity: 0.55 }]}>
+                  ₹{t.baseCost}
+                </RNText>
+              </View>
+            ))}
+          </View>
+        </Field>
+
+        <Field
+          label={`YOUR CATEGORIES (${sc.customCategories.length})`}
+        >
+          {sc.customCategories.length === 0 ? (
+            <RNText style={[styles.helperText, { color: palette.ink, opacity: 0.5 }]}>
+              None yet. Add anything you sell — vinyl, candles, prints, zines, plushies, jewelry, anything.
+            </RNText>
+          ) : (
+            <View style={styles.catGrid}>
+              {sc.customCategories.map((c) => (
+                <View
+                  key={c.key}
+                  style={[
+                    styles.catChip,
+                    { borderColor: accent, backgroundColor: accent + '18' },
+                  ]}
+                >
+                  <RNText style={[styles.catLabel, { color: palette.ink }]}>{c.name}</RNText>
+                  <RNText style={[styles.catCost, { color: palette.ink, opacity: 0.7 }]}>
+                    ₹{c.baseCost}
+                  </RNText>
+                  <Tap
+                    scale={1}
+                    onPress={() => removeCustomCategory(c.key)}
+                    burstColor={palette.ember}
+                    style={styles.catRemove}
+                  >
+                    <Ionicons name="close" size={11} color={palette.ink} />
+                  </Tap>
+                </View>
+              ))}
+            </View>
+          )}
+        </Field>
+
+        <Field label="ADD CATEGORY">
+          <View style={styles.catAddRow}>
+            <TextInput
+              style={[
+                styles.input,
+                styles.catAddName,
+                { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+              ]}
+              value={newCatName}
+              onChangeText={setNewCatName}
+              placeholder="CATEGORY"
+              placeholderTextColor={palette.mute}
+              maxFontSizeMultiplier={1.2}
+              autoCapitalize="characters"
+            />
+            <TextInput
+              style={[
+                styles.input,
+                styles.catAddCost,
+                { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+              ]}
+              value={newCatCost}
+              onChangeText={setNewCatCost}
+              placeholder="₹ COST"
+              placeholderTextColor={palette.mute}
+              keyboardType="numeric"
+              maxFontSizeMultiplier={1.2}
+            />
+            <Tap
+              scale={1}
+              onPress={addNewCategory}
+              burstColor={accent}
+              style={[styles.catAddBtn, { backgroundColor: staticPalette.ink }]}
+            >
+              <Ionicons name="add" size={20} color={accent} />
+            </Tap>
+          </View>
+        </Field>
+      </View>
+    );
+  };
+
+  const renderPages = () => {
+    const marquee = sc.sections.find((sx) => sx.type === 'marquee');
+    const hero = sc.sections.find((sx) => sx.type === 'hero');
+    const featured = sc.sections.find((sx) => sx.type === 'featured');
+    const grid = sc.sections.find((sx) => sx.type === 'grid');
+    const about = sc.sections.find((sx) => sx.type === 'about');
+    const shipping = sc.sections.find((sx) => sx.type === 'shipping');
+    const contact = sc.sections.find((sx) => sx.type === 'contact');
+    const faq = sc.sections.find((sx) => sx.type === 'faq');
+    const footer = sc.sections.find((sx) => sx.type === 'footer');
+
+    return (
+      <View style={{ gap: 18 }}>
+        {/* ===================== MARQUEE ===================== */}
+        {marquee ? (
+          <SectionEditor
+            title="MARQUEE"
+            sub="Scrolling text strip at the top of the store"
+            section={marquee}
+            accent={accent}
+            accentFg={accentFg}
+            palette={palette}
+            styles={styles}
+            onToggle={() => toggleStoreSection(marquee.id)}
+          >
+            <View style={{ gap: 8 }}>
+              {(marquee.marqueeItems || []).map((item, i) => (
+                <View key={`mq-${i}`} style={styles.listEditRow}>
+                  <TextInput
+                    style={[
+                      styles.input,
+                      { flex: 1, borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                    ]}
+                    value={item}
+                    onChangeText={(v) => {
+                      const next = [...(marquee.marqueeItems || [])];
+                      next[i] = v;
+                      updateStoreSection(marquee.id, { marqueeItems: next });
+                    }}
+                    placeholder="Marquee text"
+                    placeholderTextColor={palette.mute}
+                    autoCapitalize="characters"
+                  />
+                  <Tap
+                    scale={1}
+                    onPress={() =>
+                      updateStoreSection(marquee.id, {
+                        marqueeItems: (marquee.marqueeItems || []).filter((_, idx) => idx !== i),
+                      })
+                    }
+                    burstColor={palette.ember}
+                    style={[styles.faqRemove, { borderColor: palette.line }]}
+                  >
+                    <Ionicons name="trash-outline" size={13} color={palette.ink} />
+                  </Tap>
+                </View>
+              ))}
+              <Tap
+                scale={1}
+                onPress={() =>
+                  updateStoreSection(marquee.id, {
+                    marqueeItems: [...(marquee.marqueeItems || []), 'NEW ITEM'],
+                  })
+                }
+                burstColor={accent}
+                style={[
+                  styles.addRowBtn,
+                  { borderColor: accent, backgroundColor: accent + '12' },
+                ]}
+              >
+                <Ionicons name="add" size={14} color={palette.ink} />
+                <RNText style={[styles.addRowLabel, { color: palette.ink }]}>ADD MARQUEE ITEM</RNText>
+              </Tap>
+            </View>
+          </SectionEditor>
+        ) : null}
+
+        {/* ===================== HERO ===================== */}
+        {hero ? (
+          <SectionEditor
+            title="HERO"
+            sub="Background, title, tagline, CTA button"
+            section={hero}
+            accent={accent}
+            accentFg={accentFg}
+            palette={palette}
+            styles={styles}
+            onToggle={() => toggleStoreSection(hero.id)}
+          >
+            <View style={{ gap: 12 }}>
+              <Field label="EYEBROW">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={hero.eyebrow || ''}
+                  onChangeText={(v) => updateStoreSection(hero.id, { eyebrow: v })}
+                  placeholder="STOREFRONT"
+                  placeholderTextColor={palette.mute}
+                  autoCapitalize="characters"
+                />
+              </Field>
+              <Field label="TITLE (BLANK = STORE NAME)">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={hero.title || ''}
+                  onChangeText={(v) => updateStoreSection(hero.id, { title: v })}
+                  placeholder={sc.storeName}
+                  placeholderTextColor={palette.mute}
+                />
+              </Field>
+              <Field label="TAGLINE (BLANK = STORE TAGLINE)">
+                <TextInput
+                  style={[
+                    styles.textarea,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={hero.body || ''}
+                  onChangeText={(v) => updateStoreSection(hero.id, { body: v })}
+                  multiline
+                  placeholder={sc.tagline}
+                  placeholderTextColor={palette.mute}
+                />
+              </Field>
+              <Field label="CTA BUTTON LABEL">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={hero.ctaLabel || ''}
+                  onChangeText={(v) => updateStoreSection(hero.id, { ctaLabel: v })}
+                  placeholder="SHOP THE DROP"
+                  placeholderTextColor={palette.mute}
+                  autoCapitalize="characters"
+                />
+              </Field>
+            </View>
+          </SectionEditor>
+        ) : null}
+
+        {/* ===================== FEATURED ===================== */}
+        {featured ? (
+          <SectionEditor
+            title="FEATURED"
+            sub="One product spotlit at the top of the grid"
+            section={featured}
+            accent={accent}
+            accentFg={accentFg}
+            palette={palette}
+            styles={styles}
+            onToggle={() => toggleStoreSection(featured.id)}
+          >
+            <View style={{ gap: 12 }}>
+              <Field label="EYEBROW">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={featured.eyebrow || ''}
+                  onChangeText={(v) => updateStoreSection(featured.id, { eyebrow: v })}
+                  placeholder="FEATURED"
+                  placeholderTextColor={palette.mute}
+                  autoCapitalize="characters"
+                />
+              </Field>
+              <Field label="LABEL">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={featured.featuredLabel || ''}
+                  onChangeText={(v) => updateStoreSection(featured.id, { featuredLabel: v })}
+                  placeholder="NEW · LIMITED"
+                  placeholderTextColor={palette.mute}
+                  autoCapitalize="characters"
+                />
+              </Field>
+              <Field label="PICK PRODUCT">
+                {products.length === 0 ? (
+                  <RNText style={[styles.helperText, { color: palette.ink, opacity: 0.5 }]}>
+                    No products yet. Add one in the PRODUCTS tab.
+                  </RNText>
+                ) : (
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={{ marginHorizontal: -16 }}
+                    contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+                  >
+                    {products.map((p) => {
+                      const active = (featured.featuredProductId || products[0]?.id) === p.id;
+                      return (
+                        <Tap
+                          scale={1}
+                          key={p.id}
+                          onPress={() =>
+                            updateStoreSection(featured.id, { featuredProductId: p.id })
+                          }
+                          burstColor={accent}
+                          style={[
+                            styles.featuredPickTile,
+                            {
+                              backgroundColor: p.bg,
+                              borderColor: active ? accent : palette.line,
+                              borderWidth: active ? 2 : 1,
+                            },
+                          ]}
+                        >
+                          <ProductIcon type={p.type} size={36} color={p.fg} />
+                          <RNText
+                            style={[styles.featuredPickName, { color: p.fg }]}
+                            numberOfLines={1}
+                          >
+                            {p.name}
+                          </RNText>
+                          <RNText
+                            style={[styles.featuredPickPrice, { color: p.fg, opacity: 0.75 }]}
+                          >
+                            ₹{p.baseCost + p.margin}
+                          </RNText>
+                        </Tap>
+                      );
+                    })}
+                  </ScrollView>
+                )}
+              </Field>
+            </View>
+          </SectionEditor>
+        ) : null}
+
+        {/* ===================== GRID ===================== */}
+        {grid ? (
+          <SectionEditor
+            title="GRID"
+            sub="The full product collection layout"
+            section={grid}
+            accent={accent}
+            accentFg={accentFg}
+            palette={palette}
+            styles={styles}
+            onToggle={() => toggleStoreSection(grid.id)}
+          >
+            <Field label="HEADING">
+              <TextInput
+                style={[
+                  styles.input,
+                  { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                ]}
+                value={grid.title || ''}
+                onChangeText={(v) => updateStoreSection(grid.id, { title: v })}
+                placeholder="ALL PRODUCTS"
+                placeholderTextColor={palette.mute}
+                autoCapitalize="characters"
+              />
+            </Field>
+            <RNText style={[styles.helperText, { color: palette.ink, opacity: 0.55, marginTop: 6 }]}>
+              Tip: change the layout (grid / stack / mag) in the LAYOUT tab.
+            </RNText>
+          </SectionEditor>
+        ) : null}
+
+        {/* ===================== ABOUT ===================== */}
+        {about ? (
+          <SectionEditor
+            title="ABOUT"
+            sub="The story behind the store"
+            section={about}
+            accent={accent}
+            accentFg={accentFg}
+            palette={palette}
+            styles={styles}
+            onToggle={() => toggleStoreSection(about.id)}
+          >
+            <View style={{ gap: 12 }}>
+              <Field label="HEADING">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={about.title || ''}
+                  onChangeText={(v) => updateStoreSection(about.id, { title: v })}
+                  placeholder="ABOUT THE STORE"
+                  placeholderTextColor={palette.mute}
+                  autoCapitalize="characters"
+                />
+              </Field>
+              <Field label="BODY">
+                <TextInput
+                  style={[
+                    styles.textarea,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={about.body || ''}
+                  onChangeText={(v) => updateStoreSection(about.id, { body: v })}
+                  multiline
+                  placeholder="Tell your customers about the store…"
+                  placeholderTextColor={palette.mute}
+                />
+              </Field>
+            </View>
+          </SectionEditor>
+        ) : null}
+
+        {/* ===================== SHIPPING ===================== */}
+        {shipping ? (
+          <SectionEditor
+            title="SHIPPING"
+            sub="Times, returns, regions"
+            section={shipping}
+            accent={accent}
+            accentFg={accentFg}
+            palette={palette}
+            styles={styles}
+            onToggle={() => toggleStoreSection(shipping.id)}
+          >
+            <View style={{ gap: 12 }}>
+              <Field label="HEADING">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={shipping.title || ''}
+                  onChangeText={(v) => updateStoreSection(shipping.id, { title: v })}
+                  placeholder="SHIPPING"
+                  placeholderTextColor={palette.mute}
+                  autoCapitalize="characters"
+                />
+              </Field>
+              <Field label="BODY">
+                <TextInput
+                  style={[
+                    styles.textarea,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={shipping.body || ''}
+                  onChangeText={(v) => updateStoreSection(shipping.id, { body: v })}
+                  multiline
+                  placeholder="Shipping times, returns, regions…"
+                  placeholderTextColor={palette.mute}
+                />
+              </Field>
+            </View>
+          </SectionEditor>
+        ) : null}
+
+        {/* ===================== FAQ ===================== */}
+        {faq ? (
+          <SectionEditor
+            title="FAQ"
+            sub="Common questions"
+            section={faq}
+            accent={accent}
+            accentFg={accentFg}
+            palette={palette}
+            styles={styles}
+            onToggle={() => toggleStoreSection(faq.id)}
+          >
+            <View style={{ gap: 12 }}>
+              <Field label="HEADING">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={faq.title || ''}
+                  onChangeText={(v) => updateStoreSection(faq.id, { title: v })}
+                  placeholder="FAQ"
+                  placeholderTextColor={palette.mute}
+                  autoCapitalize="characters"
+                />
+              </Field>
+              <Field label={`ENTRIES (${(faq.items || []).length})`}>
+                <View style={{ gap: 8 }}>
+                  {(faq.items || []).map((it, i) => (
+                    <View key={`faq-${i}`} style={[styles.faqItem, { borderColor: palette.line }]}>
+                      <View style={{ flex: 1, gap: 6 }}>
+                        <TextInput
+                          style={[
+                            styles.faqInput,
+                            { color: palette.ink, fontFamily: fonts.displayBold },
+                          ]}
+                          value={it.q}
+                          onChangeText={(v) => {
+                            const next = [...(faq.items || [])];
+                            next[i] = { ...next[i], q: v };
+                            updateStoreSection(faq.id, { items: next });
+                          }}
+                          placeholder="QUESTION"
+                          placeholderTextColor={palette.mute}
+                          autoCapitalize="characters"
+                        />
+                        <TextInput
+                          style={[
+                            styles.faqInput,
+                            { color: palette.ink, fontFamily: fonts.body },
+                          ]}
+                          value={it.a}
+                          onChangeText={(v) => {
+                            const next = [...(faq.items || [])];
+                            next[i] = { ...next[i], a: v };
+                            updateStoreSection(faq.id, { items: next });
+                          }}
+                          placeholder="Answer"
+                          placeholderTextColor={palette.mute}
+                          multiline
+                        />
+                      </View>
+                      <Tap
+                        scale={1}
+                        onPress={() =>
+                          updateStoreSection(faq.id, {
+                            items: (faq.items || []).filter((_, idx) => idx !== i),
+                          })
+                        }
+                        burstColor={palette.ember}
+                        style={[styles.faqRemove, { borderColor: palette.line }]}
+                      >
+                        <Ionicons name="trash-outline" size={13} color={palette.ink} />
+                      </Tap>
+                    </View>
+                  ))}
+
+                  <View style={[styles.faqAddCard, { borderColor: palette.line }]}>
+                    <TextInput
+                      style={[styles.faqInput, { color: palette.ink, fontFamily: fonts.displayBold }]}
+                      value={newFaqQ}
+                      onChangeText={setNewFaqQ}
+                      placeholder="QUESTION"
+                      placeholderTextColor={palette.mute}
+                      autoCapitalize="characters"
+                    />
+                    <TextInput
+                      style={[
+                        styles.faqInput,
+                        { color: palette.ink, fontFamily: fonts.body, marginTop: 6 },
+                      ]}
+                      value={newFaqA}
+                      onChangeText={setNewFaqA}
+                      placeholder="Answer"
+                      placeholderTextColor={palette.mute}
+                      multiline
+                    />
+                    <Tap
+                      scale={1}
+                      onPress={addFaqItem}
+                      burstColor={accent}
+                      style={[
+                        styles.faqAdd,
+                        { backgroundColor: staticPalette.ink, borderColor: staticPalette.ink },
+                      ]}
+                    >
+                      <Ionicons name="add" size={14} color={accent} />
+                      <RNText style={[styles.faqAddLabel, { color: accent }]}>ADD Q & A</RNText>
+                    </Tap>
+                  </View>
+                </View>
+              </Field>
+            </View>
+          </SectionEditor>
+        ) : null}
+
+        {/* ===================== CONTACT ===================== */}
+        {contact ? (
+          <SectionEditor
+            title="CONTACT"
+            sub="Email and social handles"
+            section={contact}
+            accent={accent}
+            accentFg={accentFg}
+            palette={palette}
+            styles={styles}
+            onToggle={() => toggleStoreSection(contact.id)}
+          >
+            <View style={{ gap: 12 }}>
+              <Field label="HEADING">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={contact.title || ''}
+                  onChangeText={(v) => updateStoreSection(contact.id, { title: v })}
+                  placeholder="GET IN TOUCH"
+                  placeholderTextColor={palette.mute}
+                  autoCapitalize="characters"
+                />
+              </Field>
+              <Field label="EMAIL">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={contact.email || ''}
+                  onChangeText={(v) => updateStoreSection(contact.id, { email: v })}
+                  placeholder="hi@yourstore.com"
+                  placeholderTextColor={palette.mute}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </Field>
+              <Field label="INSTAGRAM HANDLE">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={contact.instagram || ''}
+                  onChangeText={(v) => updateStoreSection(contact.id, { instagram: v })}
+                  placeholder="yourname"
+                  placeholderTextColor={palette.mute}
+                  autoCapitalize="none"
+                />
+              </Field>
+              <Field label="TWITTER / X HANDLE">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={contact.twitter || ''}
+                  onChangeText={(v) => updateStoreSection(contact.id, { twitter: v })}
+                  placeholder="yourname"
+                  placeholderTextColor={palette.mute}
+                  autoCapitalize="none"
+                />
+              </Field>
+              <Field label="WHATSAPP (+COUNTRY CODE)">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={contact.whatsapp || ''}
+                  onChangeText={(v) => updateStoreSection(contact.id, { whatsapp: v })}
+                  placeholder="+91 98765 43210"
+                  placeholderTextColor={palette.mute}
+                  keyboardType="phone-pad"
+                />
+              </Field>
+            </View>
+          </SectionEditor>
+        ) : null}
+
+        {/* ===================== FOOTER ===================== */}
+        {footer ? (
+          <SectionEditor
+            title="FOOTER"
+            sub="Bottom signature line"
+            section={footer}
+            accent={accent}
+            accentFg={accentFg}
+            palette={palette}
+            styles={styles}
+            onToggle={() => toggleStoreSection(footer.id)}
+          >
+            <View style={{ gap: 12 }}>
+              <Field label="TAGLINE">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={footer.footerTagline || ''}
+                  onChangeText={(v) => updateStoreSection(footer.id, { footerTagline: v })}
+                  placeholder="POWERED BY UNDERDAWG · MMXXVI"
+                  placeholderTextColor={palette.mute}
+                  autoCapitalize="characters"
+                />
+              </Field>
+              <Field label="COPYRIGHT">
+                <TextInput
+                  style={[
+                    styles.input,
+                    { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+                  ]}
+                  value={footer.copyright || ''}
+                  onChangeText={(v) => updateStoreSection(footer.id, { copyright: v })}
+                  placeholder={`© ${sc.storeName.toLowerCase()}`}
+                  placeholderTextColor={palette.mute}
+                />
+              </Field>
+            </View>
+          </SectionEditor>
+        ) : null}
+      </View>
+    );
+  };
+
+  const renderDomain = () => (
+    <View style={{ gap: 14 }}>
+      <View style={[styles.domainCard, { borderColor: palette.line, backgroundColor: palette.paper }]}>
+        <View style={{ flex: 1 }}>
+          <RNText style={[styles.domainLabel, { color: palette.ink }]}>SITE URL</RNText>
+          <RNText style={[styles.domainValue, { color: palette.ink }]}>
+            {siteUrl}
+          </RNText>
+          <RNText style={[styles.domainSub, { color: palette.ink, opacity: 0.55 }]}>
+            FREE · UNDERDAWG-HOSTED
+          </RNText>
+        </View>
+        <Tap
+          scale={1}
+          onPress={() => {
+            setStoreField('siteEnabled', !sc.siteEnabled);
+            toast(sc.siteEnabled ? 'Standalone site off' : 'Standalone site on', 'default');
+          }}
+          burstColor={accent}
+          style={[
+            styles.domainToggle,
+            {
+              backgroundColor: sc.siteEnabled ? accent : 'transparent',
+              borderColor: sc.siteEnabled ? accent : palette.line,
+            },
+          ]}
+        >
+          <RNText
+            style={[
+              styles.domainToggleLabel,
+              { color: sc.siteEnabled ? accentFg : palette.ink },
+            ]}
+          >
+            {sc.siteEnabled ? 'ON' : 'OFF'}
+          </RNText>
+        </Tap>
+      </View>
+
+      <DomainRow
+        icon="link-outline"
+        title="Custom domain"
+        sub="Connect your own URL · free SSL"
+        onPress={() => toast('Custom domain — coming soon')}
+        palette={palette}
+      />
+      <DomainRow
+        icon="cart-outline"
+        title="Orders"
+        sub={`${orders.length} lifetime · ${orders.filter((o) => o.status === 'PRINTING').length} in production`}
+        onPress={() => router.push('/(modules)/merch/orders')}
+        palette={palette}
+      />
+      <DomainRow
+        icon="airplane-outline"
+        title="Shipping + tax"
+        sub="Zones, rates, duties handled for you"
+        onPress={() => toast('Shipping zones — coming soon')}
+        palette={palette}
+      />
+      <DomainRow
+        icon="wallet-outline"
+        title="Payouts"
+        sub="Weekly · auto to your bank"
+        onPress={() => toast('Payouts — coming soon')}
+        palette={palette}
+      />
+      <DomainRow
+        icon="refresh-outline"
+        title="Reset to defaults"
+        sub="Restore the starter design"
+        onPress={() => {
+          resetStoreCustomization();
+          toast('Store reset to defaults', 'default');
+        }}
+        palette={palette}
+        danger
+      />
+    </View>
+  );
+
+  /* =====================================================================
+   *  Composite
+   * =================================================================== */
+
+  return (
+    <ScreenFrame
+      header={
+        <ModuleHeader
+          eyebrow="MERCH STUDIO"
+          title="DESIGN YOUR STORE"
+          right={
+            <Tap
+              scale={1}
+              style={[styles.viewLiveBtn, { borderColor: accent, backgroundColor: accent }]}
+              onPress={openLive}
+              burstColor={accent}
+            >
+              <Ionicons name="eye-outline" size={14} color={accentFg} />
+              <RNText style={[styles.viewLiveLabel, { color: accentFg }]}>LIVE</RNText>
+            </Tap>
+          }
+        />
+      }
+      padding={false}
+    >
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 200 }}
+      >
+        {/* =================================================================
+         *  LIVE PREVIEW (anchored top, reflects every customization)
+         * =============================================================== */}
+        <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+          <Tap scale={1} onPress={openLive} burstColor={accent}>
+            <TiltCard style={styles.previewWrap} maxTilt={2}>
+              {sc.backgroundMode === 'image' ? (
+                <Image
+                  source={{ uri: sc.backgroundValue }}
+                  style={StyleSheet.absoluteFill as any}
+                  contentFit="cover"
+                />
+              ) : sc.backgroundMode === 'color' ? (
+                <View style={[StyleSheet.absoluteFill, { backgroundColor: sc.backgroundValue }]} />
+              ) : (
+                <View
+                  style={[
+                    StyleSheet.absoluteFill,
+                    {
+                      backgroundColor: staticPalette.ink,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    },
+                  ]}
+                >
+                  <Ionicons name="play-circle" size={42} color={staticPalette.bone} />
+                </View>
+              )}
+              <View style={styles.previewScrim} />
+
+              <View style={styles.previewTop}>
+                <View style={[styles.previewDot, { backgroundColor: accent }]} />
+                <RNText style={styles.previewLiveTxt} numberOfLines={1}>
+                  LIVE · {products.filter((p) => p.published).length} PRODUCTS · {visibleSections} SECTIONS
+                </RNText>
+                <View style={{ flex: 1 }} />
+                <RNText style={styles.previewUrl} numberOfLines={1}>
+                  {siteUrl}
+                </RNText>
+              </View>
+
+              <View style={styles.previewBottom}>
+                <View style={styles.previewBrand}>
+                  {sc.logo ? (
+                    <View style={[styles.previewLogo, { borderColor: accent }]}>
+                      <Image source={{ uri: sc.logo }} style={styles.previewLogoImg} contentFit="cover" />
+                    </View>
+                  ) : null}
+                  <View style={{ flex: 1 }}>
+                    <RNText
+                      style={[
+                        styles.previewTitle,
+                        { fontFamily: headingFamily, color: staticPalette.bone },
+                      ]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.55}
+                    >
+                      {sc.storeName}
+                    </RNText>
+                    <RNText
+                      style={[
+                        styles.previewTag,
+                        { fontFamily: bodyFamily, color: accent },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {sc.tagline}
+                    </RNText>
+                  </View>
+                </View>
+
+                <View style={styles.previewMini}>
+                  {products.slice(0, 3).map((p, i) => (
+                    <View
+                      key={p.id}
+                      style={[
+                        styles.previewTile,
+                        {
+                          backgroundColor: p.bg,
+                          flex: sc.layout === 'mag' && i === 0 ? 2 : 1,
+                          height: sc.layout === 'stack' ? 38 : 54,
+                        },
+                      ]}
+                    >
+                      <ProductIcon type={p.type} size={sc.layout === 'mag' && i === 0 ? 28 : 22} color={p.fg} />
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </TiltCard>
+          </Tap>
+
+          <View style={styles.previewFootRow}>
+            <View style={[styles.previewFootDot, { backgroundColor: accent }]} />
+            <RNText style={[styles.previewFootText, { color: palette.ink }]}>
+              TAP PREVIEW · OPEN LIVE STORE
+            </RNText>
+            <View style={[styles.previewFootDot, { backgroundColor: accent }]} />
+          </View>
+
+          {/* Inline metrics strip */}
+          <View style={[styles.metrics, { borderColor: palette.line }]}>
+            <Metric label="REVENUE" value={`₹${compact(revenue)}`} accent={accent} palette={palette} />
+            <View style={[styles.metricDivider, { backgroundColor: palette.line }]} />
+            <Metric label="UNITS" value={compact(unitsSold)} accent={palette.blush} palette={palette} />
+            <View style={[styles.metricDivider, { backgroundColor: palette.line }]} />
+            <Metric
+              label="ORDERS"
+              value={String(orders.length)}
+              accent={palette.electric}
+              palette={palette}
+            />
+            <View style={[styles.metricDivider, { backgroundColor: palette.line }]} />
+            <Metric
+              label="PRODUCTS"
+              value={String(products.length)}
+              accent={palette.ember}
+              palette={palette}
+            />
+          </View>
+        </View>
+
+        {/* =================================================================
+         *  TAB STRIP
+         * =============================================================== */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tabBarWrap}
+          contentContainerStyle={styles.tabBar}
+        >
+          {TABS.map((tb) => {
+            const active = tab === tb.key;
+            return (
+              <Tap
+                scale={1}
+                key={tb.key}
+                onPress={() => setTab(tb.key)}
+                burstColor={accent}
+                style={[
+                  styles.tabPill,
+                  active
+                    ? { backgroundColor: staticPalette.ink, borderColor: staticPalette.ink }
+                    : { borderColor: palette.line },
+                ]}
+              >
+                <RNText
+                  style={[
+                    styles.tabLabel,
+                    { color: active ? staticPalette.bone : palette.ink },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {tb.label}
+                </RNText>
+                {active ? (
+                  <View
+                    style={[styles.tabActiveDot, { backgroundColor: accent }]}
+                  />
+                ) : null}
+              </Tap>
+            );
+          })}
+        </ScrollView>
+
+        {/* =================================================================
+         *  ACTIVE PANEL
+         * =============================================================== */}
+        <View style={styles.panelWrap}>
+          <View style={styles.panelHeader}>
+            <RNText style={[styles.panelKicker, { color: accent }]}>
+              {tab.toUpperCase()} · PANEL
+            </RNText>
+            <RNText style={[styles.panelTitle, { color: palette.ink }]}>
+              {tab === 'brand'
+                ? 'Make it yours.'
+                : tab === 'type'
+                ? 'Pick the voice.'
+                : tab === 'layout'
+                ? 'Set the rhythm.'
+                : tab === 'sections'
+                ? 'Compose the page.'
+                : tab === 'products'
+                ? 'What you sell.'
+                : tab === 'pages'
+                ? 'Edit every block.'
+                : 'Where it lives.'}
+            </RNText>
+          </View>
+
+          {tab === 'brand' ? renderBrand() : null}
+          {tab === 'type' ? renderType() : null}
+          {tab === 'layout' ? renderLayout() : null}
+          {tab === 'sections' ? renderSections() : null}
+          {tab === 'products' ? renderProducts() : null}
+          {tab === 'pages' ? renderPages() : null}
+          {tab === 'domain' ? renderDomain() : null}
+        </View>
+      </ScrollView>
+
+      {/* =================================================================
+       *  PINNED PUBLISH BAR
+       * =============================================================== */}
+      <View
+        style={[
+          styles.publishBar,
+          { backgroundColor: palette.bg, borderTopColor: palette.line },
+        ]}
+      >
+        <View style={{ flex: 1 }}>
+          <RNText style={[styles.publishStat, { color: palette.ink, opacity: 0.55 }]}>
+            {visibleSections} SECTIONS · {products.filter((p) => p.published).length} PRODUCTS
+          </RNText>
+          <RNText style={[styles.publishHint, { color: palette.ink }]} numberOfLines={1}>
+            {sc.lastPublishedAt
+              ? `Last published ${timeAgo(sc.lastPublishedAt)}`
+              : 'Changes save automatically.'}
+          </RNText>
+        </View>
+        <MagneticButton
+          staticPress
+          label="PUBLISH"
+          size="lg"
+          background={accent}
+          foreground={accentFg}
+          onPress={publish}
+        />
+      </View>
+    </ScreenFrame>
+  );
+}
+
+/* =========================================================================
+ * Sub-components
+ * ======================================================================= */
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <View>
+      <RNText
+        style={{
+          fontFamily: fonts.bodyBold,
+          fontSize: 10,
+          letterSpacing: 1.8,
+          textTransform: 'uppercase',
+          color: staticPalette.ink,
+          opacity: 0.55,
+          marginBottom: 10,
+        }}
+      >
         {label}
       </RNText>
+      {children}
+    </View>
+  );
+}
+
+function Metric({
+  label,
+  value,
+  accent,
+  palette,
+}: {
+  label: string;
+  value: string;
+  accent: string;
+  palette: any;
+}) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', paddingVertical: 10 }}>
+      <RNText
+        style={{
+          fontFamily: fonts.displayBold,
+          fontSize: 18,
+          color: palette.ink,
+          letterSpacing: -0.4,
+        }}
+      >
+        {value}
+      </RNText>
+      <View
+        style={{
+          width: 16,
+          height: 2,
+          backgroundColor: accent,
+          marginVertical: 4,
+        }}
+      />
+      <RNText
+        style={{
+          fontFamily: fonts.bodyBold,
+          fontSize: 9,
+          letterSpacing: 1.4,
+          textTransform: 'uppercase',
+          color: palette.ink,
+          opacity: 0.55,
+        }}
+      >
+        {label}
+      </RNText>
+    </View>
+  );
+}
+
+function DomainRow({
+  icon,
+  title,
+  sub,
+  onPress,
+  palette,
+  danger,
+}: {
+  icon: any;
+  title: string;
+  sub: string;
+  onPress: () => void;
+  palette: any;
+  danger?: boolean;
+}) {
+  return (
+    <Tap scale={1} onPress={onPress} burstColor={danger ? palette.ember : palette.acid}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 12,
+          paddingVertical: 16,
+          paddingHorizontal: 16,
+          borderWidth: 1,
+          borderColor: palette.line,
+          borderRadius: 12,
+        }}
+      >
+        <Ionicons name={icon} size={18} color={danger ? palette.ember : palette.ink} />
+        <View style={{ flex: 1 }}>
+          <RNText
+            style={{
+              fontFamily: fonts.displayBold,
+              fontSize: 15,
+              color: danger ? palette.ember : palette.ink,
+              letterSpacing: -0.2,
+            }}
+            numberOfLines={1}
+          >
+            {title}
+          </RNText>
+          <RNText
+            style={{
+              fontFamily: fonts.body,
+              fontSize: 12,
+              lineHeight: 16,
+              color: palette.ink,
+              opacity: 0.6,
+              marginTop: 2,
+            }}
+            numberOfLines={1}
+          >
+            {sub}
+          </RNText>
+        </View>
+        <Ionicons name="chevron-forward" size={14} color={palette.ink} />
+      </View>
     </Tap>
   );
 }
 
-function SlimMetric({
-  label,
-  value,
-  accentColor,
+function SectionEditor({
+  title,
+  sub,
+  section,
+  accent,
+  accentFg,
+  palette,
+  styles,
+  onToggle,
+  children,
 }: {
-  label: string;
-  value: string;
-  accentColor: string;
+  title: string;
+  sub: string;
+  section: { enabled: boolean };
+  accent: string;
+  accentFg: string;
+  palette: any;
+  styles: any;
+  onToggle: () => void;
+  children: React.ReactNode;
 }) {
-  const palette = useThemedPalette();
-  const styles = useThemedPaletteStyles(makeStyles);
   return (
-    <View style={styles.slimMetric}>
-      <RNText
-        style={[styles.slimMetricValue, { color: palette.ink }]}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.6}
-        allowFontScaling={false}
-      >
-        {value}
-      </RNText>
-      <View style={[styles.slimMetricBar, { backgroundColor: accentColor }]} />
-      <RNText
-        style={[styles.slimMetricLabel, { color: palette.ink }]}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.7}
-        allowFontScaling={false}
-      >
-        {label}
-      </RNText>
+    <View
+      style={[
+        styles.sectionEditorCard,
+        { borderColor: palette.line, opacity: section.enabled ? 1 : 0.55 },
+      ]}
+    >
+      <View style={styles.sectionEditorHeader}>
+        <View style={{ flex: 1 }}>
+          <RNText style={[styles.sectionEditorTitle, { color: palette.ink }]} numberOfLines={1}>
+            {title}
+          </RNText>
+          <RNText
+            style={[styles.sectionEditorSub, { color: palette.ink, opacity: 0.6 }]}
+            numberOfLines={1}
+          >
+            {sub}
+          </RNText>
+        </View>
+        <Tap
+          scale={1}
+          onPress={onToggle}
+          burstColor={accent}
+          style={[
+            styles.sectionEditorToggle,
+            {
+              backgroundColor: section.enabled ? accent : 'transparent',
+              borderColor: section.enabled ? accent : palette.line,
+            },
+          ]}
+        >
+          <Ionicons
+            name={section.enabled ? 'eye-outline' : 'eye-off-outline'}
+            size={13}
+            color={section.enabled ? accentFg : palette.ink}
+          />
+          <RNText
+            style={[
+              styles.sectionEditorToggleLabel,
+              { color: section.enabled ? accentFg : palette.ink },
+            ]}
+          >
+            {section.enabled ? 'LIVE' : 'HIDDEN'}
+          </RNText>
+        </Tap>
+      </View>
+      <View style={styles.sectionEditorBody}>{children}</View>
     </View>
   );
 }
 
-/* -----------------------------------------------------------------------
- * Tiny layout diagram used inside layout picker cards
- * --------------------------------------------------------------------- */
+type ProductEditorProps = {
+  product: {
+    id: string;
+    name: string;
+    type: string;
+    baseCost: number;
+    margin: number;
+    color: string;
+    bg: string;
+    fg: string;
+    published: boolean;
+    sold: number;
+  };
+  isFeatured: boolean;
+  accent: string;
+  accentFg: string;
+  palette: any;
+  styles: any;
+  onTogglePublished: () => void;
+  onMarginChange: (n: number) => void;
+  onCostChange: (n: number) => void;
+  onSetFeatured: () => void;
+  onRemove: () => void;
+};
 
-function LayoutDiagram({ kind, color }: { kind: LayoutKey; color: string }) {
-  if (kind === 'grid') {
-    return (
-      <View style={diagramStyles.row}>
-        <View style={[diagramStyles.cell, { backgroundColor: color }]} />
-        <View style={[diagramStyles.cell, { backgroundColor: color }]} />
-        <View style={[diagramStyles.cell, { backgroundColor: color }]} />
-      </View>
-    );
-  }
-  if (kind === 'stack') {
-    return (
-      <View style={diagramStyles.col}>
-        <View style={[diagramStyles.bar, { backgroundColor: color }]} />
-        <View style={[diagramStyles.bar, { backgroundColor: color }]} />
-      </View>
-    );
-  }
+function ProductEditor({
+  product,
+  isFeatured,
+  accent,
+  accentFg,
+  palette,
+  styles,
+  onTogglePublished,
+  onMarginChange,
+  onCostChange,
+  onSetFeatured,
+  onRemove,
+}: ProductEditorProps) {
+  const [costStr, setCostStr] = useState(String(product.baseCost));
+  const [marginStr, setMarginStr] = useState(String(product.margin));
+  const price = product.baseCost + product.margin;
+
   return (
-    <View style={diagramStyles.magRow}>
-      <View style={[diagramStyles.magHero, { backgroundColor: color }]} />
-      <View style={diagramStyles.magSide}>
-        <View style={[diagramStyles.magSmall, { backgroundColor: color }]} />
-        <View style={[diagramStyles.magSmall, { backgroundColor: color }]} />
+    <View
+      style={[
+        styles.productEditorCard,
+        {
+          borderColor: isFeatured ? accent : palette.line,
+          borderWidth: isFeatured ? 2 : 1,
+        },
+      ]}
+    >
+      <View style={styles.productEditorTop}>
+        <View style={[styles.productEditorThumb, { backgroundColor: product.bg }]}>
+          <ProductIcon type={product.type} size={36} color={product.fg} />
+        </View>
+        <View style={{ flex: 1 }}>
+          <RNText
+            style={[styles.productEditorName, { color: palette.ink }]}
+            numberOfLines={1}
+          >
+            {product.name}
+          </RNText>
+          <RNText style={[styles.productEditorMeta, { color: palette.ink, opacity: 0.55 }]}>
+            {product.type} · ₹{price} · {product.sold} sold
+          </RNText>
+        </View>
+        <Tap
+          scale={1}
+          onPress={onTogglePublished}
+          burstColor={accent}
+          style={[
+            styles.productEditorPubBtn,
+            {
+              backgroundColor: product.published ? accent : 'transparent',
+              borderColor: product.published ? accent : palette.line,
+            },
+          ]}
+        >
+          <Ionicons
+            name={product.published ? 'eye-outline' : 'eye-off-outline'}
+            size={13}
+            color={product.published ? accentFg : palette.ink}
+          />
+          <RNText
+            style={[
+              styles.productEditorPubLabel,
+              { color: product.published ? accentFg : palette.ink },
+            ]}
+          >
+            {product.published ? 'LIVE' : 'DRAFT'}
+          </RNText>
+        </Tap>
+      </View>
+
+      <View style={styles.productEditorPriceRow}>
+        <View style={{ flex: 1 }}>
+          <RNText style={[styles.productEditorFieldLabel, { color: palette.ink, opacity: 0.55 }]}>
+            COST (₹)
+          </RNText>
+          <TextInput
+            style={[
+              styles.productEditorPriceInput,
+              { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+            ]}
+            value={costStr}
+            onChangeText={(v) => {
+              const cleaned = v.replace(/[^\d]/g, '');
+              setCostStr(cleaned);
+              onCostChange(Number(cleaned) || 0);
+            }}
+            keyboardType="numeric"
+            placeholder="0"
+            placeholderTextColor={palette.mute}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <RNText style={[styles.productEditorFieldLabel, { color: palette.ink, opacity: 0.55 }]}>
+            MARGIN (₹)
+          </RNText>
+          <TextInput
+            style={[
+              styles.productEditorPriceInput,
+              { borderColor: palette.line, backgroundColor: palette.paper, color: palette.ink },
+            ]}
+            value={marginStr}
+            onChangeText={(v) => {
+              const cleaned = v.replace(/[^\d]/g, '');
+              setMarginStr(cleaned);
+              onMarginChange(Number(cleaned) || 0);
+            }}
+            keyboardType="numeric"
+            placeholder="0"
+            placeholderTextColor={palette.mute}
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <RNText style={[styles.productEditorFieldLabel, { color: accent }]}>
+            PRICE
+          </RNText>
+          <View
+            style={[
+              styles.productEditorPriceTotal,
+              { borderColor: accent, backgroundColor: accent + '10' },
+            ]}
+          >
+            <RNText style={[styles.productEditorPriceTotalLabel, { color: palette.ink }]}>
+              ₹{price}
+            </RNText>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.productEditorActionRow}>
+        <Tap
+          scale={1}
+          onPress={onSetFeatured}
+          burstColor={accent}
+          style={[
+            styles.productEditorActionBtn,
+            {
+              borderColor: isFeatured ? accent : palette.line,
+              backgroundColor: isFeatured ? accent + '14' : 'transparent',
+            },
+          ]}
+        >
+          <Ionicons
+            name={isFeatured ? 'star' : 'star-outline'}
+            size={13}
+            color={isFeatured ? accent : palette.ink}
+          />
+          <RNText
+            style={[
+              styles.productEditorActionLabel,
+              { color: isFeatured ? accent : palette.ink },
+            ]}
+          >
+            {isFeatured ? 'FEATURED' : 'FEATURE'}
+          </RNText>
+        </Tap>
+        <Tap
+          scale={1}
+          onPress={onRemove}
+          burstColor={palette.ember}
+          style={[styles.productEditorActionBtn, { borderColor: palette.line }]}
+        >
+          <Ionicons name="trash-outline" size={13} color={palette.ember} />
+          <RNText
+            style={[styles.productEditorActionLabel, { color: palette.ember }]}
+          >
+            REMOVE
+          </RNText>
+        </Tap>
       </View>
     </View>
   );
 }
 
-const diagramStyles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    gap: 3,
-    height: 28,
-    alignItems: 'stretch',
-  },
-  cell: { flex: 1, borderRadius: 3 },
-  col: { gap: 3, height: 28, justifyContent: 'center', minWidth: 36 },
-  bar: { height: 8, borderRadius: 3, minWidth: 36 },
-  magRow: { flexDirection: 'row', gap: 3, height: 28 },
-  magHero: { flex: 2, borderRadius: 3 },
-  magSide: { flex: 1, gap: 3 },
-  magSmall: { flex: 1, borderRadius: 3 },
-});
-
-/* -----------------------------------------------------------------------
+/* =========================================================================
  * Styles
- * --------------------------------------------------------------------- */
+ * ======================================================================= */
 
-const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
-  previewBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: palette.line,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+const makeStyles = (palette: typeof staticPalette) =>
+  StyleSheet.create({
+    /* header right */
+    viewLiveBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 999,
+      borderWidth: 1,
+    },
+    viewLiveLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 11,
+      letterSpacing: 1.4,
+      textTransform: 'uppercase',
+      includeFontPadding: false,
+    },
 
-  /* LIVE PREVIEW */
-  previewWrap: { marginTop: 4 },
-  previewCard: {
-    height: 280,
-    borderRadius: 24,
-    overflow: 'hidden',
-  },
-  previewScrim: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(10,10,10,0.42)',
-  },
-  previewVideoLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.8,
-    textTransform: 'uppercase',
-    marginTop: 8,
-    opacity: 0.75,
-  },
-  previewTopBar: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    right: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  previewLiveDot: { width: 8, height: 8, borderRadius: 4 },
-  previewLiveText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.8,
-    color: staticPalette.bone,
-    textTransform: 'uppercase',
-  },
-  previewUrl: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.4,
-    color: staticPalette.bone,
-    opacity: 0.85,
-  },
-  previewBottom: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    bottom: 16,
-    gap: 14,
-  },
-  previewBrandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  previewLogo: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 2,
-    overflow: 'hidden',
-  },
-  previewLogoImg: { width: '100%', height: '100%' },
-  previewStoreName: {
-    fontSize: 30,
-    lineHeight: 32,
-    letterSpacing: -1.2,
-  },
-  previewHandle: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.6,
-    marginTop: 3,
-  },
-  previewMiniRow: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  previewMiniTile: {
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  previewFootRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginTop: 12,
-  },
-  previewFootText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.6,
-    textTransform: 'uppercase',
-    opacity: 0.6,
-    textAlign: 'center',
-  },
-  previewFootDot: { width: 5, height: 5, borderRadius: 3 },
+    /* preview */
+    previewWrap: {
+      height: 260,
+      borderRadius: 22,
+      overflow: 'hidden',
+      backgroundColor: staticPalette.ink,
+      marginTop: 4,
+    },
+    previewScrim: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: 'rgba(10,10,10,0.45)',
+    },
+    previewTop: {
+      position: 'absolute',
+      top: 14,
+      left: 14,
+      right: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    previewDot: { width: 8, height: 8, borderRadius: 4 },
+    previewLiveTxt: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 9,
+      letterSpacing: 1.6,
+      color: staticPalette.bone,
+      textTransform: 'uppercase',
+    },
+    previewUrl: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 9,
+      letterSpacing: 1.4,
+      color: staticPalette.bone,
+      opacity: 0.8,
+    },
+    previewBottom: { position: 'absolute', left: 14, right: 14, bottom: 14, gap: 12 },
+    previewBrand: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    previewLogo: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      borderWidth: 2,
+      overflow: 'hidden',
+    },
+    previewLogoImg: { width: '100%', height: '100%' },
+    previewTitle: {
+      fontSize: 28,
+      lineHeight: 30,
+      letterSpacing: -1.2,
+      textTransform: 'uppercase',
+    },
+    previewTag: {
+      fontSize: 11,
+      letterSpacing: 0.4,
+      marginTop: 2,
+    },
+    previewMini: { flexDirection: 'row', gap: 6 },
+    previewTile: {
+      borderRadius: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  /* MARQUEE */
-  marqueeStrip: {
-    marginTop: 16,
-    marginHorizontal: -SCREEN_PADDING,
-    height: 44,
-    overflow: 'hidden',
-  },
+    previewFootRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      marginTop: 10,
+    },
+    previewFootDot: { width: 4, height: 4, borderRadius: 2 },
+    previewFootText: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 9,
+      letterSpacing: 1.6,
+      textTransform: 'uppercase',
+    },
 
-  /* METRICS — slim 4-up row */
-  metricsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 18,
-    paddingVertical: 18,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: palette.line,
-  },
-  metricDivider: {
-    width: 1,
-    height: 36,
-  },
-  slimMetric: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingHorizontal: 4,
-  },
-  slimMetricValue: {
-    fontFamily: fonts.displayBold,
-    fontSize: 22,
-    lineHeight: 24,
-    letterSpacing: -0.6,
-    textAlign: 'center',
-    width: '100%',
-  },
-  slimMetricBar: {
-    width: 18,
-    height: 2,
-    borderRadius: 1,
-  },
-  slimMetricLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 9,
-    letterSpacing: 1.6,
-    textTransform: 'uppercase',
-    textAlign: 'center',
-    width: '100%',
-    opacity: 0.65,
-  },
+    /* metrics */
+    metrics: {
+      flexDirection: 'row',
+      borderWidth: 1,
+      borderRadius: 12,
+      marginTop: 14,
+      overflow: 'hidden',
+    },
+    metricDivider: { width: 1, alignSelf: 'stretch' },
 
-  /* CTAs */
-  ctaCol: { marginTop: 18, gap: 10 },
-  ctaSecondaryRow: { flexDirection: 'row', gap: 8 },
-  ctaSecondary: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    height: 52,
-    paddingHorizontal: 12,
-    borderRadius: 26,
-    borderWidth: 1,
-  },
-  ctaSecondaryIcon: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ctaSecondaryLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    letterSpacing: 1.6,
-    textTransform: 'uppercase',
-  },
+    /* tab bar */
+    tabBarWrap: { marginTop: 18 },
+    tabBar: { paddingHorizontal: 16, gap: 8 },
+    tabPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 999,
+      borderWidth: 1,
+    },
+    tabLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 11,
+      letterSpacing: 1.6,
+      textTransform: 'uppercase',
+    },
+    tabActiveDot: { width: 6, height: 6, borderRadius: 3 },
 
-  /* CONTROL LABELS shared */
-  controlLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.8,
-    textTransform: 'uppercase',
-    opacity: 0.65,
-    marginBottom: 10,
-  },
+    /* panel */
+    panelWrap: {
+      paddingHorizontal: 16,
+      paddingTop: 22,
+      paddingBottom: 32,
+    },
+    panelHeader: { marginBottom: 18 },
+    panelKicker: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 10,
+      letterSpacing: 1.8,
+      textTransform: 'uppercase',
+      marginBottom: 6,
+    },
+    panelTitle: {
+      fontFamily: fonts.displayBold,
+      fontSize: 28,
+      lineHeight: 30,
+      letterSpacing: -1,
+      textTransform: 'lowercase',
+    },
 
-  /* BG MODE */
-  modeRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 14,
-  },
-  modeChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    borderRadius: 999,
-    borderWidth: 1,
-    backgroundColor: palette.paper,
-  },
-  modeChipLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.6,
-    textTransform: 'uppercase',
-  },
+    /* shared input */
+    input: {
+      borderWidth: 1,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontFamily: fonts.body,
+      fontSize: 14,
+    },
+    textarea: {
+      borderWidth: 1,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontFamily: fonts.body,
+      fontSize: 14,
+      lineHeight: 20,
+      minHeight: 96,
+      textAlignVertical: 'top',
+    },
+    helperText: {
+      fontFamily: fonts.body,
+      fontSize: 12,
+      lineHeight: 17,
+    },
 
-  /* COVER */
-  coverScroll: {
-    paddingHorizontal: SCREEN_PADDING,
-    gap: 10,
-  },
-  dropTile: {
-    width: 132,
-    height: 86,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    backgroundColor: palette.paper,
-  },
-  dropTileLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.6,
-    textTransform: 'uppercase',
-  },
-  dropTileSub: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 8,
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
-  },
-  coverTile: {
-    width: 132,
-    height: 86,
-    borderRadius: 14,
-    overflow: 'hidden',
-  },
-  coverActiveBadge: {
-    position: 'absolute',
-    top: 6,
-    right: 6,
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  videoDrop: {
-    width: CONTENT_W - 24,
-    height: 110,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: palette.paper,
-    marginLeft: SCREEN_PADDING,
-  },
-  coverColorRow: {
-    flexDirection: 'row',
-    gap: 10,
-    paddingLeft: SCREEN_PADDING,
-  },
-  coverColorTile: {
-    width: 64,
-    height: 86,
-    borderRadius: 14,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+    /* BRAND panel */
+    swatchRow: { flexDirection: 'row', gap: 10 },
+    swatch: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      borderWidth: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    logoRow: { flexDirection: 'row', gap: 10 },
+    logoTile: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      borderWidth: 2,
+      overflow: 'hidden',
+    },
+    logoImg: { width: '100%', height: '100%' },
+    logoUpload: {
+      width: 64,
+      height: 64,
+      borderRadius: 32,
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 2,
+    },
+    logoUploadLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 8,
+      letterSpacing: 1.4,
+      textTransform: 'uppercase',
+    },
+    modeRow: { flexDirection: 'row', gap: 8 },
+    modeChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 999,
+      borderWidth: 1,
+    },
+    modeLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 10,
+      letterSpacing: 1.4,
+      textTransform: 'uppercase',
+    },
+    coverTile: {
+      width: 96,
+      height: 64,
+      borderRadius: 10,
+      borderWidth: 2,
+      overflow: 'hidden',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 4,
+    },
+    coverImg: { width: '100%', height: '100%' },
+    coverUploadLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 9,
+      letterSpacing: 1.4,
+      textTransform: 'uppercase',
+    },
+    coverColor: {
+      width: 64,
+      height: 64,
+      borderRadius: 12,
+      borderWidth: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  /* LOGO */
-  logoRow: {
-    flexDirection: 'row',
-    gap: 10,
-    flexWrap: 'wrap',
-  },
-  logoDrop: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 2,
-    backgroundColor: palette.paper,
-  },
-  logoTile: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    overflow: 'hidden',
-  },
+    /* TYPE panel */
+    fontGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    fontTile: {
+      flexBasis: '31%',
+      flexGrow: 1,
+      borderWidth: 1,
+      borderRadius: 12,
+      paddingVertical: 14,
+      paddingHorizontal: 8,
+      alignItems: 'center',
+      gap: 4,
+      minHeight: 90,
+      justifyContent: 'center',
+    },
+    fontSample: { fontSize: 34, lineHeight: 36 },
+    fontLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 9,
+      letterSpacing: 1.6,
+      textTransform: 'uppercase',
+    },
+    typePreview: {
+      borderWidth: 1,
+      borderRadius: 14,
+      padding: 18,
+      marginTop: 8,
+    },
+    typePreviewKicker: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 10,
+      letterSpacing: 1.8,
+      textTransform: 'uppercase',
+    },
 
-  /* FIELD ROW */
-  fieldRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 14,
-    height: 48,
-    borderRadius: 14,
-    borderWidth: 1,
-    backgroundColor: palette.paper,
-  },
-  fieldText: {
-    flex: 1,
-    fontFamily: fonts.displayBold,
-    fontSize: 16,
-    letterSpacing: -0.4,
-  },
+    /* LAYOUT panel */
+    layoutCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      padding: 14,
+      borderWidth: 1,
+      borderRadius: 14,
+    },
+    layoutDiagram: {
+      width: 80,
+      height: 80,
+      borderRadius: 10,
+      overflow: 'hidden',
+    },
+    diagramGrid: {
+      flex: 1,
+      padding: 8,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 4,
+    },
+    diagramTile: { width: 28, height: 28, borderRadius: 4 },
+    layoutLabel: {
+      fontFamily: fonts.displayBold,
+      fontSize: 18,
+      letterSpacing: -0.4,
+      textTransform: 'uppercase',
+    },
+    layoutDesc: {
+      fontFamily: fonts.body,
+      fontSize: 12,
+      lineHeight: 17,
+      marginTop: 4,
+    },
 
-  /* SWATCHES */
-  swatchRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-  },
-  swatch: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  swatchLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 9,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    marginTop: 6,
-    textAlign: 'center',
-    width: 56,
-  },
+    /* SECTIONS panel */
+    sectionList: { marginTop: 14, gap: 8 },
+    sectionRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      paddingVertical: 12,
+      paddingHorizontal: 12,
+      borderWidth: 1,
+      borderRadius: 12,
+    },
+    sectionNum: {
+      width: 26,
+      textAlign: 'center',
+      fontFamily: fonts.displayHeavy,
+      fontSize: 14,
+      letterSpacing: -0.2,
+    },
+    sectionIcon: { width: 24, alignItems: 'center' },
+    sectionLabel: {
+      fontFamily: fonts.displayBold,
+      fontSize: 14,
+      letterSpacing: -0.2,
+      textTransform: 'uppercase',
+    },
+    sectionSub: {
+      fontFamily: fonts.body,
+      fontSize: 10,
+      letterSpacing: 0.4,
+      marginTop: 2,
+      textTransform: 'uppercase',
+    },
+    sectionBtn: {
+      width: 30,
+      height: 30,
+      borderRadius: 8,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
 
-  /* FONT PICKER */
-  fontRow: { flexDirection: 'row', gap: 8 },
-  fontCard: {
-    height: 110,
-    borderRadius: 16,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 6,
-  },
-  fontCardLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.6,
-    textTransform: 'uppercase',
-  },
-  layoutCard: {
-    height: 96,
-    borderRadius: 16,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingHorizontal: 10,
-  },
+    /* PRODUCTS panel */
+    catGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    catChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      borderWidth: 1,
+      borderRadius: 999,
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+    },
+    catLabel: {
+      fontFamily: fonts.displayBold,
+      fontSize: 11,
+      letterSpacing: 0.4,
+      textTransform: 'uppercase',
+    },
+    catCost: {
+      fontFamily: fonts.body,
+      fontSize: 11,
+    },
+    catRemove: {
+      width: 18,
+      height: 18,
+      borderRadius: 9,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: 2,
+    },
+    catAddRow: {
+      flexDirection: 'row',
+      gap: 8,
+      alignItems: 'stretch',
+    },
+    catAddName: { flex: 2 },
+    catAddCost: { flex: 1 },
+    catAddBtn: {
+      width: 48,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    bigLink: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingVertical: 14,
+      paddingHorizontal: 16,
+      borderRadius: 12,
+      borderWidth: 1,
+    },
+    bigLinkLabel: {
+      flex: 1,
+      fontFamily: fonts.displayBold,
+      fontSize: 13,
+      letterSpacing: 0.4,
+      textTransform: 'uppercase',
+    },
 
-  /* PRODUCTS */
-  productGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  productCard: {
-    height: 210,
-    borderRadius: 20,
-    overflow: 'hidden',
-    padding: 14,
-    justifyContent: 'flex-end',
-  },
-  productTopRow: {
-    position: 'absolute',
-    top: 14,
-    left: 14,
-    right: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  productAccentBar: { width: 22, height: 3, borderRadius: 2 },
-  productMenu: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  productIcon: { position: 'absolute', right: 14, top: 40, opacity: 0.92 },
-  productName: { fontFamily: fonts.displayBold, fontSize: 19, letterSpacing: -0.4 },
-  productMeta: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
-    marginTop: 4,
-    opacity: 0.7,
-  },
-  productFootRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: 4,
-  },
-  productSoldDot: { width: 5, height: 5, borderRadius: 3 },
-  productSold: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
-    opacity: 0.8,
-  },
-  productAddCard: {
-    height: 210,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    backgroundColor: palette.paper,
-  },
-  productAddIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  productAddLabel: {
-    fontFamily: fonts.displayBold,
-    fontSize: 16,
-    letterSpacing: -0.3,
-  },
-  productAddSub: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 9,
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
-  },
+    /* SectionEditor (PAGES panel) */
+    sectionEditorCard: {
+      borderWidth: 1,
+      borderRadius: 16,
+      overflow: 'hidden',
+    },
+    sectionEditorHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: palette.line,
+      backgroundColor: palette.paper,
+    },
+    sectionEditorTitle: {
+      fontFamily: fonts.displayBold,
+      fontSize: 15,
+      letterSpacing: -0.2,
+      textTransform: 'uppercase',
+    },
+    sectionEditorSub: {
+      fontFamily: fonts.body,
+      fontSize: 11,
+      marginTop: 2,
+    },
+    sectionEditorToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 999,
+      borderWidth: 1,
+    },
+    sectionEditorToggleLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 9,
+      letterSpacing: 1.4,
+      textTransform: 'uppercase',
+    },
+    sectionEditorBody: {
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+    },
+    listEditRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    addRowBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      borderRadius: 12,
+      paddingVertical: 12,
+    },
+    addRowLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 11,
+      letterSpacing: 1.4,
+      textTransform: 'uppercase',
+    },
+    featuredPickTile: {
+      width: 130,
+      borderRadius: 12,
+      padding: 10,
+      gap: 4,
+      alignItems: 'flex-start',
+    },
+    featuredPickName: {
+      fontFamily: fonts.displayBold,
+      fontSize: 11,
+      letterSpacing: -0.2,
+      textTransform: 'uppercase',
+      marginTop: 6,
+    },
+    featuredPickPrice: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 10,
+      letterSpacing: 1.2,
+    },
 
-  /* PICKER */
-  pickerWrap: {
-    marginTop: 14,
-    padding: 14,
-    borderRadius: 18,
-    borderWidth: 1,
-    gap: 10,
-  },
-  pickerKicker: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.8,
-    textTransform: 'uppercase',
-    opacity: 0.65,
-  },
-  pickerGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  pickerTile: {
-    height: 96,
-    borderRadius: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  pickerLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
-  },
-  pickerCost: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 9,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-  pickerHint: {
-    fontFamily: fonts.body,
-    fontSize: 11,
-    lineHeight: 16,
-    marginTop: 4,
-  },
+    /* ProductEditor (PRODUCTS panel) */
+    productEditorCard: {
+      borderRadius: 14,
+      padding: 12,
+      gap: 12,
+    },
+    productEditorTop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    productEditorThumb: {
+      width: 56,
+      height: 56,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    productEditorName: {
+      fontFamily: fonts.displayBold,
+      fontSize: 14,
+      letterSpacing: -0.2,
+      textTransform: 'uppercase',
+    },
+    productEditorMeta: {
+      fontFamily: fonts.body,
+      fontSize: 11,
+      marginTop: 2,
+    },
+    productEditorPubBtn: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 999,
+      borderWidth: 1,
+    },
+    productEditorPubLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 9,
+      letterSpacing: 1.4,
+      textTransform: 'uppercase',
+    },
+    productEditorPriceRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    productEditorFieldLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 9,
+      letterSpacing: 1.4,
+      textTransform: 'uppercase',
+      marginBottom: 6,
+    },
+    productEditorPriceInput: {
+      borderWidth: 1,
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 9,
+      fontFamily: fonts.bodyBold,
+      fontSize: 13,
+    },
+    productEditorPriceTotal: {
+      borderWidth: 1,
+      borderRadius: 10,
+      paddingHorizontal: 10,
+      paddingVertical: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    productEditorPriceTotalLabel: {
+      fontFamily: fonts.displayBold,
+      fontSize: 14,
+      letterSpacing: -0.3,
+    },
+    productEditorActionRow: {
+      flexDirection: 'row',
+      gap: 8,
+    },
+    productEditorActionBtn: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 8,
+      borderRadius: 999,
+      borderWidth: 1,
+    },
+    productEditorActionLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 10,
+      letterSpacing: 1.4,
+      textTransform: 'uppercase',
+    },
 
-  /* DESIGNS */
-  designScroll: {
-    paddingHorizontal: SCREEN_PADDING,
-    gap: 10,
-  },
-  designDrop: {
-    width: 132,
-    height: 140,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    backgroundColor: palette.paper,
-  },
-  designTile: {
-    width: 132,
-    height: 140,
-    borderRadius: 16,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  designTileFoot: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(10,10,10,0.6)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  designTileLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.6,
-    color: staticPalette.bone,
-    textTransform: 'uppercase',
-  },
+    /* PAGES panel */
+    faqItem: {
+      flexDirection: 'row',
+      gap: 10,
+      padding: 14,
+      borderRadius: 12,
+      borderWidth: 1,
+    },
+    faqQ: {
+      fontFamily: fonts.displayBold,
+      fontSize: 14,
+      letterSpacing: -0.2,
+      textTransform: 'uppercase',
+    },
+    faqA: {
+      fontFamily: fonts.body,
+      fontSize: 12,
+      lineHeight: 17,
+      marginTop: 4,
+    },
+    faqRemove: {
+      width: 28,
+      height: 28,
+      borderRadius: 8,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    faqAddCard: {
+      padding: 14,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderStyle: 'dashed',
+    },
+    faqInput: {
+      fontSize: 13,
+      paddingVertical: 4,
+    },
+    faqAdd: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+      paddingVertical: 9,
+      paddingHorizontal: 14,
+      borderRadius: 10,
+      borderWidth: 1,
+      alignSelf: 'flex-start',
+      marginTop: 10,
+    },
+    faqAddLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 10,
+      letterSpacing: 1.6,
+      textTransform: 'uppercase',
+    },
 
-  /* MOCKUPS */
-  mockupGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  mockupTile: {
-    height: 180,
-    borderRadius: 16,
-    borderWidth: 1,
-    overflow: 'hidden',
-  },
-  mockupBadge: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  mockupBadgeText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 9,
-    letterSpacing: 1.4,
-  },
-  mockupFoot: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    backgroundColor: 'rgba(10,10,10,0.5)',
-  },
-  mockupFootText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.4,
-    color: staticPalette.bone,
-    textTransform: 'uppercase',
-  },
-  generateRow: {
-    marginTop: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    height: 48,
-    borderRadius: 14,
-  },
-  generateRowLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    letterSpacing: 1.8,
-    textTransform: 'uppercase',
-  },
+    /* DOMAIN panel */
+    domainCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 14,
+      padding: 16,
+      borderWidth: 1,
+      borderRadius: 14,
+    },
+    domainLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 9,
+      letterSpacing: 1.8,
+      textTransform: 'uppercase',
+      opacity: 0.55,
+    },
+    domainValue: {
+      fontFamily: fonts.displayBold,
+      fontSize: 18,
+      letterSpacing: -0.4,
+      marginTop: 4,
+    },
+    domainSub: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 9,
+      letterSpacing: 1.6,
+      textTransform: 'uppercase',
+      marginTop: 6,
+    },
+    domainToggle: {
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: 999,
+      borderWidth: 1,
+    },
+    domainToggleLabel: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 11,
+      letterSpacing: 1.8,
+      textTransform: 'uppercase',
+    },
 
-  /* CHANNELS */
-  channelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    padding: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    marginBottom: 10,
-  },
-  channelIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  channelTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 15,
-    letterSpacing: -0.3,
-  },
-  channelUrl: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.2,
-    marginTop: 2,
-  },
-  channelStatusOn: {
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 999,
-  },
-  channelStatusText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 9,
-    letterSpacing: 1.6,
-  },
-  toggleTrack: {
-    width: 40,
-    height: 22,
-    borderRadius: 11,
-    padding: 2,
-    justifyContent: 'center',
-  },
-  toggleThumb: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-  },
-
-  /* PAGES */
-  pageGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  pageTile: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 14,
-    height: 56,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  pageLabel: {
-    fontFamily: fonts.displayBold,
-    fontSize: 13,
-    letterSpacing: -0.2,
-    flex: 1,
-  },
-  pageStatus: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 999,
-    borderWidth: 1,
-  },
-  pageStatusText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 9,
-    letterSpacing: 1.4,
-  },
-
-  /* ADVANCED */
-  advRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-  },
-  advTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 15,
-    letterSpacing: -0.2,
-  },
-  advSub: {
-    fontFamily: fonts.body,
-    fontSize: 12,
-    lineHeight: 16,
-    marginTop: 2,
-  },
-
-  /* PUBLISH */
-  publishWrap: {
-    marginTop: 32,
-    gap: 10,
-    alignItems: 'stretch',
-  },
-  publishHint: {
-    fontFamily: fonts.body,
-    fontSize: 11,
-    lineHeight: 15,
-    marginTop: 6,
-    textAlign: 'center',
-  },
-});
+    /* publish bar */
+    publishBar: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 0,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      paddingHorizontal: 16,
+      paddingTop: 12,
+      paddingBottom: 28,
+      borderTopWidth: 1,
+    },
+    publishStat: {
+      fontFamily: fonts.bodyBold,
+      fontSize: 9,
+      letterSpacing: 1.6,
+      textTransform: 'uppercase',
+    },
+    publishHint: {
+      fontFamily: fonts.body,
+      fontSize: 12,
+      marginTop: 4,
+    },
+  });

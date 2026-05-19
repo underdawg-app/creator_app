@@ -100,5 +100,5 @@ const styles = StyleSheet.create({
     marginTop: 2,
     maxWidth: 240,
   },
-  rightSlot: { width: 38, height: 38, alignItems: 'flex-end', justifyContent: 'center' },
+  rightSlot: { minWidth: 38, height: 38, alignItems: 'flex-end', justifyContent: 'center' },
 });

@@ -1,0 +1,3055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Underdawg — Brand Guidelines v1.0</title>
+<style>
+/* =========================================================
+   FONTS
+   ========================================================= */
+@font-face { font-family: 'Anton'; src: url('../assets/fonts/Anton_400Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'Archivo'; src: url('../assets/fonts/Archivo_800ExtraBold.ttf') format('truetype'); font-weight: 800; }
+@font-face { font-family: 'Archivo'; src: url('../assets/fonts/Archivo_900Black.ttf') format('truetype'); font-weight: 900; }
+@font-face { font-family: 'Archivo'; src: url('../assets/fonts/Archivo_900Black_Italic.ttf') format('truetype'); font-weight: 900; font-style: italic; }
+@font-face { font-family: 'Space Grotesk'; src: url('../assets/fonts/SpaceGrotesk_400Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'Space Grotesk'; src: url('../assets/fonts/SpaceGrotesk_500Medium.ttf') format('truetype'); font-weight: 500; }
+@font-face { font-family: 'Space Grotesk'; src: url('../assets/fonts/SpaceGrotesk_700Bold.ttf') format('truetype'); font-weight: 700; }
+@font-face { font-family: 'Instrument Serif'; src: url('../assets/fonts/InstrumentSerif_400Regular.ttf') format('truetype'); font-weight: 400; }
+@font-face { font-family: 'Instrument Serif'; src: url('../assets/fonts/InstrumentSerif_400Regular_Italic.ttf') format('truetype'); font-weight: 400; font-style: italic; }
+
+/* =========================================================
+   RESET + PAGE
+   ========================================================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1280px; }
+@page { size: 1280px 720px; margin: 0; }
+
+:root {
+  --ink: #0A0A0A;
+  --bone: #F2EFE6;
+  --acid: #D8FF3D;
+  --blue: #2E5BFF;
+  --pink: #FF6BB5;
+  --ember: #FF5A1F;
+  --mute: #9C988A;
+  --mute-dark: #2a2a26;
+  --hairline: rgba(242, 239, 230, 0.18);
+  --hairline-dark: rgba(10, 10, 10, 0.18);
+}
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  color: var(--bone);
+  background: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================================
+   SLIDE BASE
+   ========================================================= */
+.slide {
+  width: 1280px;
+  height: 720px;
+  page-break-after: always;
+  page-break-inside: avoid;
+  position: relative;
+  overflow: hidden;
+  padding: 64px 96px 64px 96px;
+  background: var(--ink);
+  color: var(--bone);
+}
+.slide.light { background: var(--bone); color: var(--ink); }
+.slide.acid { background: var(--acid); color: var(--ink); }
+.slide:last-child { page-break-after: auto; }
+
+/* =========================================================
+   HEADER + FOOTER (top/bottom slide chrome)
+   ========================================================= */
+.s-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--mute);
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--hairline);
+  margin-bottom: 56px;
+}
+.light .s-header { border-bottom-color: var(--hairline-dark); color: #6a6660; }
+.s-header .brand { display: flex; align-items: center; gap: 10px; }
+.s-header .brand img { width: 18px; height: 18px; }
+.s-header .brand b { font-family: 'Archivo', sans-serif; font-weight: 900; letter-spacing: 0.12em; color: var(--bone); }
+.light .s-header .brand b { color: var(--ink); }
+
+.s-footer {
+  position: absolute;
+  bottom: 30px;
+  left: 96px;
+  right: 96px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--mute);
+  border-top: 1px solid var(--hairline);
+  padding-top: 16px;
+}
+.light .s-footer { border-top-color: var(--hairline-dark); color: #6a6660; }
+.s-footer .accent { width: 60px; height: 2px; background: var(--acid); display: inline-block; }
+.s-footer .num b { color: var(--bone); font-weight: 700; }
+.light .s-footer .num b { color: var(--ink); }
+
+/* =========================================================
+   TYPE
+   ========================================================= */
+.eyebrow {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--acid);
+  margin-bottom: 24px;
+}
+.eyebrow::before { content: "— "; opacity: 0.6; }
+.light .eyebrow { color: var(--ink); }
+.h-mega {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 120px;
+  line-height: 0.88;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+}
+.h-display {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 88px;
+  line-height: 0.92;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+}
+.h1 {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 62px;
+  line-height: 0.96;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+.h2 {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 900;
+  font-size: 40px;
+  line-height: 1.0;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+.h3 {
+  font-family: 'Archivo', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+.lede {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--bone);
+}
+.light .lede { color: var(--ink); }
+.body {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--bone);
+}
+.light .body { color: var(--ink); }
+.muted { color: var(--mute); }
+.italic-serif {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 400;
+}
+.acid-text { color: var(--acid); }
+.blue-text { color: var(--blue); }
+.pink-text { color: var(--pink); }
+.ember-text { color: var(--ember); }
+.strike { text-decoration: line-through; text-decoration-color: var(--ember); text-decoration-thickness: 3px; }
+
+/* =========================================================
+   LAYOUT HELPERS
+   ========================================================= */
+.row { display: flex; }
+.col { display: flex; flex-direction: column; }
+.gap-8 { gap: 8px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; } .gap-20 { gap: 20px; } .gap-24 { gap: 24px; } .gap-32 { gap: 32px; } .gap-40 { gap: 40px; }
+.mt-8 { margin-top: 8px; } .mt-12 { margin-top: 12px; } .mt-16 { margin-top: 16px; } .mt-20 { margin-top: 20px; } .mt-24 { margin-top: 24px; } .mt-32 { margin-top: 32px; } .mt-40 { margin-top: 40px; } .mt-48 { margin-top: 48px; }
+.mb-12 { margin-bottom: 12px; } .mb-16 { margin-bottom: 16px; } .mb-24 { margin-bottom: 24px; }
+.flex-1 { flex: 1; }
+.center { display: flex; align-items: center; justify-content: center; }
+
+.card {
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 28px;
+}
+.light .card { background: rgba(0,0,0,0.025); border-color: var(--hairline-dark); }
+.card-flat {
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 28px;
+}
+.light .card-flat { border-color: var(--hairline-dark); }
+.card-bare {
+  padding: 0;
+  border: 0;
+}
+.divide-top { border-top: 1px solid var(--hairline); padding-top: 24px; }
+.light .divide-top { border-top-color: var(--hairline-dark); }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--acid);
+  color: var(--ink);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.badge.line {
+  background: transparent;
+  border: 1px solid var(--bone);
+  color: var(--bone);
+}
+.light .badge.line { border-color: var(--ink); color: var(--ink); }
+.badge.blue { background: var(--blue); color: var(--bone); }
+.badge.pink { background: var(--pink); color: var(--ink); }
+.badge.ember { background: var(--ember); color: var(--bone); }
+
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--acid); display: inline-block; }
+
+.label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 500;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--mute);
+}
+
+/* =========================================================
+   COVER
+   ========================================================= */
+.cover {
+  padding: 0;
+  background: var(--ink);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.cover .top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 56px 72px 0 72px;
+  font-family: 'Space Grotesk'; font-weight: 500; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mute);
+}
+.cover .top .brand { display: flex; align-items: center; gap: 12px; }
+.cover .top .brand img { width: 22px; height: 22px; }
+.cover .top .brand b { font-family: 'Archivo'; font-weight: 900; letter-spacing: 0.14em; font-size: 14px; color: var(--bone); }
+.cover .mid {
+  padding: 0 72px;
+  display: flex; align-items: center; gap: 60px;
+}
+.cover .mid img.logo { width: 220px; height: auto; }
+.cover .mid .title-block .meta {
+  font-family: 'Space Grotesk'; font-weight: 500; font-size: 12px; letter-spacing: 0.24em; text-transform: uppercase; color: var(--acid);
+  margin-bottom: 14px;
+}
+.cover .mid .title-block h1 {
+  font-family: 'Archivo'; font-weight: 900; font-size: 88px; line-height: 0.88; letter-spacing: -0.02em; text-transform: uppercase;
+}
+.cover .mid .title-block h1 em { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; text-transform: none; color: var(--acid); letter-spacing: -0.01em; }
+.cover .bottom {
+  padding: 0 72px 56px 72px;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  border-top: 1px solid var(--hairline);
+  padding-top: 18px;
+  font-family: 'Space Grotesk'; font-weight: 500; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mute);
+}
+.cover .bottom strong { color: var(--bone); font-weight: 700; }
+.cover .bottom .strip { display: flex; gap: 4px; }
+.cover .bottom .strip span { width: 28px; height: 6px; display: inline-block; }
+.cover .obj {
+  position: absolute;
+  width: 240px;
+  right: 90px;
+  top: 240px;
+  opacity: 0.95;
+}
+.cover .obj-2 {
+  position: absolute;
+  width: 160px;
+  left: 470px;
+  bottom: 110px;
+  opacity: 0.9;
+}
+
+/* =========================================================
+   TOC
+   ========================================================= */
+.toc-list { display: flex; flex-direction: column; gap: 0; }
+.toc-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.toc-row .letter {
+  font-family: 'Archivo'; font-weight: 900; font-size: 42px; line-height: 1; color: var(--acid); width: 48px;
+}
+.toc-row .title { font-family: 'Archivo'; font-weight: 900; font-size: 22px; text-transform: uppercase; flex: 1; padding-left: 8px; }
+.toc-row .pages { font-family: 'Space Grotesk'; font-weight: 500; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mute); }
+.toc-row .sub { font-family: 'Space Grotesk'; font-weight: 400; font-size: 12px; color: var(--mute); padding-left: 24px; flex: 1.5; }
+
+/* =========================================================
+   MANIFESTO
+   ========================================================= */
+.manifesto {
+  display: flex; align-items: center; justify-content: flex-start;
+  padding: 120px 140px;
+}
+.manifesto .obj-bg {
+  position: absolute;
+  width: 360px;
+  right: -40px;
+  top: -40px;
+  opacity: 0.85;
+}
+.manifesto .obj-bg-2 {
+  position: absolute;
+  width: 220px;
+  left: -40px;
+  bottom: -40px;
+  opacity: 0.85;
+}
+.manifesto h1 {
+  font-family: 'Archivo'; font-weight: 900; font-size: 110px; line-height: 0.88; text-transform: uppercase; letter-spacing: -0.03em;
+  text-align: left; position: relative; z-index: 2;
+}
+.manifesto h1 em { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; text-transform: none; color: var(--acid); }
+
+/* =========================================================
+   GRID / COLUMNS
+   ========================================================= */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+.grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+
+/* table */
+table.spec {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  color: var(--bone);
+}
+.light table.spec { color: var(--ink); }
+table.spec th {
+  text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--hairline);
+  font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; font-size: 9px; color: var(--mute);
+}
+table.spec td { padding: 12px 8px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+.light table.spec th { border-color: var(--hairline-dark); color: #6a6660; }
+.light table.spec td { border-color: var(--hairline-dark); }
+table.spec td.k { color: var(--mute); width: 30%; }
+table.spec tr:last-child td { border-bottom: 0; }
+
+/* Section divider page */
+.divider {
+  display: flex; flex-direction: column; justify-content: center; padding: 100px 140px;
+  background: var(--ink);
+}
+.divider .letter-massive {
+  font-family: 'Archivo'; font-weight: 900; font-size: 420px; line-height: 0.8; color: var(--acid); letter-spacing: -0.05em;
+  position: relative; z-index: 2;
+}
+.divider .section-title {
+  font-family: 'Archivo'; font-weight: 900; font-size: 72px; line-height: 0.92; text-transform: uppercase; letter-spacing: -0.025em;
+  margin-top: 24px;
+}
+.divider .desc {
+  font-family: 'Space Grotesk'; font-weight: 400; font-size: 17px; line-height: 1.5; color: var(--mute); max-width: 640px; margin-top: 24px;
+}
+.divider .corner {
+  position: absolute; bottom: 64px; right: 96px;
+  font-family: 'Space Grotesk'; font-weight: 500; font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--mute);
+}
+.divider .obj {
+  position: absolute; width: 320px; right: 40px; top: 120px; opacity: 0.85;
+}
+.divider .top-meta {
+  position: absolute; top: 64px; left: 96px;
+  font-family: 'Space Grotesk'; font-weight: 500; font-size: 10px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--mute);
+  display: flex; align-items: center; gap: 12px;
+}
+.divider .top-meta img { width: 18px; height: 18px; }
+
+/* Color swatches */
+.swatch {
+  border-radius: 10px;
+  padding: 18px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  min-height: 170px;
+  position: relative;
+}
+.swatch .name { font-family: 'Archivo'; font-weight: 900; font-size: 16px; text-transform: uppercase; letter-spacing: 0.02em; }
+.swatch .hex { font-family: 'Space Grotesk'; font-weight: 500; font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; }
+.swatch .codes { font-family: 'Space Grotesk'; font-weight: 400; font-size: 9px; line-height: 1.5; opacity: 0.85; }
+.swatch.dark-text { color: var(--ink); }
+.swatch.light-text { color: var(--bone); }
+
+/* Type scale row */
+.scale-row {
+  display: flex; align-items: baseline; gap: 24px; padding: 12px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.scale-row .tag { width: 60px; font-family: 'Space Grotesk'; font-weight: 500; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute); }
+.scale-row .spec { width: 200px; font-family: 'Space Grotesk'; font-weight: 400; font-size: 11px; color: var(--mute); }
+.scale-row .sample { flex: 1; }
+
+/* Do / Don't */
+.dd { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.dd .box { border-radius: 8px; padding: 18px; min-height: 140px; }
+.dd .do { border: 1px solid var(--acid); background: rgba(216, 255, 61, 0.04); }
+.dd .dont { border: 1px solid var(--ember); background: rgba(255, 90, 31, 0.04); }
+.dd .head { font-family: 'Archivo'; font-weight: 900; font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+.dd .do .head { color: var(--acid); }
+.dd .dont .head { color: var(--ember); }
+.dd .ex { font-family: 'Space Grotesk'; font-weight: 500; font-size: 14px; line-height: 1.45; }
+
+/* Phone mockup */
+.phone {
+  width: 200px; height: 410px; border-radius: 28px;
+  border: 2px solid var(--bone);
+  background: var(--ink); overflow: hidden;
+  position: relative;
+  padding: 12px 10px;
+}
+.phone .notch {
+  width: 70px; height: 18px; background: var(--ink); border-radius: 0 0 12px 12px;
+  position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+}
+.phone .status { font-family: 'Space Grotesk'; font-weight: 700; font-size: 8px; color: var(--bone); text-align: center; margin-bottom: 8px; letter-spacing: 0.1em; }
+.phone .ph-h { font-family: 'Archivo'; font-weight: 900; font-size: 12px; text-transform: uppercase; color: var(--bone); letter-spacing: 0.08em; padding: 4px 4px 8px 4px; border-bottom: 1px solid var(--hairline); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.phone .ph-h .acid-dot { width: 6px; height: 6px; background: var(--acid); border-radius: 50%; }
+.phone .ph-tabs { display: flex; gap: 6px; font-family: 'Space Grotesk'; font-weight: 700; font-size: 7px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--mute); padding: 4px; margin-bottom: 8px; }
+.phone .ph-tabs .active { color: var(--bone); border-bottom: 2px solid var(--acid); padding-bottom: 4px; }
+
+.kv { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--hairline); font-family: 'Space Grotesk'; font-size: 12px; }
+.kv .k { color: var(--mute); letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px; font-weight: 500; }
+.kv .v { font-weight: 500; color: var(--bone); }
+.light .kv { border-bottom-color: var(--hairline-dark); }
+.light .kv .v { color: var(--ink); }
+
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     SLIDE 01 — COVER
+     ============================================================ -->
+<section class="slide cover">
+  <div class="top">
+    <div class="brand">
+      <img src="../assets/1.png" alt="" />
+      <b>UNDERDAWG</b>
+    </div>
+    <div>UD &middot; BG &middot; V 1.0 &middot; MMXXVI</div>
+  </div>
+
+  <div class="mid">
+    <img class="logo" src="../assets/3.png" alt="Underdawg logo" />
+    <div class="title-block">
+      <div class="meta">The Brand Book &middot; 2026 Edition</div>
+      <h1>Brand<br/>Guidelines<br/><em>v1.0</em></h1>
+    </div>
+  </div>
+
+  <img class="obj" src="../src/objects/obj-1.png" alt="" />
+  <img class="obj-2" src="../src/objects/obj-2.png" alt="" />
+
+  <div class="bottom">
+    <div>Internal &middot; Confidential &middot; <strong>For the ones still climbing.</strong></div>
+    <div class="strip">
+      <span style="background:#D8FF3D"></span>
+      <span style="background:#2E5BFF"></span>
+      <span style="background:#FF6BB5"></span>
+      <span style="background:#FF5A1F"></span>
+      <span style="background:#F2EFE6"></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 02 — TABLE OF CONTENTS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>Brand Guidelines v1.0 &middot; Contents</div>
+  </div>
+
+  <div class="eyebrow">Table of Contents</div>
+  <h2 class="h1" style="margin-bottom: 28px;">Inside the book.</h2>
+
+  <div class="grid-2" style="gap: 0 60px;">
+    <div class="toc-list">
+      <div class="toc-row"><div class="letter">A</div><div class="title">Foundation</div><div class="pages">P. 03&ndash;10</div></div>
+      <div class="toc-row"><div class="letter">B</div><div class="title">Verbal Identity</div><div class="pages">P. 11&ndash;16</div></div>
+      <div class="toc-row"><div class="letter">C</div><div class="title">Logo System</div><div class="pages">P. 17&ndash;24</div></div>
+      <div class="toc-row"><div class="letter">D</div><div class="title">Color System</div><div class="pages">P. 25&ndash;30</div></div>
+      <div class="toc-row"><div class="letter">E</div><div class="title">Typography</div><div class="pages">P. 31&ndash;36</div></div>
+    </div>
+    <div class="toc-list">
+      <div class="toc-row"><div class="letter">F</div><div class="title">Visual Language</div><div class="pages">P. 37&ndash;42</div></div>
+      <div class="toc-row"><div class="letter">G</div><div class="title">Motion</div><div class="pages">P. 43&ndash;46</div></div>
+      <div class="toc-row"><div class="letter">H</div><div class="title">Product &amp; UI</div><div class="pages">P. 47&ndash;51</div></div>
+      <div class="toc-row"><div class="letter">I</div><div class="title">Applications</div><div class="pages">P. 52&ndash;58</div></div>
+      <div class="toc-row"><div class="letter">J</div><div class="title">Governance</div><div class="pages">P. 59&ndash;62</div></div>
+    </div>
+  </div>
+
+  <div class="s-footer">
+    <div><span class="accent"></span></div>
+    <div class="num">CONTENTS &middot; <b>02</b> / 62</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 03 — SECTION DIVIDER A
+     ============================================================ -->
+<section class="slide divider">
+  <div class="top-meta"><img src="../assets/1.png" alt=""/><span>UNDERDAWG &middot; BRAND GUIDELINES V1.0</span></div>
+  <div class="letter-massive">A</div>
+  <div class="section-title">Foundation.</div>
+  <div class="desc">The strategy behind the brand. Mission, story, values, audience, and positioning &mdash; the source of truth every other section refers back to.</div>
+  <img class="obj" src="../src/objects/obj-3.png" alt=""/>
+  <div class="corner">SECTION A &middot; 03 / 62</div>
+</section>
+
+<!-- ============================================================
+     SLIDE 04 — MANIFESTO
+     ============================================================ -->
+<section class="slide manifesto">
+  <img class="obj-bg" src="../src/objects/obj-4.png" alt=""/>
+  <img class="obj-bg-2" src="../src/objects/obj-5.png" alt=""/>
+  <div>
+    <div class="eyebrow" style="margin-bottom:30px;">Manifesto</div>
+    <h1>If you're not<br/>already famous,<br/>the system<br/><em>ignores you.</em></h1>
+    <div class="lede" style="max-width: 720px; margin-top: 36px;">
+      Every platform monetizes creators after they're valuable. We exist to flip that. We back the climb &mdash; the 10K-follower designer, the 30K-stream producer, the 8K subscriber kid in tier-2 India making the best work nobody's seen yet. <span class="acid-text">We don't help creators go viral. We build the home base that decides who gets to rise.</span>
+    </div>
+  </div>
+  <div class="s-footer">
+    <div><span class="accent"></span></div>
+    <div class="num">MANIFESTO &middot; <b>04</b> / 62</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 05 — BRAND STORY
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>A. Foundation &middot; Brand Story</div>
+  </div>
+  <div class="eyebrow">The Story</div>
+  <h2 class="h1" style="margin-bottom: 24px;">A market broken<br/>on both sides.</h2>
+  <div class="grid-2 gap-40" style="margin-top: 28px;">
+    <div>
+      <div class="h3 acid-text mb-12">The Creator Side</div>
+      <div class="body muted" style="margin-bottom: 14px;">10 million creators in India. 99% are invisible. Algorithms reward popularity, not potential. YouTube needs 1K subs + 4K hours. Instagram pays nothing. Spotify pays ₹0.003 per stream.</div>
+      <div class="body">Average time to first ₹1 earned as a creator: <span class="acid-text" style="font-weight:700;">2+ years.</span></div>
+    </div>
+    <div>
+      <div class="h3 pink-text mb-12">The Brand Side</div>
+      <div class="body muted" style="margin-bottom: 14px;">Brands pay ₹50L for a celebrity post that converts at 0.3%. They can't find authentic mid-tier creators. They can't tell who's real and who's bot-padded. 60% say influencer ROI is their #1 problem.</div>
+      <div class="body">Result: brands overpay. Creators underearn. The market loses on both sides.</div>
+    </div>
+  </div>
+  <div class="card mt-32" style="border-color: var(--acid); background: rgba(216,255,61,0.04);">
+    <div class="label acid-text mb-12">What we saw</div>
+    <div class="lede">The middle &mdash; creators with 10K to 100K followers, 3&ndash;8% engagement, zero infrastructure &mdash; is the most engaged, most ignored segment in the creator economy. <span class="italic-serif" style="font-size: 24px;">That's where the ROI lives.</span> That's our wedge.</div>
+  </div>
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">A. FOUNDATION &middot; <b>05</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 06 — MISSION / VISION / PURPOSE / PROMISE
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>A. Foundation &middot; Mission / Vision / Purpose / Promise</div>
+  </div>
+  <div class="eyebrow">The Why</div>
+  <h2 class="h1" style="margin-bottom: 28px;">Why we exist,<br/>what we're building.</h2>
+
+  <div class="grid-2 gap-24" style="margin-top: 20px;">
+    <div class="card">
+      <div class="label acid-text mb-12">Mission</div>
+      <div class="lede">Give every undiscovered creator the <strong>home base</strong> to be seen, hired, and paid &mdash; before the market prices them in.</div>
+    </div>
+    <div class="card">
+      <div class="label" style="color: var(--blue);">Vision</div>
+      <div class="lede mt-12">A world where being a creator is a legitimate, sustainable career &mdash; built on craft and consistency, not luck or virality.</div>
+    </div>
+    <div class="card">
+      <div class="label" style="color: var(--pink);">Purpose</div>
+      <div class="lede mt-12">Invert the timing of the creator economy. Capture and compound value during the climb, not after the creator is already expensive.</div>
+    </div>
+    <div class="card" style="background: var(--acid); border-color: var(--acid); color: var(--ink);">
+      <div class="label" style="color: var(--ink);">Brand Promise</div>
+      <div style="font-family: 'Archivo'; font-weight: 900; font-size: 30px; line-height: 1.0; text-transform: uppercase; margin-top: 10px; color: var(--ink);">Get Discovered.<br/>Get Connected.<br/>Get Paid.</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">A. FOUNDATION &middot; <b>06</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 07 — VALUES
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>A. Foundation &middot; Values</div>
+  </div>
+  <div class="eyebrow">Six Principles</div>
+  <h2 class="h1" style="margin-bottom: 24px;">What we believe.</h2>
+
+  <div class="grid-3 gap-20">
+    <div class="card">
+      <div class="badge mb-12">01</div>
+      <div class="h3 mb-12">Growth over popularity.</div>
+      <div class="body muted">A 15K creator with 8% engagement beats a 2M creator with 0.3%. We measure potential, not vanity.</div>
+    </div>
+    <div class="card">
+      <div class="badge mb-12">02</div>
+      <div class="h3 mb-12">You own the climb.</div>
+      <div class="body muted">Reputation, audience, receipts &mdash; they belong to the creator. We don't rent your career back to you.</div>
+    </div>
+    <div class="card">
+      <div class="badge mb-12">03</div>
+      <div class="h3 mb-12">Show the grind, not just the glow.</div>
+      <div class="body muted">We tell the truth about how hard this is. No pastel manifest-your-dream-career nonsense.</div>
+    </div>
+    <div class="card">
+      <div class="badge mb-12">04</div>
+      <div class="h3 mb-12">Money is not a dirty word.</div>
+      <div class="body muted">Creators should talk about rates, contracts, and margins out loud. We make it normal.</div>
+    </div>
+    <div class="card">
+      <div class="badge mb-12">05</div>
+      <div class="h3 mb-12">Built for the underdawg.</div>
+      <div class="body muted">Every product decision: does this help the 10K-100K creator more than the 10M one?</div>
+    </div>
+    <div class="card">
+      <div class="badge mb-12">06</div>
+      <div class="h3 mb-12">No fakes. No shortcuts.</div>
+      <div class="body muted">We verify. We escrow. We disclose. Trust is the moat.</div>
+    </div>
+  </div>
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">A. FOUNDATION &middot; <b>07</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 08 — BRAND PERSONALITY / ARCHETYPE
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>A. Foundation &middot; Personality &amp; Archetype</div>
+  </div>
+  <div class="eyebrow">Personality</div>
+  <h2 class="h1" style="margin-bottom: 22px;">Rebel. Hero. Creator.</h2>
+  <div class="lede muted" style="max-width: 760px; margin-bottom: 28px;">Underdawg is the friend who says &ldquo;you're underselling yourself&rdquo; and opens a spreadsheet to prove it. Not edgy for edginess's sake &mdash; edgy because the truth is.</div>
+
+  <div class="grid-3 gap-20">
+    <div class="card" style="border-color: var(--acid);">
+      <div class="row" style="justify-content: space-between; align-items:center; margin-bottom:10px;">
+        <div class="h3 acid-text">Rebel</div>
+        <div class="h2 acid-text">60%</div>
+      </div>
+      <div class="body muted">Fights the gatekeepers. Instagram's algorithm. The "famous-first, paid-second" rule. The whole brand thesis is "the system ignores you; we fix it."</div>
+    </div>
+    <div class="card" style="border-color: var(--blue);">
+      <div class="row" style="justify-content: space-between; align-items:center; margin-bottom:10px;">
+        <div class="h3 blue-text">Hero</div>
+        <div class="h2 blue-text">30%</div>
+      </div>
+      <div class="body muted">Doesn't just complain about the system &mdash; builds the alternative and empowers creators to win inside it.</div>
+    </div>
+    <div class="card" style="border-color: var(--pink);">
+      <div class="row" style="justify-content: space-between; align-items:center; margin-bottom:10px;">
+        <div class="h3 pink-text">Creator</div>
+        <div class="h2 pink-text">10%</div>
+      </div>
+      <div class="body muted">Quiet but present. Celebrates the craft, the grind, the actual work behind the metrics.</div>
+    </div>
+  </div>
+
+  <div class="grid-4 gap-16 mt-32">
+    <div class="card-flat"><div class="label">Is</div><div class="h3 mt-8">Gritty</div></div>
+    <div class="card-flat"><div class="label">Is</div><div class="h3 mt-8">Direct</div></div>
+    <div class="card-flat"><div class="label">Is Not</div><div class="h3 mt-8 muted">Pastel</div></div>
+    <div class="card-flat"><div class="label">Is Not</div><div class="h3 mt-8 muted">Polite</div></div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">A. FOUNDATION &middot; <b>08</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 09 — AUDIENCE / PERSONAS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>A. Foundation &middot; Audience &amp; Personas</div>
+  </div>
+  <div class="eyebrow">Who we build for</div>
+  <h2 class="h1" style="margin-bottom: 26px;">The mid-tier wedge.</h2>
+
+  <div class="grid-3 gap-20">
+    <div class="card">
+      <div class="badge pink">Persona 01</div>
+      <div class="h3 mt-12">Sola, 24<br/>The Multi-Hyphenate</div>
+      <div class="label mt-12">Profile</div>
+      <div class="body mt-8">Visual artist + photographer. 12K IG, 5K TikTok. Brooklyn / Bengaluru. Rising tier.</div>
+      <div class="label mt-16">Pain</div>
+      <div class="body mt-8 muted">Brands DM then ghost. Undersells. 8 disconnected tools. Algorithm tanked her reach.</div>
+      <div class="label mt-16">Wishes for</div>
+      <div class="body italic-serif acid-text mt-8" style="font-size: 16px;">"One place where my career actually lives."</div>
+    </div>
+
+    <div class="card">
+      <div class="badge blue">Persona 02</div>
+      <div class="h3 mt-12">Arjun, 29<br/>The Career-Switcher</div>
+      <div class="label mt-12">Profile</div>
+      <div class="body mt-8">Ex-corporate designer/podcaster. 30K combined. Tier-2 India. Established tier.</div>
+      <div class="label mt-16">Pain</div>
+      <div class="body mt-8 muted">Irregular income, no credit. Tax/GST nightmare. Can't tell what actually drives revenue.</div>
+      <div class="label mt-16">Wishes for</div>
+      <div class="body italic-serif acid-text mt-8" style="font-size: 16px;">"A finance + analytics layer for nine-source income."</div>
+    </div>
+
+    <div class="card">
+      <div class="badge ember">Persona 03</div>
+      <div class="h3 mt-12">Riya, 21<br/>The Micro-Brand Builder</div>
+      <div class="label mt-12">Profile</div>
+      <div class="body mt-8">Fashion + lifestyle, drops merch. 8K IG. College/fresh grad. Emerging tier.</div>
+      <div class="label mt-16">Pain</div>
+      <div class="body mt-8 muted">80% of revenue eaten by fees. Can't afford a designer. Followers ≠ customers.</div>
+      <div class="label mt-16">Wishes for</div>
+      <div class="body italic-serif acid-text mt-8" style="font-size: 16px;">"AI mockups, a store that builds itself, an email list I own."</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">A. FOUNDATION &middot; <b>09</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 10 — POSITIONING + PROMISE
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>A. Foundation &middot; Positioning</div>
+  </div>
+  <div class="eyebrow">Positioning</div>
+  <h2 class="h1" style="margin-bottom: 26px;">Home base for emerging creators.</h2>
+
+  <div class="card mb-24">
+    <div class="label mb-12">Positioning Statement</div>
+    <div class="lede">For <span class="acid-text">emerging creators in the 10K&ndash;100K mid-tier</span> &mdash; the most engaged, most ignored segment in the creator economy &mdash; <strong>Underdawg is the home base</strong> that turns talent into a paid career. Unlike Instagram, Upwork, or LinkedIn (each solves one slice), we hold the whole thing under one roof: discovery, money, audience, and reputation.</div>
+  </div>
+
+  <div class="grid-2 gap-24">
+    <div class="card-flat">
+      <div class="label mb-12">Category</div>
+      <div class="h2 acid-text">Home base for emerging creators.</div>
+      <div class="body muted mt-12">Not a social app. Not a marketplace. Not an agency. The one place a creator's whole career lives.</div>
+    </div>
+    <div class="card-flat" style="background: var(--acid); color: var(--ink); border-color: var(--acid);">
+      <div class="label" style="color: var(--ink);">Brand Promise</div>
+      <div style="font-family: 'Archivo'; font-weight: 900; font-size: 36px; line-height: 1.0; text-transform: uppercase; margin-top: 10px; color: var(--ink);">Get Discovered.<br/>Get Connected.<br/>Get Paid.</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">A. FOUNDATION &middot; <b>10</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SECTION B DIVIDER
+     ============================================================ -->
+<section class="slide divider">
+  <div class="top-meta"><img src="../assets/1.png" alt=""/><span>UNDERDAWG &middot; BRAND GUIDELINES V1.0</span></div>
+  <div class="letter-massive">B</div>
+  <div class="section-title">Verbal<br/>Identity.</div>
+  <div class="desc">How Underdawg sounds in writing &mdash; the name, the taglines, the tone, the words we use and the ones we never touch.</div>
+  <img class="obj" src="../src/objects/obj-6.png" alt=""/>
+  <div class="corner">SECTION B &middot; 11 / 62</div>
+</section>
+
+<!-- ============================================================
+     SLIDE 12 — NAME & MEANING
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>B. Verbal Identity &middot; Name &amp; Meaning</div>
+  </div>
+  <div class="eyebrow">Etymology</div>
+  <h2 class="h1" style="margin-bottom: 26px;">Why <em class="italic-serif acid-text" style="font-size: 64px;">"Underdawg"</em></h2>
+
+  <div class="grid-2 gap-40" style="margin-top: 10px;">
+    <div>
+      <div class="card">
+        <div class="label acid-text mb-12">The deliberate misspelling</div>
+        <div class="body">A spelling that signals culture &mdash; hip-hop, internet-native, lowercase rebellion. <span class="italic-serif acid-text" style="font-size: 16px;">Dawg</span> is what you call your homie. The brand is <strong>for the dawgs</strong> before it's about them.</div>
+      </div>
+      <div class="card mt-16">
+        <div class="label acid-text mb-12">Under, not over</div>
+        <div class="body">Not a brag. Not "Top Creator." We're for the ones <em class="italic-serif">still climbing</em>. The day a creator becomes "over-dawg," they've graduated &mdash; and they didn't get there alone.</div>
+      </div>
+    </div>
+    <div>
+      <div class="card-flat" style="background: var(--acid); color: var(--ink); border-color: var(--acid);">
+        <div class="label" style="color: var(--ink);">The thesis, in one word</div>
+        <div style="font-family: 'Archivo'; font-weight: 900; font-size: 84px; line-height: 0.9; text-transform: uppercase; margin-top: 14px; color: var(--ink); letter-spacing: -0.02em;">Under<br/>dawg.</div>
+        <div class="body" style="margin-top: 18px; color: var(--ink);"><strong>Underdog</strong> &mdash; the contender. Boxing slang since the 1880s. The one not expected to win.</div>
+        <div class="body" style="margin-top: 8px; color: var(--ink);"><strong>-awg</strong> &mdash; the culture. The dawg in your corner. The crew.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">B. VERBAL IDENTITY &middot; <b>12</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 13 — TAGLINES
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>B. Verbal Identity &middot; Tagline System</div>
+  </div>
+  <div class="eyebrow">Taglines</div>
+  <h2 class="h1" style="margin-bottom: 26px;">Lines that travel.</h2>
+
+  <div class="grid-2 gap-24">
+    <div class="card" style="background: var(--ink); border-color: var(--acid);">
+      <div class="label acid-text mb-12">Primary &middot; Hero</div>
+      <div style="font-family: 'Instrument Serif'; font-style: italic; font-size: 60px; line-height: 1.0; color: var(--acid); letter-spacing: -0.01em;">For the ones<br/>still climbing.</div>
+      <div class="body muted mt-16">Used on: cover assets, manifesto, hero marketing, t-shirt backs, splash screens.</div>
+    </div>
+    <div class="card">
+      <div class="label mb-12">Product Line</div>
+      <div style="font-family: 'Archivo'; font-weight: 900; font-size: 32px; line-height: 1.0; text-transform: uppercase;">Get Discovered.<br/>Get Connected.<br/>Get Paid.</div>
+      <div class="body muted mt-16">Used on: app store, onboarding, sales decks, product pages.</div>
+    </div>
+  </div>
+
+  <div class="grid-3 gap-16 mt-24">
+    <div class="card-flat"><div class="label">Cultural</div><div class="h3 mt-8">Built for the dawgs.</div></div>
+    <div class="card-flat"><div class="label">Manifesto</div><div class="h3 mt-8">Unknown to unstoppable.</div></div>
+    <div class="card-flat"><div class="label">Philosophy</div><div class="h3 mt-8 acid-text">Growth over popularity.</div></div>
+  </div>
+
+  <div class="card-flat mt-24" style="border-color: var(--ember);">
+    <div class="label" style="color: var(--ember);">Category descriptor</div>
+    <div class="h3 mt-8">The home base for emerging creators.</div>
+    <div class="body muted mt-8">Use this in investor decks, press, and partnership intros. <span class="strike">"Creator OS"</span> &mdash; retired. Too cold for the audience.</div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">B. VERBAL IDENTITY &middot; <b>13</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 14 — TONE OF VOICE
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>B. Verbal Identity &middot; Tone of Voice</div>
+  </div>
+  <div class="eyebrow">Tone</div>
+  <h2 class="h1" style="margin-bottom: 24px;">Gritty. Direct.<br/>Never showing off.</h2>
+
+  <div class="grid-2 gap-24">
+    <div>
+      <div class="label mb-16">Voice sliders</div>
+      <div style="display:flex; flex-direction:column; gap: 14px;">
+        <div>
+          <div class="row" style="justify-content: space-between; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute); margin-bottom: 6px;"><span>Formal</span><span>Casual</span></div>
+          <div style="height: 4px; background: var(--mute-dark); border-radius: 2px; position: relative;"><span style="position:absolute; top: -5px; left: 78%; width: 14px; height: 14px; background: var(--acid); border-radius: 50%;"></span></div>
+        </div>
+        <div>
+          <div class="row" style="justify-content: space-between; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute); margin-bottom: 6px;"><span>Serious</span><span>Playful</span></div>
+          <div style="height: 4px; background: var(--mute-dark); border-radius: 2px; position: relative;"><span style="position:absolute; top: -5px; left: 40%; width: 14px; height: 14px; background: var(--acid); border-radius: 50%;"></span></div>
+        </div>
+        <div>
+          <div class="row" style="justify-content: space-between; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute); margin-bottom: 6px;"><span>Respectful</span><span>Irreverent</span></div>
+          <div style="height: 4px; background: var(--mute-dark); border-radius: 2px; position: relative;"><span style="position:absolute; top: -5px; left: 60%; width: 14px; height: 14px; background: var(--acid); border-radius: 50%;"></span></div>
+        </div>
+        <div>
+          <div class="row" style="justify-content: space-between; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute); margin-bottom: 6px;"><span>Polished</span><span>Raw</span></div>
+          <div style="height: 4px; background: var(--mute-dark); border-radius: 2px; position: relative;"><span style="position:absolute; top: -5px; left: 70%; width: 14px; height: 14px; background: var(--acid); border-radius: 50%;"></span></div>
+        </div>
+        <div>
+          <div class="row" style="justify-content: space-between; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute); margin-bottom: 6px;"><span>Hyped</span><span>Understated</span></div>
+          <div style="height: 4px; background: var(--mute-dark); border-radius: 2px; position: relative;"><span style="position:absolute; top: -5px; left: 30%; width: 14px; height: 14px; background: var(--acid); border-radius: 50%;"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-16">Four attributes, no exceptions</div>
+      <div class="grid-2 gap-12">
+        <div class="card-flat"><div class="h3 acid-text">Gritty</div><div class="body muted mt-8">Truth-first. We name what's broken.</div></div>
+        <div class="card-flat"><div class="h3 acid-text">Warm</div><div class="body muted mt-8">In the creator's corner, not above them.</div></div>
+        <div class="card-flat"><div class="h3 acid-text">Smart</div><div class="body muted mt-8">We know the numbers. We don't lecture.</div></div>
+        <div class="card-flat"><div class="h3 acid-text">Confident</div><div class="body muted mt-8">Underdoggish &mdash; punches up at platforms, never down at creators.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">B. VERBAL IDENTITY &middot; <b>14</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 15 — MESSAGING PILLARS + DOs/DONTs
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>B. Verbal Identity &middot; Messaging &amp; Do's / Don'ts</div>
+  </div>
+  <div class="eyebrow">Messaging Pillars</div>
+  <h2 class="h1" style="margin-bottom: 22px;">Four stories,<br/>told a thousand ways.</h2>
+
+  <div class="grid-4 gap-16">
+    <div class="card-flat" style="border-color: var(--acid);"><div class="label acid-text">01</div><div class="h3 mt-8">The System Is Rigged</div><div class="body muted mt-8">Platforms pay creators after they're already expensive. We invert the timing.</div></div>
+    <div class="card-flat" style="border-color: var(--blue);"><div class="label" style="color: var(--blue);">02</div><div class="h3 mt-8">The Middle Is The Wedge</div><div class="body muted mt-8">10K&ndash;100K has the engagement. Nobody is building for them.</div></div>
+    <div class="card-flat" style="border-color: var(--pink);"><div class="label" style="color: var(--pink);">03</div><div class="h3 mt-8">One App, Six Streams</div><div class="body muted mt-8">Same creator unlocks subs, merch, gigs, campaigns, management over time.</div></div>
+    <div class="card-flat" style="border-color: var(--ember);"><div class="label" style="color: var(--ember);">04</div><div class="h3 mt-8">You Own What You Build</div><div class="body muted mt-8">Reputation lives here. Audience migrates from rented to owned.</div></div>
+  </div>
+
+  <div class="dd mt-32">
+    <div class="box do">
+      <div class="head">Write like this</div>
+      <div class="ex">"Brands overpay. Creators underearn. We fix both."</div>
+      <div class="ex mt-12">"If you're not already famous, the system ignores you."</div>
+      <div class="ex mt-12">"First income in 30 days. Not 30 months."</div>
+    </div>
+    <div class="box dont">
+      <div class="head">Not like this</div>
+      <div class="ex muted">"Empowering the next generation of digital storytellers through our comprehensive creator-centric ecosystem."</div>
+      <div class="ex muted mt-12">"Unlock your true potential and synergize your influencer journey."</div>
+      <div class="ex muted mt-12">"Welcome, valued user."</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">B. VERBAL IDENTITY &middot; <b>15</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 16 — VOCABULARY
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>B. Verbal Identity &middot; Vocabulary</div>
+  </div>
+  <div class="eyebrow">Word List</div>
+  <h2 class="h1" style="margin-bottom: 24px;">Words to use.<br/>Words to never use.</h2>
+
+  <div class="grid-2 gap-24">
+    <div class="card" style="border-color: var(--acid);">
+      <div class="label acid-text mb-16">Use ✓</div>
+      <table class="spec">
+        <tr><td class="k">Audience</td><td>creator, artist, the dawgs, homie</td></tr>
+        <tr><td class="k">Action</td><td>ship it, drop, climb, the come-up</td></tr>
+        <tr><td class="k">Money</td><td>get paid, earn from day one</td></tr>
+        <tr><td class="k">Trust</td><td>reputation, receipts, the work</td></tr>
+        <tr><td class="k">Identity</td><td>underdawg, mid-tier, rising</td></tr>
+        <tr><td class="k">Context</td><td>crore, lakh, ₹, India-first</td></tr>
+        <tr><td class="k">Philosophy</td><td>growth over popularity</td></tr>
+      </table>
+    </div>
+    <div class="card" style="border-color: var(--ember);">
+      <div class="label" style="color: var(--ember); margin-bottom: 16px;">Avoid ✗</div>
+      <table class="spec">
+        <tr><td class="k">Audience</td><td class="strike">user, consumer, influencer, KOL</td></tr>
+        <tr><td class="k">Action</td><td class="strike">engagement, leverage, synergize</td></tr>
+        <tr><td class="k">Money</td><td class="strike">monetize (when "get paid" works)</td></tr>
+        <tr><td class="k">Trust</td><td class="strike">personal brand, hustle culture</td></tr>
+        <tr><td class="k">Identity</td><td class="strike">nano-/micro-influencer (jargon)</td></tr>
+        <tr><td class="k">Context</td><td class="strike">"global creator" (lazy)</td></tr>
+        <tr><td class="k">Category</td><td class="strike">operating system, platform, SaaS</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">B. VERBAL IDENTITY &middot; <b>16</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SECTION C DIVIDER — LOGO
+     ============================================================ -->
+<section class="slide divider">
+  <div class="top-meta"><img src="../assets/1.png" alt=""/><span>UNDERDAWG &middot; BRAND GUIDELINES V1.0</span></div>
+  <div class="letter-massive">C</div>
+  <div class="section-title">Logo<br/>System.</div>
+  <div class="desc">The mark, the wordmark, the lockups, the rules. How the brand signs its name &mdash; and how it never signs it.</div>
+  <img class="obj" src="../src/objects/obj-7.png" alt=""/>
+  <div class="corner">SECTION C &middot; 17 / 62</div>
+</section>
+
+<!-- ============================================================
+     SLIDE 18 — PRIMARY LOGO
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>C. Logo System &middot; Primary Logo</div>
+  </div>
+  <div class="eyebrow">The Hero Mark</div>
+  <h2 class="h1" style="margin-bottom: 22px;">This is the signature.</h2>
+
+  <div class="grid-2 gap-40" style="margin-top: 20px;">
+    <div class="card-flat" style="display:flex; align-items:center; justify-content:center; padding: 40px; min-height: 360px;">
+      <img src="../assets/3.png" style="max-width: 320px; height: auto;" alt="Underdawg full logo"/>
+    </div>
+    <div>
+      <div class="label mb-12">Anatomy</div>
+      <table class="spec">
+        <tr><td class="k">Mark</td><td>Acid-green circular signet with central ink dot &mdash; the bullseye. A target on the climb.</td></tr>
+        <tr><td class="k">Wordmark</td><td>UNDERDAWG, Archivo Black, all caps, tight tracking. Heavy. Editorial.</td></tr>
+        <tr><td class="k">Lockup</td><td>Mark + wordmark horizontal &mdash; mark sits at exactly the cap-height of the wordmark.</td></tr>
+        <tr><td class="k">Construction</td><td>Mark diameter = 1x. Wordmark cap-height = 1x. Gap between mark and wordmark = 0.4x.</td></tr>
+        <tr><td class="k">Default file</td><td>brand-logo.png &middot; 3.png (master) &middot; 1.png (icon)</td></tr>
+      </table>
+      <div class="card mt-16" style="background: rgba(216,255,61,0.06); border-color: var(--acid);">
+        <div class="label acid-text">Rule</div>
+        <div class="body mt-8">The signet is the brand's hero. When in doubt, lead with the mark, support with the wordmark.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">C. LOGO SYSTEM &middot; <b>18</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 19 — LOGO CONSTRUCTION
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>C. Logo System &middot; Construction</div>
+  </div>
+  <div class="eyebrow">Geometry</div>
+  <h2 class="h1" style="margin-bottom: 22px;">The math.</h2>
+
+  <div class="grid-2 gap-40">
+    <div class="card-flat" style="position: relative; min-height: 380px; padding: 32px; background: rgba(216,255,61,0.04); border-color: var(--hairline);">
+      <!-- construction grid lines -->
+      <div style="position: absolute; inset: 32px; background-image: linear-gradient(rgba(216,255,61,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(216,255,61,0.08) 1px, transparent 1px); background-size: 32px 32px;"></div>
+      <div style="position: relative; display:flex; align-items:center; justify-content:center; height: 100%;">
+        <img src="../assets/1.png" style="width: 220px; height: 220px;" alt="Signet construction"/>
+      </div>
+      <div style="position: absolute; bottom: 16px; left: 32px; font-family: 'Space Grotesk'; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute);">Signet on 8&times;8 grid &middot; X = base unit</div>
+    </div>
+    <div>
+      <div class="label mb-12">Construction Rules</div>
+      <table class="spec">
+        <tr><td class="k">Outer ring</td><td>Diameter 8X &middot; stroke 0.6X</td></tr>
+        <tr><td class="k">Inner ring gap</td><td>Negative space at 7X diameter</td></tr>
+        <tr><td class="k">Center dot</td><td>2X diameter, perfectly centered</td></tr>
+        <tr><td class="k">Optical center</td><td>Bullseye sits at exact geometric center</td></tr>
+        <tr><td class="k">Wordmark height</td><td>Cap-height equals signet diameter</td></tr>
+        <tr><td class="k">Letter spacing</td><td>-2% tracking &middot; Archivo Black 900</td></tr>
+        <tr><td class="k">Gap</td><td>Mark to wordmark = 0.4 &times; cap-height</td></tr>
+        <tr><td class="k">Baseline</td><td>Mark optically aligned to wordmark center</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">C. LOGO SYSTEM &middot; <b>19</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 20 — LOGO VARIATIONS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>C. Logo System &middot; Variations</div>
+  </div>
+  <div class="eyebrow">Lockup Family</div>
+  <h2 class="h1" style="margin-bottom: 22px;">One mark, six lockups.</h2>
+
+  <div class="grid-3 gap-16">
+    <div class="card-flat" style="min-height: 150px; display:flex; flex-direction:column; justify-content: space-between;">
+      <div class="label">01 &middot; Primary Lockup</div>
+      <div class="center" style="flex:1;"><img src="../assets/3.png" style="max-width: 200px;" alt=""/></div>
+      <div class="body muted">Horizontal &middot; default</div>
+    </div>
+    <div class="card-flat" style="min-height: 150px; display:flex; flex-direction:column; justify-content: space-between;">
+      <div class="label">02 &middot; Icon Only</div>
+      <div class="center" style="flex:1;"><img src="../assets/1.png" style="width: 80px; height:80px;" alt=""/></div>
+      <div class="body muted">Avatars, favicon, app icon</div>
+    </div>
+    <div class="card-flat" style="min-height: 150px; display:flex; flex-direction:column; justify-content: space-between;">
+      <div class="label">03 &middot; Wordmark Only</div>
+      <div class="center" style="flex:1;"><span style="font-family: 'Archivo'; font-weight: 900; font-size: 38px; text-transform: uppercase; letter-spacing: -0.01em;">UNDERDAWG</span></div>
+      <div class="body muted">Editorial, headlines, swag</div>
+    </div>
+    <div class="card-flat light" style="background: var(--bone); min-height: 150px; display:flex; flex-direction:column; justify-content: space-between; color: var(--ink); border-color: rgba(0,0,0,0.15);">
+      <div class="label" style="color: #6a6660;">04 &middot; Inverted</div>
+      <div class="center" style="flex:1;"><img src="../assets/3.png" style="max-width: 180px; filter: invert(1);" alt=""/></div>
+      <div class="body" style="color: #6a6660;">For light surfaces</div>
+    </div>
+    <div class="card-flat" style="min-height: 150px; display:flex; flex-direction:column; justify-content: space-between;">
+      <div class="label">05 &middot; Monochrome Bone</div>
+      <div class="center" style="flex:1;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <div style="width:48px; height:48px; border-radius:50%; border: 4px solid var(--bone); display:flex; align-items:center; justify-content:center;"><div style="width:14px; height:14px; border-radius:50%; background: var(--bone);"></div></div>
+          <span style="font-family: 'Archivo'; font-weight: 900; font-size: 24px; text-transform: uppercase; color: var(--bone);">UNDERDAWG</span>
+        </div>
+      </div>
+      <div class="body muted">Single-color reproduction</div>
+    </div>
+    <div class="card-flat" style="min-height: 150px; display:flex; flex-direction:column; justify-content: space-between;">
+      <div class="label">06 &middot; Stacked</div>
+      <div class="center" style="flex:1;"><div style="text-align:center;"><img src="../assets/1.png" style="width:48px; height:48px; margin-bottom: 6px;" alt=""/><div style="font-family: 'Archivo'; font-weight: 900; font-size: 16px; text-transform: uppercase;">UNDERDAWG</div></div></div>
+      <div class="body muted">Square placements, social</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">C. LOGO SYSTEM &middot; <b>20</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 21 — CLEAR SPACE & MIN SIZE
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>C. Logo System &middot; Clear Space &amp; Minimum Size</div>
+  </div>
+  <div class="eyebrow">Breathing Room</div>
+  <h2 class="h1" style="margin-bottom: 22px;">Give it air.<br/>Give it size.</h2>
+
+  <div class="grid-2 gap-32">
+    <div class="card-flat" style="padding: 0; overflow: hidden;">
+      <div class="label" style="padding: 16px 20px 0 20px;">Clear Space</div>
+      <div style="position: relative; padding: 60px; margin: 16px 0; border: 1px dashed var(--acid);">
+        <div style="position: absolute; top: 20px; left: 20px; right: 20px; bottom: 20px; border: 1px dashed rgba(216,255,61,0.4);"></div>
+        <div class="center"><img src="../assets/3.png" style="max-width: 200px;" alt=""/></div>
+      </div>
+      <div class="body muted" style="padding: 0 20px 20px 20px;">Minimum clear space on all sides = 1X (one signet diameter). Never crowd the logo.</div>
+    </div>
+
+    <div>
+      <div class="label mb-16">Minimum Size</div>
+      <div class="grid-3 gap-12 mb-16">
+        <div class="card-flat" style="text-align:center; padding: 14px;">
+          <img src="../assets/3.png" style="width: 120px;" alt=""/>
+          <div class="label mt-8">120px wide</div>
+          <div class="body muted">Digital min</div>
+        </div>
+        <div class="card-flat" style="text-align:center; padding: 14px;">
+          <img src="../assets/3.png" style="width: 80px;" alt=""/>
+          <div class="label mt-8">80px wide</div>
+          <div class="body muted">Edge case</div>
+        </div>
+        <div class="card-flat" style="text-align:center; padding: 14px;">
+          <img src="../assets/1.png" style="width: 24px; height: 24px;" alt=""/>
+          <div class="label mt-8">24×24 px</div>
+          <div class="body muted">Icon only</div>
+        </div>
+      </div>
+      <table class="spec">
+        <tr><td class="k">Print min</td><td>20mm wide (lockup) &middot; 8mm (icon)</td></tr>
+        <tr><td class="k">Digital min</td><td>120px wide (lockup) &middot; 24px (icon)</td></tr>
+        <tr><td class="k">Favicon</td><td>32&times;32 px &middot; use icon, not lockup</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">C. LOGO SYSTEM &middot; <b>21</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 22 — LOGO ON BACKGROUNDS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>C. Logo System &middot; Logo on Backgrounds</div>
+  </div>
+  <div class="eyebrow">Surface Test</div>
+  <h2 class="h1" style="margin-bottom: 22px;">Where it sits.</h2>
+
+  <div class="grid-4 gap-12">
+    <div class="card-flat" style="background: var(--ink); padding: 28px; min-height: 180px; display:flex; flex-direction:column; justify-content:space-between;">
+      <div class="label">On Ink</div>
+      <div class="center" style="flex:1;"><img src="../assets/3.png" style="max-width: 140px;" alt=""/></div>
+      <div class="label acid-text">✓ Default</div>
+    </div>
+    <div class="card-flat" style="background: var(--bone); padding: 28px; min-height: 180px; display:flex; flex-direction:column; justify-content:space-between; color: var(--ink);">
+      <div class="label" style="color: #6a6660;">On Bone</div>
+      <div class="center" style="flex:1;"><img src="../assets/3.png" style="max-width: 140px; filter: invert(1);" alt=""/></div>
+      <div class="label" style="color: var(--ember);">✓ Approved (inverted)</div>
+    </div>
+    <div class="card-flat" style="background: var(--acid); padding: 28px; min-height: 180px; display:flex; flex-direction:column; justify-content:space-between; color: var(--ink);">
+      <div class="label" style="color: var(--ink);">On Acid</div>
+      <div class="center" style="flex:1;"><img src="../assets/3.png" style="max-width: 140px; filter: invert(1);" alt=""/></div>
+      <div class="label" style="color: var(--ink);">✓ Use mono-ink only</div>
+    </div>
+    <div class="card-flat" style="background: var(--blue); padding: 28px; min-height: 180px; display:flex; flex-direction:column; justify-content:space-between; color: var(--bone);">
+      <div class="label">On Electric Blue</div>
+      <div class="center" style="flex:1;"><img src="../assets/3.png" style="max-width: 140px;" alt=""/></div>
+      <div class="label" style="color: var(--acid);">✓ Reserved use</div>
+    </div>
+  </div>
+
+  <div class="grid-4 gap-12 mt-16">
+    <div class="card-flat" style="background: linear-gradient(135deg, #2a2a26, #0a0a0a); padding: 28px; min-height: 180px; display:flex; flex-direction:column; justify-content:space-between;">
+      <div class="label">On Photography</div>
+      <div class="center" style="flex:1;"><img src="../assets/3.png" style="max-width: 140px;" alt=""/></div>
+      <div class="label muted">✓ Only on darkened images</div>
+    </div>
+    <div class="card-flat" style="background: var(--pink); padding: 28px; min-height: 180px; display:flex; flex-direction:column; justify-content:space-between; color: var(--ink);">
+      <div class="label" style="color: var(--ink);">On Blush</div>
+      <div class="center" style="flex:1;"><img src="../assets/3.png" style="max-width: 140px; filter: invert(1);" alt=""/></div>
+      <div class="label" style="color: var(--ink);">✓ Mono-ink lockup</div>
+    </div>
+    <div class="card-flat" style="background: repeating-linear-gradient(45deg, #FF5A1F, #FF5A1F 12px, #FF6BB5 12px, #FF6BB5 24px); padding: 28px; min-height: 180px; display:flex; flex-direction:column; justify-content:space-between;">
+      <div class="label" style="color: var(--ink);">On Busy</div>
+      <div class="center" style="flex:1;"><div style="background: var(--ink); padding: 14px;"><img src="../assets/3.png" style="max-width: 110px;" alt=""/></div></div>
+      <div class="label" style="color: var(--ink);">✓ Use ink panel behind</div>
+    </div>
+    <div class="card-flat" style="background: #6a6a6a; padding: 28px; min-height: 180px; display:flex; flex-direction:column; justify-content:space-between;">
+      <div class="label">On Low Contrast</div>
+      <div class="center" style="flex:1;"><img src="../assets/3.png" style="max-width: 140px;" alt=""/></div>
+      <div class="label" style="color: var(--ember);">✗ Avoid</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">C. LOGO SYSTEM &middot; <b>22</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 23 — LOGO MISUSE
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>C. Logo System &middot; Misuse</div>
+  </div>
+  <div class="eyebrow">Never Do This</div>
+  <h2 class="h1" style="margin-bottom: 22px;">Eight ways<br/>to ruin the mark.</h2>
+
+  <div class="grid-4 gap-12">
+    <div class="card-flat" style="border-color: var(--ember); padding: 18px; min-height: 150px; position: relative;">
+      <div class="center" style="height: 80px;"><img src="../assets/3.png" style="max-width: 130px; transform: scaleX(1.6);" alt=""/></div>
+      <div class="label" style="color: var(--ember);">✗ Stretch</div>
+      <div class="body muted">Never alter aspect ratio.</div>
+    </div>
+    <div class="card-flat" style="border-color: var(--ember); padding: 18px; min-height: 150px;">
+      <div class="center" style="height: 80px;"><img src="../assets/3.png" style="max-width: 130px; transform: rotate(-12deg);" alt=""/></div>
+      <div class="label" style="color: var(--ember);">✗ Rotate</div>
+      <div class="body muted">Logo always sits level.</div>
+    </div>
+    <div class="card-flat" style="border-color: var(--ember); padding: 18px; min-height: 150px;">
+      <div class="center" style="height: 80px;"><img src="../assets/3.png" style="max-width: 130px; filter: hue-rotate(180deg);" alt=""/></div>
+      <div class="label" style="color: var(--ember);">✗ Recolor</div>
+      <div class="body muted">Only acid, bone, ink.</div>
+    </div>
+    <div class="card-flat" style="border-color: var(--ember); padding: 18px; min-height: 150px;">
+      <div class="center" style="height: 80px;"><img src="../assets/3.png" style="max-width: 130px; filter: drop-shadow(0 6px 10px rgba(216,255,61,0.6));" alt=""/></div>
+      <div class="label" style="color: var(--ember);">✗ Drop shadows</div>
+      <div class="body muted">No glows, no shadows.</div>
+    </div>
+    <div class="card-flat" style="border-color: var(--ember); padding: 18px; min-height: 150px;">
+      <div class="center" style="height: 80px; background: rgba(255,255,255,0.04);"><img src="../assets/3.png" style="max-width: 130px; opacity: 0.35;" alt=""/></div>
+      <div class="label" style="color: var(--ember);">✗ Reduce opacity</div>
+      <div class="body muted">100% opaque, always.</div>
+    </div>
+    <div class="card-flat" style="border-color: var(--ember); padding: 18px; min-height: 150px;">
+      <div class="center" style="height: 80px;"><span style="font-family: 'Times New Roman', serif; font-size: 28px; font-weight: 900; color: var(--bone);">UNDERDAWG</span></div>
+      <div class="label" style="color: var(--ember);">✗ Wrong typeface</div>
+      <div class="body muted">Archivo Black only.</div>
+    </div>
+    <div class="card-flat" style="border-color: var(--ember); padding: 18px; min-height: 150px;">
+      <div class="center" style="height: 80px;"><span style="font-family: 'Archivo'; font-weight: 900; font-size: 22px; text-transform: uppercase; -webkit-text-stroke: 1px var(--bone); color: transparent;">UNDERDAWG</span></div>
+      <div class="label" style="color: var(--ember);">✗ Outline / hollow</div>
+      <div class="body muted">Mark stays solid.</div>
+    </div>
+    <div class="card-flat" style="border-color: var(--ember); padding: 18px; min-height: 150px;">
+      <div class="center" style="height: 80px;"><img src="../assets/3.png" style="max-width: 130px; transform: skewX(-15deg);" alt=""/></div>
+      <div class="label" style="color: var(--ember);">✗ Skew / 3D</div>
+      <div class="body muted">No perspective tricks.</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">C. LOGO SYSTEM &middot; <b>23</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 24 — APP ICON SYSTEM
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>C. Logo System &middot; App Icon</div>
+  </div>
+  <div class="eyebrow">App Icon</div>
+  <h2 class="h1" style="margin-bottom: 22px;">The icon on every screen.</h2>
+
+  <div class="grid-4 gap-16">
+    <div class="card-flat" style="text-align:center; padding: 20px;">
+      <div style="width: 120px; height: 120px; border-radius: 26px; background: var(--ink); margin: 0 auto 14px; display:flex; align-items:center; justify-content:center; border: 1px solid var(--hairline);">
+        <img src="../assets/1.png" style="width: 80px; height: 80px;" alt=""/>
+      </div>
+      <div class="label">iOS App Icon</div>
+      <div class="body muted">1024&times;1024 &middot; 26% corner radius</div>
+    </div>
+    <div class="card-flat" style="text-align:center; padding: 20px;">
+      <div style="width: 120px; height: 120px; border-radius: 50%; background: var(--ink); margin: 0 auto 14px; display:flex; align-items:center; justify-content:center; border: 1px solid var(--hairline);">
+        <img src="../assets/1.png" style="width: 80px; height: 80px;" alt=""/>
+      </div>
+      <div class="label">Android (Round)</div>
+      <div class="body muted">512&times;512 &middot; adaptive icon</div>
+    </div>
+    <div class="card-flat" style="text-align:center; padding: 20px;">
+      <div style="width: 120px; height: 120px; border-radius: 22%; background: var(--acid); margin: 0 auto 14px; display:flex; align-items:center; justify-content:center;">
+        <img src="../assets/1.png" style="width: 80px; height: 80px; filter: invert(1);" alt=""/>
+      </div>
+      <div class="label">Acid Variant</div>
+      <div class="body muted">Brand events, app drops</div>
+    </div>
+    <div class="card-flat" style="text-align:center; padding: 20px;">
+      <div style="width: 120px; height: 120px; border-radius: 22%; background: var(--bone); margin: 0 auto 14px; display:flex; align-items:center; justify-content:center;">
+        <img src="../assets/1.png" style="width: 56px; height: 56px; filter: invert(1);" alt=""/>
+      </div>
+      <div class="label">Notification</div>
+      <div class="body muted">Status bar &middot; single-color</div>
+    </div>
+  </div>
+
+  <table class="spec mt-32">
+    <tr><th>Use</th><th>Size</th><th>Format</th><th>Note</th></tr>
+    <tr><td>iOS app icon</td><td>1024&times;1024 px</td><td>PNG, no alpha</td><td>Apple applies the squircle mask automatically</td></tr>
+    <tr><td>Android adaptive</td><td>432&times;432 dp foreground</td><td>SVG / vector</td><td>Foreground = signet on safe zone (66dp)</td></tr>
+    <tr><td>Splash screen</td><td>1242&times;2688 px</td><td>PNG</td><td>Ink background, signet centered at 1/3 vertical</td></tr>
+    <tr><td>Favicon</td><td>32&times;32 / 192&times;192</td><td>ICO / PNG</td><td>Use 1.png &mdash; never the lockup</td></tr>
+    <tr><td>Push notification</td><td>72&times;72 (Android) / vector (iOS)</td><td>Mono PNG / SF Symbol</td><td>Single-color silhouette only</td></tr>
+  </table>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">C. LOGO SYSTEM &middot; <b>24</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SECTION D DIVIDER — COLOR
+     ============================================================ -->
+<section class="slide divider">
+  <div class="top-meta"><img src="../assets/1.png" alt=""/><span>UNDERDAWG &middot; BRAND GUIDELINES V1.0</span></div>
+  <div class="letter-massive">D</div>
+  <div class="section-title">Color<br/>System.</div>
+  <div class="desc">High-contrast, editorial, unmistakable. Acid green leads. Ink and bone hold the page. Every other color earns its appearance.</div>
+  <img class="obj" src="../src/objects/obj-8.png" alt=""/>
+  <div class="corner">SECTION D &middot; 25 / 62</div>
+</section>
+
+<!-- ============================================================
+     SLIDE 26 — PRIMARY PALETTE
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>D. Color System &middot; Primary Palette</div>
+  </div>
+  <div class="eyebrow">Three Heroes</div>
+  <h2 class="h1" style="margin-bottom: 22px;">The brand's primary colors.</h2>
+
+  <div class="grid-3 gap-16">
+    <div class="swatch dark-text" style="background: var(--acid); min-height: 280px;">
+      <div>
+        <div class="name">Acid Green</div>
+        <div class="hex">HEX #D8FF3D</div>
+      </div>
+      <div class="codes">
+        RGB 216 / 255 / 61<br/>
+        CMYK 19 / 0 / 88 / 0<br/>
+        HSL 69° / 100% / 62%<br/>
+        Pantone 388 C
+      </div>
+    </div>
+    <div class="swatch light-text" style="background: var(--ink); min-height: 280px;">
+      <div>
+        <div class="name">Ink Black</div>
+        <div class="hex">HEX #0A0A0A</div>
+      </div>
+      <div class="codes">
+        RGB 10 / 10 / 10<br/>
+        CMYK 0 / 0 / 0 / 96<br/>
+        HSL 0° / 0% / 4%<br/>
+        Pantone Black 6 C
+      </div>
+    </div>
+    <div class="swatch dark-text" style="background: var(--bone); min-height: 280px;">
+      <div>
+        <div class="name">Bone</div>
+        <div class="hex">HEX #F2EFE6</div>
+      </div>
+      <div class="codes">
+        RGB 242 / 239 / 230<br/>
+        CMYK 4 / 4 / 11 / 0<br/>
+        HSL 45° / 27% / 93%<br/>
+        Pantone 9043 C
+      </div>
+    </div>
+  </div>
+
+  <div class="card mt-24">
+    <div class="label acid-text mb-12">The 60 / 30 / 10 rule</div>
+    <div class="grid-3 gap-12" style="align-items:end;">
+      <div><div style="height: 28px; background: var(--ink); border: 1px solid var(--hairline);"></div><div class="body mt-8"><strong>60%</strong> Ink Black <span class="muted">&mdash; surfaces, body</span></div></div>
+      <div><div style="height: 28px; background: var(--bone);"></div><div class="body mt-8"><strong>30%</strong> Bone <span class="muted">&mdash; text, hairlines, contrast surfaces</span></div></div>
+      <div><div style="height: 28px; background: var(--acid);"></div><div class="body mt-8"><strong>10%</strong> Acid Green <span class="muted">&mdash; accent, key CTA, highlights</span></div></div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">D. COLOR SYSTEM &middot; <b>26</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 27 — SECONDARY / ACCENTS + NEUTRALS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>D. Color System &middot; Secondary &amp; Neutrals</div>
+  </div>
+  <div class="eyebrow">Secondary &amp; Neutrals</div>
+  <h2 class="h1" style="margin-bottom: 22px;">Earned color.</h2>
+  <div class="lede muted mb-24">Used sparingly. Each accent has a job &mdash; not a vibe.</div>
+
+  <div class="grid-4 gap-16">
+    <div class="swatch light-text" style="background: var(--blue);">
+      <div><div class="name">Electric Blue</div><div class="hex">#2E5BFF</div></div>
+      <div class="codes">RGB 46 / 91 / 255 &middot; Analytics, data, brand-side UI</div>
+    </div>
+    <div class="swatch dark-text" style="background: var(--pink);">
+      <div><div class="name">Blush Pink</div><div class="hex">#FF6BB5</div></div>
+      <div class="codes">RGB 255 / 107 / 181 &middot; Community, social, fan-side</div>
+    </div>
+    <div class="swatch light-text" style="background: var(--ember);">
+      <div><div class="name">Ember Orange</div><div class="hex">#FF5A1F</div></div>
+      <div class="codes">RGB 255 / 90 / 31 &middot; Money, monetization, alerts</div>
+    </div>
+    <div class="swatch dark-text" style="background: var(--mute);">
+      <div><div class="name">Mute Gray</div><div class="hex">#9C988A</div></div>
+      <div class="codes">RGB 156 / 152 / 138 &middot; Labels, captions, muted text</div>
+    </div>
+  </div>
+
+  <div class="label mt-32 mb-12">Neutral Scale</div>
+  <div class="grid-6 gap-8">
+    <div><div style="height: 70px; background: #0A0A0A; border: 1px solid var(--hairline);"></div><div class="body muted mt-8"><strong>Ink 950</strong><br/>#0A0A0A</div></div>
+    <div><div style="height: 70px; background: #1A1A1A;"></div><div class="body muted mt-8"><strong>Ink 800</strong><br/>#1A1A1A</div></div>
+    <div><div style="height: 70px; background: #2A2A26;"></div><div class="body muted mt-8"><strong>Ink 700</strong><br/>#2A2A26</div></div>
+    <div><div style="height: 70px; background: #6A6660;"></div><div class="body muted mt-8"><strong>Mute 500</strong><br/>#6A6660</div></div>
+    <div><div style="height: 70px; background: #9C988A;"></div><div class="body muted mt-8"><strong>Mute 400</strong><br/>#9C988A</div></div>
+    <div><div style="height: 70px; background: #F2EFE6;"></div><div class="body muted mt-8"><strong>Bone 50</strong><br/>#F2EFE6</div></div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">D. COLOR SYSTEM &middot; <b>27</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 28 — COLOR CODES (FULL SPEC)
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>D. Color System &middot; Codes &amp; Conversions</div>
+  </div>
+  <div class="eyebrow">Reference Table</div>
+  <h2 class="h1" style="margin-bottom: 22px;">Codes, in full.</h2>
+
+  <table class="spec">
+    <tr><th></th><th>Token</th><th>HEX</th><th>RGB</th><th>HSL</th><th>CMYK</th><th>Pantone</th></tr>
+    <tr><td><div style="width:24px; height:24px; background:#D8FF3D; border-radius:4px;"></div></td><td>--acid</td><td>#D8FF3D</td><td>216, 255, 61</td><td>69°, 100%, 62%</td><td>19, 0, 88, 0</td><td>388 C</td></tr>
+    <tr><td><div style="width:24px; height:24px; background:#0A0A0A; border-radius:4px;"></div></td><td>--ink</td><td>#0A0A0A</td><td>10, 10, 10</td><td>0°, 0%, 4%</td><td>0, 0, 0, 96</td><td>Black 6 C</td></tr>
+    <tr><td><div style="width:24px; height:24px; background:#F2EFE6; border-radius:4px;"></div></td><td>--bone</td><td>#F2EFE6</td><td>242, 239, 230</td><td>45°, 27%, 93%</td><td>4, 4, 11, 0</td><td>9043 C</td></tr>
+    <tr><td><div style="width:24px; height:24px; background:#2E5BFF; border-radius:4px;"></div></td><td>--blue</td><td>#2E5BFF</td><td>46, 91, 255</td><td>227°, 100%, 59%</td><td>82, 64, 0, 0</td><td>2728 C</td></tr>
+    <tr><td><div style="width:24px; height:24px; background:#FF6BB5; border-radius:4px;"></div></td><td>--pink</td><td>#FF6BB5</td><td>255, 107, 181</td><td>329°, 100%, 71%</td><td>0, 58, 29, 0</td><td>231 C</td></tr>
+    <tr><td><div style="width:24px; height:24px; background:#FF5A1F; border-radius:4px;"></div></td><td>--ember</td><td>#FF5A1F</td><td>255, 90, 31</td><td>16°, 100%, 56%</td><td>0, 65, 88, 0</td><td>165 C</td></tr>
+    <tr><td><div style="width:24px; height:24px; background:#9C988A; border-radius:4px;"></div></td><td>--mute</td><td>#9C988A</td><td>156, 152, 138</td><td>47°, 9%, 58%</td><td>0, 3, 12, 39</td><td>Warm Gray 5 C</td></tr>
+  </table>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">D. COLOR SYSTEM &middot; <b>28</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 29 — COLOR PAIRINGS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>D. Color System &middot; Pairings &amp; Proportions</div>
+  </div>
+  <div class="eyebrow">Pairings</div>
+  <h2 class="h1" style="margin-bottom: 22px;">What pairs.<br/>What clashes.</h2>
+
+  <div class="grid-4 gap-12">
+    <div class="card-flat" style="border-color: var(--acid); padding: 0; overflow: hidden;">
+      <div style="background: var(--ink); color: var(--bone); padding: 18px; min-height: 110px;"><div class="label acid-text">Default</div><div style="font-family:'Archivo'; font-weight:900; font-size: 22px; text-transform: uppercase; color: var(--acid); margin-top: 8px;">Ink &times; Acid</div><div class="body muted mt-8">Hero pairing. Highest impact.</div></div>
+      <div class="label acid-text" style="padding: 12px;">✓ Always works</div>
+    </div>
+    <div class="card-flat" style="border-color: var(--acid); padding: 0; overflow: hidden;">
+      <div style="background: var(--bone); color: var(--ink); padding: 18px; min-height: 110px;"><div class="label" style="color:#6a6660;">Editorial</div><div style="font-family:'Archivo'; font-weight:900; font-size: 22px; text-transform: uppercase; color: var(--ink); margin-top: 8px;">Bone &times; Ink</div><div class="body" style="color:#6a6660;">Print, long-form.</div></div>
+      <div class="label acid-text" style="padding: 12px;">✓ Editorial standard</div>
+    </div>
+    <div class="card-flat" style="border-color: var(--acid); padding: 0; overflow: hidden;">
+      <div style="background: var(--acid); color: var(--ink); padding: 18px; min-height: 110px;"><div class="label" style="color: var(--ink);">Loud</div><div style="font-family:'Archivo'; font-weight:900; font-size: 22px; text-transform: uppercase; color: var(--ink); margin-top: 8px;">Acid &times; Ink</div><div class="body" style="color: var(--ink);">Stunt copy, drops.</div></div>
+      <div class="label acid-text" style="padding: 12px;">✓ Use sparingly</div>
+    </div>
+    <div class="card-flat" style="border-color: var(--ember); padding: 0; overflow: hidden;">
+      <div style="background: var(--blue); color: var(--pink); padding: 18px; min-height: 110px;"><div class="label" style="color: var(--pink);">Trash</div><div style="font-family:'Archivo'; font-weight:900; font-size: 22px; text-transform: uppercase; color: var(--pink); margin-top: 8px;">Blue &times; Pink</div><div class="body" style="color: var(--pink);">Vibrates, illegible.</div></div>
+      <div class="label" style="padding: 12px; color: var(--ember);">✗ Never</div>
+    </div>
+  </div>
+
+  <div class="card mt-24">
+    <div class="label acid-text mb-16">Accent rules</div>
+    <table class="spec">
+      <tr><td class="k">Blue (analytics)</td><td>Use only on data, charts, and brand-side UI surfaces. Never as primary brand color.</td></tr>
+      <tr><td class="k">Pink (community)</td><td>Use only on community, fan, and social-context UI. Pair with ink, never with acid.</td></tr>
+      <tr><td class="k">Ember (money)</td><td>Use only on monetization, payouts, and alerts. Pair with bone or ink.</td></tr>
+      <tr><td class="k">Never stack accents</td><td>One accent per surface. Two accents = noise.</td></tr>
+    </table>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">D. COLOR SYSTEM &middot; <b>29</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 30 — ACCESSIBILITY + DARK/LIGHT
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>D. Color System &middot; Accessibility &amp; Modes</div>
+  </div>
+  <div class="eyebrow">WCAG &amp; Modes</div>
+  <h2 class="h1" style="margin-bottom: 22px;">Readable. By default.</h2>
+
+  <div class="grid-2 gap-32">
+    <div>
+      <div class="label mb-12">Contrast ratios (WCAG)</div>
+      <table class="spec">
+        <tr><th>Pairing</th><th>Ratio</th><th>AA</th><th>AAA</th></tr>
+        <tr><td>Bone on Ink</td><td>17.4 : 1</td><td class="acid-text">✓</td><td class="acid-text">✓</td></tr>
+        <tr><td>Acid on Ink</td><td>15.1 : 1</td><td class="acid-text">✓</td><td class="acid-text">✓</td></tr>
+        <tr><td>Ink on Acid</td><td>15.1 : 1</td><td class="acid-text">✓</td><td class="acid-text">✓</td></tr>
+        <tr><td>Ink on Bone</td><td>16.6 : 1</td><td class="acid-text">✓</td><td class="acid-text">✓</td></tr>
+        <tr><td>Mute on Ink (body)</td><td>5.2 : 1</td><td class="acid-text">✓</td><td style="color: var(--ember);">✗</td></tr>
+        <tr><td>Mute on Ink (caption only)</td><td>5.2 : 1</td><td class="acid-text">✓ (≥18px)</td><td>&mdash;</td></tr>
+        <tr><td>Pink on Ink</td><td>9.4 : 1</td><td class="acid-text">✓</td><td class="acid-text">✓</td></tr>
+        <tr><td>Blue on Bone</td><td>5.8 : 1</td><td class="acid-text">✓</td><td style="color: var(--ember);">✗</td></tr>
+      </table>
+      <div class="body muted mt-12">Body text ≥ 4.5:1. Large text ≥ 3:1. UI controls ≥ 3:1.</div>
+    </div>
+
+    <div>
+      <div class="label mb-12">Light Mode &amp; Dark Mode</div>
+      <div class="grid-2 gap-12">
+        <div class="card-flat" style="background: var(--ink); padding: 18px; min-height: 220px;">
+          <div class="label acid-text">Dark (default)</div>
+          <div class="h2 mt-8" style="color: var(--bone);">UNDERDAWG</div>
+          <div class="body muted mt-12">Surface: --ink<br/>Text: --bone<br/>Accent: --acid<br/>Hairline: rgba(bone, 0.18)</div>
+        </div>
+        <div class="card-flat" style="background: var(--bone); padding: 18px; min-height: 220px; color: var(--ink); border-color: rgba(0,0,0,0.15);">
+          <div class="label" style="color: #6a6660;">Light</div>
+          <div class="h2 mt-8" style="color: var(--ink);">UNDERDAWG</div>
+          <div class="body mt-12" style="color: #6a6660;">Surface: --bone<br/>Text: --ink<br/>Accent: --acid (on ink chip)<br/>Hairline: rgba(ink, 0.18)</div>
+        </div>
+      </div>
+      <div class="card mt-16" style="background: rgba(216,255,61,0.04); border-color: var(--acid);">
+        <div class="label acid-text">Default mode</div>
+        <div class="body mt-8">Dark mode is the brand default. Light mode is an alternate &mdash; not an opposite.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">D. COLOR SYSTEM &middot; <b>30</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SECTION E DIVIDER — TYPOGRAPHY
+     ============================================================ -->
+<section class="slide divider">
+  <div class="top-meta"><img src="../assets/1.png" alt=""/><span>UNDERDAWG &middot; BRAND GUIDELINES V1.0</span></div>
+  <div class="letter-massive">E</div>
+  <div class="section-title">Typography.</div>
+  <div class="desc">Heavy display type for impact. Clean grotesk for clarity. A whisper of italic serif for warmth. Three families, never four.</div>
+  <img class="obj" src="../src/objects/obj-9.png" alt=""/>
+  <div class="corner">SECTION E &middot; 31 / 62</div>
+</section>
+
+<!-- ============================================================
+     SLIDE 32 — PRIMARY TYPEFACE
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>E. Typography &middot; Primary Typeface</div>
+  </div>
+  <div class="eyebrow">Display Family</div>
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 32px;">
+    <h2 class="h1">Archivo Black.</h2>
+    <div class="label">Weight 900 &middot; Headlines &middot; Wordmark</div>
+  </div>
+
+  <div style="font-family: 'Archivo'; font-weight: 900; font-size: 220px; line-height: 0.84; letter-spacing: -0.04em; text-transform: uppercase; color: var(--acid); margin-bottom: 24px;">Aa<span style="color: var(--bone);">Bb</span></div>
+
+  <div class="grid-2 gap-40 divide-top">
+    <div>
+      <div class="label mb-12">Character set</div>
+      <div class="body" style="font-family: 'Archivo'; font-weight: 900; text-transform: uppercase; font-size: 18px; line-height: 1.5; letter-spacing: -0.01em;">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br/>abcdefghijklmnopqrstuvwxyz<br/>0123456789 &amp; @ # $ % &amp; * ! ? &mdash;</div>
+    </div>
+    <div>
+      <div class="label mb-12">Usage</div>
+      <table class="spec">
+        <tr><td class="k">Use for</td><td>Headlines, wordmark, posters, hero type</td></tr>
+        <tr><td class="k">Tracking</td><td>-2% to -3% for display sizes</td></tr>
+        <tr><td class="k">Case</td><td>UPPERCASE only, except for the wordmark</td></tr>
+        <tr><td class="k">Alternate</td><td>Anton (Weight 400) for ultra-condensed editorial moments</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">E. TYPOGRAPHY &middot; <b>32</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 33 — SECONDARY TYPEFACES
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>E. Typography &middot; Secondary Typefaces</div>
+  </div>
+  <div class="eyebrow">Body &amp; Accent</div>
+  <h2 class="h1" style="margin-bottom: 40px;">Two supporting voices.</h2>
+
+  <div class="grid-2 gap-40">
+    <div>
+      <div style="font-family: 'Space Grotesk'; font-weight: 700; font-size: 120px; line-height: 0.9; letter-spacing: -0.02em; color: var(--acid);">Aa</div>
+      <div class="label mt-16">Space Grotesk</div>
+      <div class="h3 mt-8">Body &amp; UI</div>
+      <table class="spec mt-12">
+        <tr><td class="k">Weights</td><td>400 / 500 / 700</td></tr>
+        <tr><td class="k">Use for</td><td>Body, labels, UI text, captions</td></tr>
+        <tr><td class="k">Style</td><td>Geometric, modern, neutral</td></tr>
+      </table>
+    </div>
+    <div>
+      <div style="font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-size: 140px; line-height: 0.9; color: var(--acid);">Aa</div>
+      <div class="label mt-16">Instrument Serif Italic</div>
+      <div class="h3 mt-8">Editorial accent</div>
+      <table class="spec mt-12">
+        <tr><td class="k">Weights</td><td>400 italic only</td></tr>
+        <tr><td class="k">Use for</td><td>Pull quotes, single-word emphasis, signatures</td></tr>
+        <tr><td class="k">Frequency</td><td>Once per page max &mdash; this is the whisper, not the voice</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">E. TYPOGRAPHY &middot; <b>33</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 34 — TYPE HIERARCHY
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>E. Typography &middot; Hierarchy</div>
+  </div>
+  <div class="eyebrow">Hierarchy</div>
+  <h2 class="h1" style="margin-bottom: 40px;">The ladder.</h2>
+
+  <div class="scale-row">
+    <div class="tag">H-mega</div>
+    <div class="spec">Archivo 900 &middot; 120px / 0.88 / -0.025em</div>
+    <div class="sample" style="font-family:'Archivo'; font-weight:900; font-size:56px; line-height:0.9; text-transform:uppercase;">For the dawgs.</div>
+  </div>
+  <div class="scale-row">
+    <div class="tag">H1</div>
+    <div class="spec">Archivo 900 &middot; 62px / 0.96 / -0.02em</div>
+    <div class="sample" style="font-family:'Archivo'; font-weight:900; font-size:40px; line-height:1; text-transform:uppercase;">Built for the climb.</div>
+  </div>
+  <div class="scale-row">
+    <div class="tag">H2</div>
+    <div class="spec">Archivo 900 &middot; 40px / 1.0 / -0.01em</div>
+    <div class="sample" style="font-family:'Archivo'; font-weight:900; font-size:28px; line-height:1; text-transform:uppercase;">Built for the climb.</div>
+  </div>
+  <div class="scale-row">
+    <div class="tag">H3</div>
+    <div class="spec">Archivo 800 &middot; 22px / 1.1 / 0</div>
+    <div class="sample" style="font-family:'Archivo'; font-weight:800; font-size:20px; line-height:1.1; text-transform:uppercase;">Built for the climb.</div>
+  </div>
+  <div class="scale-row">
+    <div class="tag">Lede</div>
+    <div class="spec">Space Grotesk 400 &middot; 20px / 1.35</div>
+    <div class="sample" style="font-family:'Space Grotesk'; font-weight:400; font-size:18px; line-height:1.35;">Built for the ones still climbing.</div>
+  </div>
+  <div class="scale-row">
+    <div class="tag">Body</div>
+    <div class="spec">Space Grotesk 400 &middot; 14px / 1.5</div>
+    <div class="sample" style="font-family:'Space Grotesk'; font-weight:400; font-size:14px; line-height:1.5;">Body copy reads at 14px on a 1.5 leading. Quiet, readable, never decorative.</div>
+  </div>
+  <div class="scale-row" style="border-bottom: 0;">
+    <div class="tag">Label</div>
+    <div class="spec">Space Grotesk 500 &middot; 10px / 0.2em tracking</div>
+    <div class="sample" style="font-family:'Space Grotesk'; font-weight:500; font-size:10px; line-height:1; letter-spacing:0.2em; text-transform:uppercase; color: var(--mute);">SMALL CAPS LABEL</div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">E. TYPOGRAPHY &middot; <b>34</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 35 — TYPE SCALE (APP + WEB)
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>E. Typography &middot; Scale &amp; Spacing</div>
+  </div>
+  <div class="eyebrow">App + Web Scale</div>
+  <h2 class="h1" style="margin-bottom: 40px;">Pixel for pixel.</h2>
+
+  <div class="grid-2 gap-32">
+    <div>
+      <div class="label mb-16">Mobile App (React Native)</div>
+      <table class="spec">
+        <tr><th>Token</th><th>Size</th><th>Weight</th><th>Line</th><th>Use</th></tr>
+        <tr><td>display</td><td>40</td><td>900</td><td>44</td><td>Splash, hero</td></tr>
+        <tr><td>title-xl</td><td>32</td><td>900</td><td>36</td><td>Module headers</td></tr>
+        <tr><td>title</td><td>22</td><td>800</td><td>26</td><td>Card titles</td></tr>
+        <tr><td>body</td><td>16</td><td>400</td><td>22</td><td>Default text</td></tr>
+        <tr><td>body-sm</td><td>14</td><td>400</td><td>20</td><td>Secondary</td></tr>
+        <tr><td>caption</td><td>12</td><td>500</td><td>16</td><td>Meta</td></tr>
+        <tr><td>label</td><td>10</td><td>500</td><td>12</td><td>UPPER 0.2em</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="label mb-16">Web</div>
+      <table class="spec">
+        <tr><th>Token</th><th>Size</th><th>Weight</th><th>Line</th><th>Use</th></tr>
+        <tr><td>display</td><td>96</td><td>900</td><td>0.9</td><td>Hero on landing</td></tr>
+        <tr><td>h1</td><td>62</td><td>900</td><td>0.96</td><td>Page headers</td></tr>
+        <tr><td>h2</td><td>40</td><td>900</td><td>1.0</td><td>Section headers</td></tr>
+        <tr><td>h3</td><td>22</td><td>800</td><td>1.1</td><td>Card titles</td></tr>
+        <tr><td>lede</td><td>20</td><td>400</td><td>1.35</td><td>Intro paragraphs</td></tr>
+        <tr><td>body</td><td>16</td><td>400</td><td>1.6</td><td>Long-form</td></tr>
+        <tr><td>caption</td><td>12</td><td>500</td><td>1.4</td><td>Meta, footnotes</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mt-24">
+    <div class="label acid-text mb-8">Tracking rules</div>
+    <div class="body">Display (40px+): -2% to -3%. Headlines (22-40px): -1%. Body: 0. Labels &amp; caps: +20% (0.2em).</div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">E. TYPOGRAPHY &middot; <b>35</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 36 — TYPOGRAPHY IN USE
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>E. Typography &middot; In Use</div>
+  </div>
+  <div class="eyebrow">Applied</div>
+  <h2 class="h1" style="margin-bottom: 40px;">Type, doing its job.</h2>
+
+  <div class="grid-3 gap-20">
+    <div class="card-flat" style="padding: 32px; min-height: 280px; background: var(--ink);">
+      <div class="label muted">Poster</div>
+      <div style="font-family:'Archivo'; font-weight:900; font-size: 56px; line-height: 0.88; text-transform: uppercase; letter-spacing: -0.02em; margin-top: 50px;">Built<br/>for the<br/><span class="acid-text">dawgs.</span></div>
+      <div class="body muted mt-24" style="font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;">UNDERDAWG &middot; MMXXVI</div>
+    </div>
+    <div class="card-flat" style="padding: 0; min-height: 280px; overflow: hidden;">
+      <div class="label muted" style="padding: 32px 32px 0;">App screen</div>
+      <div style="margin: 20px 32px 0; border: 1px solid var(--hairline); border-radius: 8px; padding: 16px; background: rgba(255,255,255,0.02);">
+        <div style="font-family:'Space Grotesk'; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute);">MODULE 06</div>
+        <div style="font-family:'Archivo'; font-weight:900; font-size: 22px; text-transform: uppercase; margin-top: 6px;">Analytics</div>
+        <div style="font-family:'Space Grotesk'; font-size: 12px; line-height: 1.5; color: var(--mute); margin-top: 8px;">Total reach across every platform. The one number that tells you the truth.</div>
+        <div style="font-family:'Archivo'; font-weight:900; font-size: 36px; color: var(--acid); margin-top: 16px;">12.4K</div>
+        <div style="font-family:'Space Grotesk'; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute); margin-top: 4px;">WEEKLY &middot; +18%</div>
+      </div>
+    </div>
+    <div class="card-flat" style="padding: 32px; min-height: 280px; background: var(--bone); color: var(--ink);">
+      <div class="label" style="color: #6a6660;">Editorial</div>
+      <div style="font-family:'Instrument Serif'; font-style: italic; font-size: 40px; line-height: 1.1; margin-top: 40px; color: var(--ink);">"We don't help creators go viral.</div>
+      <div style="font-family:'Archivo'; font-weight: 900; font-size: 22px; text-transform: uppercase; margin-top: 14px; color: var(--ink);">We build the home base that decides who gets to rise."</div>
+      <div style="font-family: 'Space Grotesk'; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-top: 24px; color: #6a6660;">UNDERDAWG MANIFESTO</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">E. TYPOGRAPHY &middot; <b>36</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SECTION F DIVIDER — VISUAL LANGUAGE
+     ============================================================ -->
+<section class="slide divider">
+  <div class="top-meta"><img src="../assets/1.png" alt=""/><span>UNDERDAWG &middot; BRAND GUIDELINES V1.0</span></div>
+  <div class="letter-massive">F</div>
+  <div class="section-title">Visual<br/>Language.</div>
+  <div class="desc">The recurring devices. Icons, brand objects, photography, layout grids, hairlines, badges, dots &mdash; the texture of the brand.</div>
+  <img class="obj" src="../src/objects/obj-10.png" alt=""/>
+  <div class="corner">SECTION F &middot; 37 / 62</div>
+</section>
+
+<!-- ============================================================
+     SLIDE 38 — ICONOGRAPHY
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>F. Visual Language &middot; Iconography</div>
+  </div>
+  <div class="eyebrow">Icons</div>
+  <h2 class="h1" style="margin-bottom: 40px;">Line. Even. Honest.</h2>
+
+  <div class="grid-2 gap-40">
+    <div>
+      <div class="label mb-16">Specs</div>
+      <table class="spec">
+        <tr><td class="k">Style</td><td>Line / outline only &mdash; no fill, no duotone</td></tr>
+        <tr><td class="k">Stroke</td><td>1.5px on a 24&times;24 grid</td></tr>
+        <tr><td class="k">Corners</td><td>Round caps, round joins</td></tr>
+        <tr><td class="k">Grid</td><td>24&times;24 standard &middot; 16&times;16 dense UI &middot; 32&times;32 large</td></tr>
+        <tr><td class="k">Color</td><td>Inherits from text. Acid only for primary actions.</td></tr>
+        <tr><td class="k">Library</td><td>Lucide (base) &middot; custom brand icons for app-specific actions</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="label mb-16">Sample set (line / 24 / 1.5)</div>
+      <div class="grid-4 gap-16">
+        <!-- mini icons drawn with svg-like spans -->
+        <div class="card-flat" style="text-align:center; padding: 18px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F2EFE6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="#D8FF3D" stroke="none"/></svg>
+          <div class="label mt-12">Signet</div>
+        </div>
+        <div class="card-flat" style="text-align:center; padding: 18px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F2EFE6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <div class="label mt-12">Stack</div>
+        </div>
+        <div class="card-flat" style="text-align:center; padding: 18px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F2EFE6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <div class="label mt-12">Search</div>
+        </div>
+        <div class="card-flat" style="text-align:center; padding: 18px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F2EFE6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z"/></svg>
+          <div class="label mt-12">Save</div>
+        </div>
+        <div class="card-flat" style="text-align:center; padding: 18px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F2EFE6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          <div class="label mt-12">Pay</div>
+        </div>
+        <div class="card-flat" style="text-align:center; padding: 18px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F2EFE6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <div class="label mt-12">Chart</div>
+        </div>
+        <div class="card-flat" style="text-align:center; padding: 18px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F2EFE6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          <div class="label mt-12">Message</div>
+        </div>
+        <div class="card-flat" style="text-align:center; padding: 18px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F2EFE6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <div class="label mt-12">Star</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">F. VISUAL LANGUAGE &middot; <b>38</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 39 — BRAND OBJECTS (3D SHAPES)
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>F. Visual Language &middot; Brand Objects</div>
+  </div>
+  <div class="eyebrow">Brand Objects</div>
+  <h2 class="h1" style="margin-bottom: 22px;">3D shapes. <em class="italic-serif acid-text" style="font-size: 56px;">Texture, not decoration.</em></h2>
+  <div class="lede muted" style="max-width: 720px; margin-bottom: 32px;">Glossy 3D shapes used as recurring brand devices. They sit in the negative space &mdash; signaling craft, weight, and a little weirdness. Never in the center of a layout.</div>
+
+  <div class="grid-5 gap-16">
+    <div class="card-flat" style="padding: 16px; text-align: center;"><img src="../src/objects/obj-1.png" style="height: 90px; object-fit: contain;" alt=""/><div class="label mt-8">Knot &middot; Blue</div></div>
+    <div class="card-flat" style="padding: 16px; text-align: center;"><img src="../src/objects/obj-2.png" style="height: 90px; object-fit: contain;" alt=""/><div class="label mt-8">Smile &middot; Blue</div></div>
+    <div class="card-flat" style="padding: 16px; text-align: center;"><img src="../src/objects/obj-3.png" style="height: 90px; object-fit: contain;" alt=""/><div class="label mt-8">Cross &middot; Foil</div></div>
+    <div class="card-flat" style="padding: 16px; text-align: center;"><img src="../src/objects/obj-4.png" style="height: 90px; object-fit: contain;" alt=""/><div class="label mt-8">Brain</div></div>
+    <div class="card-flat" style="padding: 16px; text-align: center;"><img src="../src/objects/obj-5.png" style="height: 90px; object-fit: contain;" alt=""/><div class="label mt-8">Drip &middot; Blue</div></div>
+    <div class="card-flat" style="padding: 16px; text-align: center;"><img src="../src/objects/obj-6.png" style="height: 90px; object-fit: contain;" alt=""/><div class="label mt-8">Megaphone</div></div>
+    <div class="card-flat" style="padding: 16px; text-align: center;"><img src="../src/objects/obj-7.png" style="height: 90px; object-fit: contain;" alt=""/><div class="label mt-8">Yarn &middot; Pink</div></div>
+    <div class="card-flat" style="padding: 16px; text-align: center;"><img src="../src/objects/obj-8.png" style="height: 90px; object-fit: contain;" alt=""/><div class="label mt-8">Pill</div></div>
+    <div class="card-flat" style="padding: 16px; text-align: center;"><img src="../src/objects/obj-9.png" style="height: 90px; object-fit: contain;" alt=""/><div class="label mt-8">Hash</div></div>
+    <div class="card-flat" style="padding: 16px; text-align: center;"><img src="../src/objects/obj-10.png" style="height: 90px; object-fit: contain;" alt=""/><div class="label mt-8">Knot &middot; Blue B</div></div>
+  </div>
+
+  <div class="card mt-24" style="background: rgba(216,255,61,0.04); border-color: var(--acid);">
+    <div class="label acid-text mb-8">Object rules</div>
+    <div class="body">One object per layout. Off-axis placement (corner, edge). Never larger than 30% of layout. Never recolored. Never used as a logo replacement.</div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">F. VISUAL LANGUAGE &middot; <b>39</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 40 — PHOTOGRAPHY
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>F. Visual Language &middot; Photography</div>
+  </div>
+  <div class="eyebrow">Photography</div>
+  <h2 class="h1" style="margin-bottom: 32px;">Real rooms. Real hands. Real work.</h2>
+
+  <div class="grid-2 gap-32">
+    <div>
+      <div class="label mb-12">Subject</div>
+      <div class="body muted mb-24">Creators in their actual workspace &mdash; studios, bedrooms, balconies, festival backstage, basement setups. Hands on the work: a paintbrush, a guitar, a camera, a sewing machine, a laptop.</div>
+      <div class="label mb-12">Mood</div>
+      <div class="body muted mb-24">Mid-task, mid-thought, never posed. Slight imperfection. The behind-the-scenes shot, not the final glamour.</div>
+      <div class="label mb-12">Light</div>
+      <div class="body muted mb-24">Hard window light, late afternoon. Strong shadows. A single warm bulb. Never a soft-box studio look.</div>
+      <div class="label mb-12">Color treatment</div>
+      <div class="body muted">Slight desaturation. Lifted blacks. Warm highlights. Never heavy filters. Never AI-perfect.</div>
+    </div>
+    <div>
+      <div class="dd">
+        <div class="box do" style="min-height: 220px;">
+          <div class="head">Yes</div>
+          <div class="ex">A 22-year-old visual artist editing prints at 11 pm in a small Mumbai studio.</div>
+          <div class="ex mt-12">Hands stained with ink, a half-eaten samosa in frame.</div>
+          <div class="ex mt-12">The mess of making something. Wires, drafts, sticky notes.</div>
+        </div>
+        <div class="box dont" style="min-height: 220px;">
+          <div class="head">No</div>
+          <div class="ex muted">Stock-photo creators with white teeth and ring lights.</div>
+          <div class="ex mt-12 muted">"Hustle hard" gym shots. Aspirational empty desks.</div>
+          <div class="ex mt-12 muted">AI-generated faces. Generic startup unsplash sets.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">F. VISUAL LANGUAGE &middot; <b>40</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 41 — GRAPHIC ELEMENTS / DEVICES
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>F. Visual Language &middot; Devices</div>
+  </div>
+  <div class="eyebrow">Brand Devices</div>
+  <h2 class="h1" style="margin-bottom: 32px;">The little things.</h2>
+
+  <div class="grid-3 gap-20">
+    <div class="card-flat">
+      <div class="label mb-16">Acid Dot</div>
+      <div class="center" style="height: 80px;"><div class="dot" style="width: 16px; height: 16px;"></div></div>
+      <div class="body muted mt-12">Always 6px or 8px (UI) / 16px (display). Always acid green. Signals "live," "active," or "key point."</div>
+    </div>
+    <div class="card-flat">
+      <div class="label mb-16">Hairline</div>
+      <div class="center" style="height: 80px;"><div style="width: 100%; height: 1px; background: var(--bone);"></div></div>
+      <div class="body muted mt-12">1px, never thicker. Bone on ink, ink on bone. Separates sections without shouting.</div>
+    </div>
+    <div class="card-flat">
+      <div class="label mb-16">Strike</div>
+      <div class="center" style="height: 80px;"><span class="strike" style="font-family:'Archivo'; font-weight:900; font-size: 28px; text-transform: uppercase;">OVERPAID</span></div>
+      <div class="body muted mt-12">3px ember strike-through. Used to mark what we're crossing out &mdash; old rules, bad words, broken systems.</div>
+    </div>
+    <div class="card-flat">
+      <div class="label mb-16">Badge / Chip</div>
+      <div class="center" style="height: 80px;"><span class="badge">RISING TIER</span></div>
+      <div class="body muted mt-12">Pill, acid background, ink text. Compact, uppercase, tracked. Used for status, version, tier.</div>
+    </div>
+    <div class="card-flat">
+      <div class="label mb-16">Number Marker</div>
+      <div class="center" style="height: 80px;"><span style="font-family:'Archivo'; font-weight: 900; font-size: 48px; color: var(--acid); line-height: 1;">01</span></div>
+      <div class="body muted mt-12">Two-digit zero-padded numerals (01, 02, 14, 62). Used for sequencing, modules, slide pagination.</div>
+    </div>
+    <div class="card-flat">
+      <div class="label mb-16">Italic Accent</div>
+      <div class="center" style="height: 80px;"><span class="italic-serif acid-text" style="font-size: 40px;">still climbing.</span></div>
+      <div class="body muted mt-12">Instrument Serif Italic on key phrases. Once per layout. Functions as the brand's whisper &mdash; the warm note in cold copy.</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">F. VISUAL LANGUAGE &middot; <b>41</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 42 — GRID & LAYOUT
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>F. Visual Language &middot; Grid &amp; Layout</div>
+  </div>
+  <div class="eyebrow">Grid</div>
+  <h2 class="h1" style="margin-bottom: 32px;">12 columns. 8pt baseline.</h2>
+
+  <div class="grid-2 gap-32">
+    <div class="card-flat" style="padding: 24px; position: relative; min-height: 280px;">
+      <div style="display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; height: 240px;">
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+        <div style="background: rgba(216,255,61,0.12); border: 1px solid rgba(216,255,61,0.3);"></div>
+      </div>
+      <div class="label mt-16">12-column &middot; 8px gutter</div>
+    </div>
+    <div>
+      <div class="label mb-12">Layout rules</div>
+      <table class="spec">
+        <tr><td class="k">Columns</td><td>12 desktop &middot; 6 tablet &middot; 4 mobile</td></tr>
+        <tr><td class="k">Gutter</td><td>24px desktop &middot; 16px tablet &middot; 16px mobile</td></tr>
+        <tr><td class="k">Margin</td><td>96px desktop &middot; 32px tablet &middot; 16px mobile</td></tr>
+        <tr><td class="k">Baseline</td><td>8px grid for spacing (8, 16, 24, 32, 40, 56, 72, 96)</td></tr>
+        <tr><td class="k">Anchors</td><td>Eyebrow → headline → lede → divider → content</td></tr>
+        <tr><td class="k">Whitespace</td><td>If in doubt, take a card out. Never crowd the page.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">F. VISUAL LANGUAGE &middot; <b>42</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SECTION G DIVIDER — MOTION
+     ============================================================ -->
+<section class="slide divider">
+  <div class="top-meta"><img src="../assets/1.png" alt=""/><span>UNDERDAWG &middot; BRAND GUIDELINES V1.0</span></div>
+  <div class="letter-massive">G</div>
+  <div class="section-title">Motion.</div>
+  <div class="desc">How the brand moves. Fast, confident, snap-back. Never bouncy. Never showy. Animation is a courtesy &mdash; not a performance.</div>
+  <img class="obj" src="../src/objects/obj-1.png" alt=""/>
+  <div class="corner">SECTION G &middot; 43 / 62</div>
+</section>
+
+<!-- ============================================================
+     SLIDE 44 — MOTION PRINCIPLES
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>G. Motion &middot; Principles</div>
+  </div>
+  <div class="eyebrow">Principles</div>
+  <h2 class="h1" style="margin-bottom: 40px;">Four rules.<br/>No exceptions.</h2>
+
+  <div class="grid-2 gap-24">
+    <div class="card">
+      <div class="badge mb-16">01</div>
+      <div class="h3 mb-12">Quick &mdash; not jumpy.</div>
+      <div class="body muted">Default duration is 220ms. Under 200ms feels twitchy. Over 350ms feels slow. We use one speed unless we have a reason not to.</div>
+    </div>
+    <div class="card">
+      <div class="badge mb-16">02</div>
+      <div class="h3 mb-12">Ease-out, almost always.</div>
+      <div class="body muted">Elements arrive fast, settle gently. Ease-in (slow start) is reserved for elements <em>leaving</em> the screen.</div>
+    </div>
+    <div class="card">
+      <div class="badge mb-16">03</div>
+      <div class="h3 mb-12">No bounce. No spring.</div>
+      <div class="body muted">No overshoot, no rubber-banding. The brand is gritty editorial, not playful SaaS. Motion respects the type.</div>
+    </div>
+    <div class="card">
+      <div class="badge mb-16">04</div>
+      <div class="h3 mb-12">Motion has a reason.</div>
+      <div class="body muted">If it doesn't show state change, hierarchy, or relationship &mdash; don't animate it. Decoration is not a use case.</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">G. MOTION &middot; <b>44</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 45 — EASING & DURATIONS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>G. Motion &middot; Easing &amp; Durations</div>
+  </div>
+  <div class="eyebrow">Curves &amp; Timing</div>
+  <h2 class="h1" style="margin-bottom: 40px;">The math of motion.</h2>
+
+  <div class="grid-2 gap-32">
+    <div>
+      <div class="label mb-16">Easing curves</div>
+      <table class="spec">
+        <tr><th>Token</th><th>Curve</th><th>Use</th></tr>
+        <tr><td>ease-out-quick</td><td>cubic-bezier(0.22, 1, 0.36, 1)</td><td>Default. UI arrivals.</td></tr>
+        <tr><td>ease-in-quick</td><td>cubic-bezier(0.4, 0, 1, 1)</td><td>Elements leaving.</td></tr>
+        <tr><td>ease-standard</td><td>cubic-bezier(0.4, 0, 0.2, 1)</td><td>Transitions, color shifts.</td></tr>
+        <tr><td>ease-linear</td><td>cubic-bezier(0, 0, 1, 1)</td><td>Loaders, progress bars only.</td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="label mb-16">Durations</div>
+      <table class="spec">
+        <tr><th>Token</th><th>Time</th><th>Use</th></tr>
+        <tr><td>instant</td><td>0ms</td><td>Toggles, switches</td></tr>
+        <tr><td>fast</td><td>140ms</td><td>Hover, tap feedback</td></tr>
+        <tr><td>default</td><td>220ms</td><td>Most UI motion</td></tr>
+        <tr><td>medium</td><td>320ms</td><td>Modal, sheet, route</td></tr>
+        <tr><td>slow</td><td>480ms</td><td>Splash, manifesto</td></tr>
+        <tr><td>brand</td><td>800ms</td><td>Signet reveal only</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card mt-24" style="background: rgba(216,255,61,0.04); border-color: var(--acid);">
+    <div class="label acid-text mb-8">Default pairing</div>
+    <div class="body"><strong>220ms &middot; ease-out-quick</strong> &mdash; the only motion most engineers should ever need to reach for.</div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">G. MOTION &middot; <b>45</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 46 — LOGO ANIMATION + MICRO-INTERACTIONS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>G. Motion &middot; Logo Animation &amp; Micro-Interactions</div>
+  </div>
+  <div class="eyebrow">Brand Motion</div>
+  <h2 class="h1" style="margin-bottom: 32px;">The signet, alive.</h2>
+
+  <div class="grid-2 gap-32">
+    <div>
+      <div class="label mb-16">Logo animation &middot; splash sequence</div>
+      <div class="card-flat" style="padding: 24px;">
+        <div class="grid-4 gap-12 mt-8">
+          <div style="text-align:center;">
+            <div style="width: 64px; height: 64px; margin: 0 auto 8px; border: 2px solid var(--bone); border-radius: 50%;"></div>
+            <div class="label">00ms</div>
+            <div class="body muted" style="font-size: 10px;">Outer ring</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="width: 64px; height: 64px; margin: 0 auto 8px; border: 2px solid var(--bone); border-radius: 50%; position:relative;"><div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width: 6px; height: 6px; background: var(--acid); border-radius: 50%;"></div></div>
+            <div class="label">200ms</div>
+            <div class="body muted" style="font-size: 10px;">Dot enters</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="width: 64px; height: 64px; margin: 0 auto 8px; border: 2px solid var(--bone); border-radius: 50%; position:relative;"><div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width: 14px; height: 14px; background: var(--acid); border-radius: 50%;"></div></div>
+            <div class="label">480ms</div>
+            <div class="body muted" style="font-size: 10px;">Dot scales</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="width: 64px; height: 64px; margin: 0 auto 8px; border: 2px solid var(--bone); border-radius: 50%; position:relative;"><div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width: 14px; height: 14px; background: var(--acid); border-radius: 50%;"></div></div>
+            <div class="label">800ms</div>
+            <div class="body muted" style="font-size: 10px;">Settled</div>
+          </div>
+        </div>
+        <div class="body muted mt-16" style="font-size: 12px;">Total: 800ms &middot; ease-out-quick. The ring is already there; the bullseye <em class="italic-serif">lands</em>. Never spins. Never bounces.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-16">Micro-interactions</div>
+      <table class="spec">
+        <tr><th>Action</th><th>Motion</th><th>Duration</th></tr>
+        <tr><td>Tap / press</td><td>Scale 0.96 down, snap back</td><td>140ms in, 220ms out</td></tr>
+        <tr><td>Like (heart)</td><td>Scale 1.0 → 1.2 → 1.0, color fill</td><td>320ms total</td></tr>
+        <tr><td>Follow</td><td>Pill expands, label crossfade</td><td>220ms</td></tr>
+        <tr><td>Save</td><td>Bookmark fill, slight Y nudge</td><td>220ms</td></tr>
+        <tr><td>Send (message)</td><td>Bubble slide up + fade</td><td>320ms</td></tr>
+        <tr><td>Confetti / acid splash</td><td>Particle burst, 600ms</td><td>600ms total</td></tr>
+        <tr><td>Route transition</td><td>Cross-fade + 8px Y</td><td>320ms ease-standard</td></tr>
+        <tr><td>Toast</td><td>Slide down from top, settle</td><td>220ms in, 320ms hold-then-out</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">G. MOTION &middot; <b>46</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SECTION H DIVIDER — PRODUCT / UI
+     ============================================================ -->
+<section class="slide divider">
+  <div class="top-meta"><img src="../assets/1.png" alt=""/><span>UNDERDAWG &middot; BRAND GUIDELINES V1.0</span></div>
+  <div class="letter-massive">H</div>
+  <div class="section-title">Product<br/>&amp; UI.</div>
+  <div class="desc">Where the brand lives every day &mdash; on a creator's phone. App icon, splash, components, screens, and the states that make it feel built.</div>
+  <img class="obj" src="../src/objects/obj-2.png" alt=""/>
+  <div class="corner">SECTION H &middot; 47 / 62</div>
+</section>
+
+<!-- ============================================================
+     SLIDE 48 — APP ICON IN CONTEXT + SPLASH
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>H. Product &amp; UI &middot; Icon in Context &amp; Splash</div>
+  </div>
+  <div class="eyebrow">On the device</div>
+  <h2 class="h1" style="margin-bottom: 40px;">How the app shows up.</h2>
+
+  <div class="grid-3 gap-32">
+    <div>
+      <div class="label mb-16">Home screen &middot; iOS</div>
+      <div style="background: linear-gradient(135deg, #1d1d20, #0a0a0a); padding: 20px; border-radius: 14px;">
+        <div class="grid-4 gap-12">
+          <div style="aspect-ratio: 1; background: #6a6660; border-radius: 12px;"></div>
+          <div style="aspect-ratio: 1; background: #6a6660; border-radius: 12px;"></div>
+          <div style="aspect-ratio: 1; background: var(--ink); border-radius: 12px; display:flex; align-items:center; justify-content:center; border: 1px solid var(--hairline);"><img src="../assets/1.png" style="width: 60%; height: 60%;" alt=""/></div>
+          <div style="aspect-ratio: 1; background: #6a6660; border-radius: 12px;"></div>
+          <div style="aspect-ratio: 1; background: #6a6660; border-radius: 12px;"></div>
+          <div style="aspect-ratio: 1; background: #6a6660; border-radius: 12px;"></div>
+          <div style="aspect-ratio: 1; background: #6a6660; border-radius: 12px;"></div>
+          <div style="aspect-ratio: 1; background: #6a6660; border-radius: 12px;"></div>
+        </div>
+        <div class="body muted mt-16" style="font-size: 9px; text-align: center; letter-spacing: 0.18em;">UNDERDAWG</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-16">Splash screen</div>
+      <div class="phone" style="margin: 0 auto;">
+        <div style="display: flex; flex-direction: column; height: 100%;">
+          <div style="font-family:'Space Grotesk'; font-weight:500; font-size: 6px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute); display:flex; justify-content:space-between; padding: 4px;">
+            <span>UD &middot; CREATOR APP</span>
+            <span>N 001</span>
+          </div>
+          <div style="flex:1; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <img src="../assets/1.png" style="width: 70px; height: 70px; margin-bottom: 14px;" alt=""/>
+            <div style="font-family:'Archivo'; font-weight:900; font-size: 18px; text-transform: uppercase; letter-spacing: -0.01em;">UNDERDAWG</div>
+            <div style="font-family:'Space Grotesk'; font-size: 6px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute); margin-top: 4px;">VERSION MMXXVI</div>
+          </div>
+          <div style="font-family:'Space Grotesk'; font-weight: 700; font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase; text-align: center; padding-bottom: 16px;">GET DISCOVERED.<br/>GET CONNECTED. GET PAID.</div>
+          <div style="height: 2px; width: 60%; background: var(--mute-dark); margin: 0 auto 8px; border-radius: 2px;"><div style="height: 100%; width: 65%; background: var(--acid); border-radius: 2px;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-16">Notification</div>
+      <div class="card-flat" style="padding: 14px; background: #1d1d20;">
+        <div style="display:flex; gap: 10px; align-items: flex-start;">
+          <img src="../assets/1.png" style="width: 36px; height: 36px; border-radius: 8px;" alt=""/>
+          <div style="flex:1;">
+            <div style="display:flex; justify-content:space-between; font-family:'Space Grotesk'; font-size: 9px; color: var(--mute); margin-bottom: 4px; letter-spacing: 0.1em; text-transform: uppercase;"><span>UNDERDAWG</span><span>now</span></div>
+            <div style="font-family:'Space Grotesk'; font-weight: 700; font-size: 12px; color: var(--bone);">@oddbird is hiring</div>
+            <div style="font-family:'Space Grotesk'; font-size: 11px; color: var(--mute); margin-top: 2px; line-height: 1.4;">"ACID SUMMER CAPSULE — VISUAL LEAD" matches your niche. Budget ₹40K–₹60K.</div>
+          </div>
+        </div>
+      </div>
+      <div class="body muted mt-12" style="font-size: 11px;">Icon: signet on ink. Heading: app name + time. Body: human language, short.</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">H. PRODUCT &amp; UI &middot; <b>48</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 49 — UI COMPONENTS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>H. Product &amp; UI &middot; Components</div>
+  </div>
+  <div class="eyebrow">Component Library</div>
+  <h2 class="h1" style="margin-bottom: 32px;">The building blocks.</h2>
+
+  <div class="grid-2 gap-32">
+    <div>
+      <div class="label mb-16">Buttons</div>
+      <div class="grid-2 gap-12">
+        <div class="card-flat" style="padding: 18px;">
+          <div style="background: var(--acid); color: var(--ink); font-family:'Space Grotesk'; font-weight:700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.14em; padding: 10px 16px; border-radius: 4px; text-align: center; margin-bottom: 8px;">PRIMARY</div>
+          <div class="body muted" style="font-size: 11px;">Acid &middot; the action that moves money / status forward.</div>
+        </div>
+        <div class="card-flat" style="padding: 18px;">
+          <div style="border: 1.5px solid var(--bone); color: var(--bone); font-family:'Space Grotesk'; font-weight:700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.14em; padding: 8.5px 16px; border-radius: 4px; text-align: center; margin-bottom: 8px;">SECONDARY</div>
+          <div class="body muted" style="font-size: 11px;">Ghost &middot; supporting actions.</div>
+        </div>
+        <div class="card-flat" style="padding: 18px;">
+          <div style="background: var(--bone); color: var(--ink); font-family:'Space Grotesk'; font-weight:700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.14em; padding: 10px 16px; border-radius: 4px; text-align: center; margin-bottom: 8px;">TERTIARY</div>
+          <div class="body muted" style="font-size: 11px;">Inverted &middot; on photography surfaces.</div>
+        </div>
+        <div class="card-flat" style="padding: 18px;">
+          <div style="background: var(--mute-dark); color: var(--mute); font-family:'Space Grotesk'; font-weight:700; font-size: 12px; text-transform: uppercase; letter-spacing: 0.14em; padding: 10px 16px; border-radius: 4px; text-align: center; margin-bottom: 8px;">DISABLED</div>
+          <div class="body muted" style="font-size: 11px;">40% opacity, no pointer.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-16">Cards &amp; Inputs</div>
+      <div class="card-flat" style="padding: 18px; margin-bottom: 12px;">
+        <div class="label" style="margin-bottom: 8px;">CREATOR CARD</div>
+        <div style="display:flex; align-items:center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--pink), var(--ember));"></div>
+          <div style="flex:1;">
+            <div style="font-family:'Archivo'; font-weight:900; font-size: 13px; text-transform: uppercase;">Sola Roux</div>
+            <div style="font-family:'Space Grotesk'; font-size: 10px; color: var(--mute); letter-spacing: 0.1em; text-transform: uppercase;">VISUAL ARTIST &middot; 12.4K</div>
+          </div>
+          <span class="badge" style="font-size: 9px;">RISING</span>
+        </div>
+      </div>
+
+      <div class="card-flat" style="padding: 18px;">
+        <div class="label" style="margin-bottom: 12px;">TEXT INPUT</div>
+        <div style="border: 1px solid var(--hairline); border-radius: 4px; padding: 12px 14px; font-family:'Space Grotesk'; font-size: 12px; color: var(--mute);">@yourhandle</div>
+        <div style="margin-top: 8px; border: 1.5px solid var(--acid); border-radius: 4px; padding: 12px 14px; font-family:'Space Grotesk'; font-size: 12px; color: var(--bone);">@solaroux <span style="color: var(--acid);">✓</span></div>
+        <div class="body muted mt-8" style="font-size: 10px;">Default → focused (acid border).</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-16">Tab Bar</div>
+      <div class="card-flat" style="padding: 14px;">
+        <div style="display:flex; justify-content: space-around; gap: 16px;">
+          <div style="text-align:center;"><div class="dot" style="margin: 0 auto 4px;"></div><div class="label" style="color: var(--acid);">FEED</div></div>
+          <div style="text-align:center;"><div class="label muted">EXPLORE</div></div>
+          <div style="text-align:center;"><div class="label muted">CREATE</div></div>
+          <div style="text-align:center;"><div class="label muted">INBOX</div></div>
+          <div style="text-align:center;"><div class="label muted">YOU</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-16">Modal Sheet</div>
+      <div class="card-flat" style="padding: 18px; background: rgba(255,255,255,0.04);">
+        <div style="width: 32px; height: 4px; background: var(--mute); border-radius: 2px; margin: 0 auto 14px;"></div>
+        <div class="h3 mb-8">CONFIRM PAYOUT</div>
+        <div class="body muted" style="font-size: 11px;">₹4,800 will land in HDFC ****1234 in 2 business days.</div>
+        <div style="background: var(--acid); color: var(--ink); font-family:'Space Grotesk'; font-weight:700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; padding: 8px 14px; border-radius: 4px; text-align: center; margin-top: 12px;">CONFIRM</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">H. PRODUCT &amp; UI &middot; <b>49</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 50 — KEY SCREENS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>H. Product &amp; UI &middot; Key Screens</div>
+  </div>
+  <div class="eyebrow">Anchor Screens</div>
+  <h2 class="h1" style="margin-bottom: 32px;">Six screens, one system.</h2>
+
+  <div class="grid-6 gap-12">
+    <div>
+      <div class="phone">
+        <div class="status">UNDERDAWGS</div>
+        <div class="ph-h"><span>FEED</span><span class="acid-dot"></span></div>
+        <div class="ph-tabs"><span class="active">FOR YOU</span><span>FOLLOWING</span><span>RISING</span></div>
+        <div style="height: 60px; background: linear-gradient(135deg, var(--blue), var(--pink)); border-radius: 4px; margin-bottom: 6px;"></div>
+        <div class="kv"><span class="k">Sola Roux</span><span class="acid-text" style="font-size: 9px;">+18%</span></div>
+        <div class="kv"><span class="k">Maya Patel</span><span class="acid-text" style="font-size: 9px;">+9%</span></div>
+        <div class="kv"><span class="k">Kabir Iqbal</span><span class="acid-text" style="font-size: 9px;">+12%</span></div>
+      </div>
+      <div class="label mt-12" style="text-align: center;">FEED</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="status">PROFILE</div>
+        <div style="font-family:'Archivo'; font-weight:900; font-size: 22px; line-height: 0.9; text-transform: uppercase; margin: 4px 0; letter-spacing: -0.02em;">SOLA.<br/>ROUX.</div>
+        <div style="font-family:'Space Grotesk'; font-size: 7px; color: var(--mute); letter-spacing: 0.16em; text-transform: uppercase; margin-bottom: 8px;">@SOLAROUX &middot; BROOKLYN</div>
+        <div style="display:flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px;"><span class="badge" style="font-size: 7px;">RISING</span><span class="badge line" style="font-size: 7px;">✓ VERIFIED</span></div>
+        <div class="kv"><span class="k">Followers</span><span class="v">12.4K</span></div>
+        <div class="kv"><span class="k">Reputation</span><span class="v">82</span></div>
+        <div class="kv"><span class="k">Earned</span><span class="acid-text" style="font-size: 11px; font-weight: 700;">₹4.8K</span></div>
+      </div>
+      <div class="label mt-12" style="text-align: center;">PROFILE</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="status">JOB BOARD</div>
+        <div class="ph-h"><span>MODULE 07</span></div>
+        <div style="background: rgba(255,255,255,0.04); padding: 8px; border-radius: 4px; margin-bottom: 6px;">
+          <div style="font-family:'Archivo'; font-weight:900; font-size: 9px; text-transform: uppercase; line-height: 1.1;">ACID SUMMER<br/>CAPSULE</div>
+          <div style="font-family:'Space Grotesk'; font-size: 6px; color: var(--mute); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px;">ODDBIRD &middot; ✓ VERIFIED</div>
+          <div style="font-family:'Archivo'; font-weight: 900; font-size: 13px; color: var(--acid); margin-top: 6px;">₹40K–60K</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.04); padding: 8px; border-radius: 4px; margin-bottom: 6px;">
+          <div style="font-family:'Archivo'; font-weight:900; font-size: 9px; text-transform: uppercase; line-height: 1.1;">NIGHT BUS<br/>SOUND CAMPAIGN</div>
+          <div style="font-family:'Space Grotesk'; font-size: 6px; color: var(--mute); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px;">CITYLINE &middot; ✓ VERIFIED</div>
+          <div style="font-family:'Archivo'; font-weight: 900; font-size: 13px; color: var(--acid); margin-top: 6px;">₹75K–1.2L</div>
+        </div>
+      </div>
+      <div class="label mt-12" style="text-align: center;">JOBS</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="status">FINANCE</div>
+        <div class="ph-h"><span>MODULE 10</span></div>
+        <div style="font-family:'Space Grotesk'; font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute);">EARNED &middot; MAY</div>
+        <div style="font-family:'Archivo'; font-weight:900; font-size: 28px; color: var(--acid); line-height: 1; margin: 4px 0 12px; letter-spacing: -0.02em;">₹4,820</div>
+        <div class="kv"><span class="k">Brand deal</span><span class="v">₹3,200</span></div>
+        <div class="kv"><span class="k">Merch</span><span class="v">₹820</span></div>
+        <div class="kv"><span class="k">Tips</span><span class="v">₹400</span></div>
+        <div class="kv"><span class="k">Fee</span><span class="v" style="color: var(--ember);">-₹240</span></div>
+      </div>
+      <div class="label mt-12" style="text-align: center;">FINANCE</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="status">ANALYTICS</div>
+        <div class="ph-h"><span>MODULE 06</span></div>
+        <div style="font-family:'Space Grotesk'; font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute);">TOTAL REACH</div>
+        <div style="font-family:'Archivo'; font-weight:900; font-size: 26px; color: var(--bone); line-height: 1; margin: 4px 0 6px;">186K</div>
+        <div style="font-family:'Space Grotesk'; font-size: 8px; color: var(--acid); letter-spacing: 0.1em;">+24% WTD</div>
+        <div style="height: 50px; margin-top: 12px; display: flex; align-items: flex-end; gap: 3px;">
+          <div style="flex:1; height: 30%; background: var(--mute-dark);"></div>
+          <div style="flex:1; height: 50%; background: var(--mute-dark);"></div>
+          <div style="flex:1; height: 40%; background: var(--mute-dark);"></div>
+          <div style="flex:1; height: 65%; background: var(--mute-dark);"></div>
+          <div style="flex:1; height: 80%; background: var(--acid);"></div>
+          <div style="flex:1; height: 95%; background: var(--acid);"></div>
+          <div style="flex:1; height: 100%; background: var(--acid);"></div>
+        </div>
+      </div>
+      <div class="label mt-12" style="text-align: center;">ANALYTICS</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="status">INBOX</div>
+        <div class="ph-h"><span>THREADS</span></div>
+        <div class="ph-tabs"><span class="active">PRIMARY</span><span>DEALS</span><span>COLLAB</span></div>
+        <div style="background: rgba(255,255,255,0.04); padding: 8px; border-radius: 4px; margin-bottom: 6px; border-left: 2px solid var(--acid);">
+          <div style="font-family:'Archivo'; font-weight:900; font-size: 9px; text-transform: uppercase;">CITYLINE × RED CIRCLE</div>
+          <div style="font-family:'Space Grotesk'; font-size: 9px; color: var(--mute); margin-top: 4px; line-height: 1.3;">Brief approved. Send drafts by Fri.</div>
+        </div>
+        <div style="background: rgba(255,255,255,0.04); padding: 8px; border-radius: 4px;">
+          <div style="font-family:'Archivo'; font-weight:900; font-size: 9px; text-transform: uppercase;">@KEIRA.T</div>
+          <div style="font-family:'Space Grotesk'; font-size: 9px; color: var(--mute); margin-top: 4px;">Love the Glass House print 🪞</div>
+        </div>
+      </div>
+      <div class="label mt-12" style="text-align: center;">INBOX</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">H. PRODUCT &amp; UI &middot; <b>50</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 51 — EMPTY / ERROR / LOADING STATES
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>H. Product &amp; UI &middot; States</div>
+  </div>
+  <div class="eyebrow">Empty / Error / Loading</div>
+  <h2 class="h1" style="margin-bottom: 40px;">The states that matter most.</h2>
+
+  <div class="grid-3 gap-20">
+    <div class="card-flat" style="padding: 28px; min-height: 280px; display: flex; flex-direction: column; justify-content: space-between;">
+      <div class="label">EMPTY STATE</div>
+      <div style="text-align: center; margin: 24px 0;">
+        <img src="../assets/1.png" style="width: 56px; height: 56px; opacity: 0.4; margin: 0 auto 16px; display: block;" alt=""/>
+        <div class="h3">No drafts yet.</div>
+        <div class="body muted mt-8">Tap <span class="acid-text" style="font-weight: 700;">CREATE</span> to start the first one.</div>
+      </div>
+      <div class="body muted" style="font-size: 11px;">Voice: never apologetic, never cheery. State the fact, point to the action.</div>
+    </div>
+
+    <div class="card-flat" style="padding: 28px; min-height: 280px; display: flex; flex-direction: column; justify-content: space-between; border-color: var(--ember);">
+      <div class="label" style="color: var(--ember);">ERROR STATE</div>
+      <div style="text-align: center; margin: 24px 0;">
+        <div style="font-family:'Archivo'; font-weight: 900; font-size: 60px; color: var(--ember); line-height: 1; margin-bottom: 12px;">!</div>
+        <div class="h3">Payout failed.</div>
+        <div class="body muted mt-8">Your bank rejected the transfer. Check details and retry.</div>
+        <div style="margin-top: 14px; display: inline-block; border: 1px solid var(--ember); color: var(--ember); font-family:'Space Grotesk'; font-weight:700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; padding: 6px 14px; border-radius: 4px;">RETRY</div>
+      </div>
+      <div class="body muted" style="font-size: 11px;">Voice: blunt, useful. What broke, what to do. No "oops!".</div>
+    </div>
+
+    <div class="card-flat" style="padding: 28px; min-height: 280px; display: flex; flex-direction: column; justify-content: space-between;">
+      <div class="label">LOADING STATE</div>
+      <div style="text-align: center; margin: 24px 0;">
+        <div style="width: 80%; height: 12px; background: var(--mute-dark); border-radius: 6px; margin: 0 auto 12px; position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 0; left: 0; height: 100%; width: 60%; background: var(--acid); border-radius: 6px;"></div>
+        </div>
+        <div class="h3">Cross-posting to 3 platforms&hellip;</div>
+        <div class="body muted mt-8">Instagram ✓ &middot; TikTok ✓ &middot; YouTube&hellip;</div>
+      </div>
+      <div class="body muted" style="font-size: 11px;">Voice: real status, not vague spinners. Tell the user what's happening.</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">H. PRODUCT &amp; UI &middot; <b>51</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SECTION I DIVIDER — APPLICATIONS
+     ============================================================ -->
+<section class="slide divider">
+  <div class="top-meta"><img src="../assets/1.png" alt=""/><span>UNDERDAWG &middot; BRAND GUIDELINES V1.0</span></div>
+  <div class="letter-massive">I</div>
+  <div class="section-title">Applications.</div>
+  <div class="desc">The brand out in the world &mdash; social posts, app store, posters, merch, email, stationery, web, and the swag we'll print and hand to our first 100 creators.</div>
+  <img class="obj" src="../src/objects/obj-7.png" alt=""/>
+  <div class="corner">SECTION I &middot; 52 / 62</div>
+</section>
+
+<!-- ============================================================
+     SLIDE 53 — SOCIAL MEDIA TEMPLATES
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>I. Applications &middot; Social Templates</div>
+  </div>
+  <div class="eyebrow">Social</div>
+  <h2 class="h1" style="margin-bottom: 32px;">For the feed.</h2>
+
+  <div class="grid-4 gap-16">
+    <div>
+      <div class="label mb-12">IG POST &middot; 1:1</div>
+      <div style="aspect-ratio: 1; background: var(--ink); border: 1px solid var(--hairline); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="font-family:'Space Grotesk'; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute);">DROP 03 &middot; MMXXVI</div>
+        <div style="font-family:'Archivo'; font-weight:900; font-size: 30px; line-height: 0.9; text-transform: uppercase; letter-spacing: -0.02em;">First<br/>income<br/>in <span class="acid-text">30 days.</span></div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <img src="../assets/1.png" style="width: 18px; height: 18px;" alt=""/>
+          <div style="font-family:'Space Grotesk'; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;">UNDERDAWG</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-12">IG STORY &middot; 9:16</div>
+      <div style="aspect-ratio: 9/16; background: var(--acid); color: var(--ink); padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="font-family:'Space Grotesk'; font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase;">STORY &middot; 01</div>
+        <div style="font-family:'Archivo'; font-weight:900; font-size: 22px; line-height: 0.9; text-transform: uppercase; letter-spacing: -0.02em;">For the<br/>ones still<br/><em class="italic-serif" style="font-size: 28px;">climbing.</em></div>
+        <div style="display:flex; justify-content:space-between;">
+          <img src="../assets/1.png" style="width: 16px; height: 16px; filter: invert(1);" alt=""/>
+          <div style="font-family:'Space Grotesk'; font-size: 7px; letter-spacing: 0.2em; text-transform: uppercase;">UNDERDAWG.COM</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-12">REEL COVER</div>
+      <div style="aspect-ratio: 9/16; background: linear-gradient(180deg, transparent 60%, var(--ink) 100%), linear-gradient(135deg, var(--blue), var(--pink)); padding: 16px; display: flex; flex-direction: column; justify-content: flex-end;">
+        <div style="font-family:'Archivo'; font-weight:900; font-size: 22px; line-height: 0.9; text-transform: uppercase; color: var(--bone); letter-spacing: -0.02em;">HOW SOLA<br/>EARNED <span class="acid-text">₹4.8K</span><br/>FROM 8K<br/>FOLLOWERS.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-12">LINKEDIN</div>
+      <div style="aspect-ratio: 1.91/1; background: var(--bone); color: var(--ink); padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="font-family:'Space Grotesk'; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: #6a6660;">PRESS &middot; INDUSTRY</div>
+        <div style="font-family:'Archivo'; font-weight:900; font-size: 18px; line-height: 0.95; text-transform: uppercase; letter-spacing: -0.01em;">The middle market is undervalued. <span style="color: var(--ember);">That's where the ROI lives.</span></div>
+        <div style="display:flex; justify-content:space-between;">
+          <img src="../assets/3.png" style="height: 14px; filter: invert(1);" alt=""/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">I. APPLICATIONS &middot; <b>53</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 54 — APP STORE + POSTERS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>I. Applications &middot; App Store &amp; Posters</div>
+  </div>
+  <div class="eyebrow">Distribution &amp; OOH</div>
+  <h2 class="h1" style="margin-bottom: 32px;">Where the world sees us.</h2>
+
+  <div class="grid-2 gap-32">
+    <div>
+      <div class="label mb-12">APP STORE SCREENSHOTS &middot; 1242×2688</div>
+      <div class="grid-3 gap-12">
+        <div style="aspect-ratio: 9/19; background: var(--ink); border: 1px solid var(--hairline); padding: 14px; display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="font-family:'Archivo'; font-weight:900; font-size: 16px; line-height: 0.9; text-transform: uppercase;">GET<br/>DISCOVERED.</div>
+          <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 4px; font-family:'Space Grotesk'; font-size: 8px;"><div class="label" style="font-size: 7px;">FEED</div><div style="font-family:'Archivo'; font-weight:900; font-size: 12px; margin-top: 4px;">SOLA ROUX</div></div>
+        </div>
+        <div style="aspect-ratio: 9/19; background: var(--ink); border: 1px solid var(--hairline); padding: 14px; display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="font-family:'Archivo'; font-weight:900; font-size: 16px; line-height: 0.9; text-transform: uppercase;">GET<br/>CONNECTED.</div>
+          <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 4px;"><div class="label" style="font-size: 7px;">JOB BOARD</div><div style="font-family:'Archivo'; font-weight:900; font-size: 12px; margin-top: 4px;">₹40K–60K</div></div>
+        </div>
+        <div style="aspect-ratio: 9/19; background: var(--acid); color: var(--ink); padding: 14px; display:flex; flex-direction:column; justify-content:space-between;">
+          <div style="font-family:'Archivo'; font-weight:900; font-size: 16px; line-height: 0.9; text-transform: uppercase;">GET<br/>PAID.</div>
+          <div style="background: rgba(0,0,0,0.08); padding: 10px; border-radius: 4px;"><div style="font-family:'Space Grotesk'; font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase;">EARNED &middot; MAY</div><div style="font-family:'Archivo'; font-weight:900; font-size: 14px; margin-top: 4px;">₹4,820</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-12">POSTER &middot; A1 / TRANSIT</div>
+      <div style="aspect-ratio: 594/841; background: var(--ink); padding: 24px; display: flex; flex-direction: column; justify-content: space-between; position: relative;">
+        <div style="display:flex; justify-content:space-between; align-items: flex-start;">
+          <img src="../assets/3.png" style="max-width: 90px;" alt=""/>
+          <div style="font-family:'Space Grotesk'; font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mute); text-align: right;">EST. 2026<br/>FOR THE DAWGS</div>
+        </div>
+        <div>
+          <div style="font-family:'Archivo'; font-weight:900; font-size: 64px; line-height: 0.88; text-transform: uppercase; letter-spacing: -0.025em;">For the<br/>ones still<br/><em class="italic-serif acid-text" style="font-size: 76px;">climbing.</em></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div style="font-family:'Space Grotesk'; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;">UNDERDAWG.COM</div>
+          <img src="../src/objects/obj-2.png" style="height: 80px;" alt=""/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">I. APPLICATIONS &middot; <b>54</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 55 — MERCH
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>I. Applications &middot; Merch</div>
+  </div>
+  <div class="eyebrow">Wearable Brand</div>
+  <h2 class="h1" style="margin-bottom: 22px;">Eat your own dog food.</h2>
+  <div class="lede muted" style="max-width: 700px; margin-bottom: 32px;">Underdawg builds a merch product. We use it. Every brand drop ships through the same store creators use.</div>
+
+  <div class="grid-4 gap-16">
+    <div>
+      <div style="aspect-ratio: 1; background: var(--ink); padding: 24px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--hairline);">
+        <div style="text-align: center;">
+          <div style="font-family:'Archivo'; font-weight:900; font-size: 28px; line-height: 0.88; text-transform: uppercase; letter-spacing: -0.02em;">FOR<br/>THE<br/>DAWGS</div>
+        </div>
+      </div>
+      <div class="label mt-12">TEE &middot; INK / BONE PRINT</div>
+    </div>
+    <div>
+      <div style="aspect-ratio: 1; background: var(--acid); color: var(--ink); padding: 24px; display: flex; align-items: center; justify-content: center;">
+        <div style="text-align: center;">
+          <img src="../assets/1.png" style="width: 60px; height: 60px; filter: invert(1); margin: 0 auto 8px; display: block;" alt=""/>
+          <div style="font-family:'Archivo'; font-weight:900; font-size: 18px; text-transform: uppercase;">UNDERDAWG</div>
+        </div>
+      </div>
+      <div class="label mt-12">TEE &middot; ACID / INK PRINT</div>
+    </div>
+    <div>
+      <div style="aspect-ratio: 1; background: var(--bone); color: var(--ink); padding: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px;">
+        <div style="width: 60px; height: 60px; border: 4px solid var(--ink); border-radius: 50%; display: flex; align-items: center; justify-content: center;"><div style="width: 14px; height: 14px; background: var(--acid); border-radius: 50%;"></div></div>
+        <div style="font-family:'Archivo'; font-weight:900; font-size: 12px; text-transform: uppercase;">UNDERDAWG</div>
+      </div>
+      <div class="label mt-12">CAP &middot; BONE</div>
+    </div>
+    <div>
+      <div style="aspect-ratio: 1; background: var(--ink); padding: 14px; border: 1px solid var(--hairline); display: flex; flex-wrap: wrap; gap: 4px; align-content: center; justify-content: center;">
+        <div style="background: var(--acid); color: var(--ink); padding: 4px 8px; font-family:'Archivo'; font-weight:900; font-size: 9px; text-transform: uppercase;">RISING</div>
+        <div style="background: var(--bone); color: var(--ink); padding: 4px 8px; font-family:'Archivo'; font-weight:900; font-size: 9px; text-transform: uppercase;">UNDERDAWG</div>
+        <div style="border: 1px solid var(--bone); padding: 4px 8px; font-family:'Archivo'; font-weight:900; font-size: 9px; text-transform: uppercase;">GROWTH &gt; POP</div>
+        <div style="background: var(--ember); color: var(--bone); padding: 4px 8px; font-family:'Archivo'; font-weight:900; font-size: 9px; text-transform: uppercase;">GET PAID</div>
+        <div style="background: var(--blue); color: var(--bone); padding: 4px 8px; font-family:'Archivo'; font-weight:900; font-size: 9px; text-transform: uppercase;">MMXXVI</div>
+      </div>
+      <div class="label mt-12">STICKER PACK</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">I. APPLICATIONS &middot; <b>55</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 56 — EMAIL TEMPLATES
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>I. Applications &middot; Email</div>
+  </div>
+  <div class="eyebrow">Email System</div>
+  <h2 class="h1" style="margin-bottom: 40px;">Inbox-ready.</h2>
+
+  <div class="grid-3 gap-20">
+    <div class="card-flat" style="padding: 0; overflow: hidden;">
+      <div style="padding: 16px 18px; border-bottom: 1px solid var(--hairline);">
+        <div class="label mb-8">ONBOARDING</div>
+        <div class="body muted" style="font-size: 10px;">Subject: <strong style="color: var(--bone);">Welcome, dawg. Here's the climb.</strong></div>
+      </div>
+      <div style="padding: 18px; background: var(--ink);">
+        <img src="../assets/3.png" style="height: 18px; margin-bottom: 16px;" alt=""/>
+        <div style="font-family:'Archivo'; font-weight: 900; font-size: 20px; line-height: 1; text-transform: uppercase;">You're in.<br/>What now?</div>
+        <div class="body mt-12" style="font-size: 11px;">Three things to do this week:</div>
+        <ol style="font-family:'Space Grotesk'; font-size: 11px; color: var(--bone); padding-left: 16px; margin-top: 8px; line-height: 1.6;">
+          <li>Connect your IG</li>
+          <li>Upload 3 portfolio pieces</li>
+          <li>Set your collab status</li>
+        </ol>
+        <div style="background: var(--acid); color: var(--ink); font-family:'Space Grotesk'; font-weight:700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; padding: 8px 14px; border-radius: 4px; text-align: center; margin-top: 14px; display: inline-block;">START SETUP</div>
+      </div>
+    </div>
+
+    <div class="card-flat" style="padding: 0; overflow: hidden;">
+      <div style="padding: 16px 18px; border-bottom: 1px solid var(--hairline);">
+        <div class="label mb-8">TRANSACTIONAL</div>
+        <div class="body muted" style="font-size: 10px;">Subject: <strong style="color: var(--bone);">₹4,820 just landed.</strong></div>
+      </div>
+      <div style="padding: 18px; background: var(--ink);">
+        <img src="../assets/3.png" style="height: 18px; margin-bottom: 16px;" alt=""/>
+        <div style="font-family:'Space Grotesk'; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute);">PAYOUT &middot; CONFIRMED</div>
+        <div style="font-family:'Archivo'; font-weight: 900; font-size: 42px; line-height: 1; color: var(--acid); margin-top: 6px; letter-spacing: -0.02em;">₹4,820</div>
+        <div class="body mt-12" style="font-size: 11px;">Landed in HDFC ****1234 at 11:42 AM.</div>
+        <div class="body muted mt-16" style="font-size: 10px;">CITYLINE × RED CIRCLE &middot; Brand deal &middot; Invoice 00214</div>
+      </div>
+    </div>
+
+    <div class="card-flat" style="padding: 0; overflow: hidden;">
+      <div style="padding: 16px 18px; border-bottom: 1px solid var(--hairline);">
+        <div class="label mb-8">NEWSLETTER</div>
+        <div class="body muted" style="font-size: 10px;">Subject: <strong style="color: var(--bone);">The Climb &middot; Drop 04</strong></div>
+      </div>
+      <div style="padding: 18px; background: var(--ink);">
+        <img src="../assets/3.png" style="height: 18px; margin-bottom: 16px;" alt=""/>
+        <div style="font-family:'Instrument Serif'; font-style: italic; font-size: 26px; line-height: 1.05; color: var(--acid);">"Three creators<br/>just hit ₹1L."</div>
+        <div class="body mt-14" style="font-size: 11px;">This week: a Mumbai illustrator turned a brand deal into a monthly retainer. A Chennai DJ sold out his first merch drop. And we shipped Audience Ownership in beta.</div>
+        <div style="margin-top: 14px; font-family:'Space Grotesk'; font-weight:700; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;">READ THE ISSUE →</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">I. APPLICATIONS &middot; <b>56</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 57 — STATIONERY + WEB
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>I. Applications &middot; Stationery &amp; Web</div>
+  </div>
+  <div class="eyebrow">Print + Web</div>
+  <h2 class="h1" style="margin-bottom: 32px;">Off the screen. On the screen.</h2>
+
+  <div class="grid-2 gap-32">
+    <div>
+      <div class="label mb-12">BUSINESS CARD &middot; 85×55mm</div>
+      <div style="aspect-ratio: 85/55; background: var(--ink); border: 1px solid var(--hairline); padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <img src="../assets/3.png" style="height: 16px;" alt=""/>
+          <div style="font-family:'Space Grotesk'; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mute);">MMXXVI</div>
+        </div>
+        <div>
+          <div style="font-family:'Archivo'; font-weight: 900; font-size: 18px; text-transform: uppercase; letter-spacing: -0.01em;">FIRST LAST</div>
+          <div style="font-family:'Space Grotesk'; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute); margin-top: 2px;">FOUNDER &middot; UNDERDAWG</div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <div style="font-family:'Space Grotesk'; font-size: 9px; color: var(--bone);">name@underdawg.com<br/>+91 98xxxxxxxx</div>
+          <span class="dot"></span>
+        </div>
+      </div>
+      <div class="label mt-16 mb-12">LETTERHEAD</div>
+      <div style="background: var(--bone); color: var(--ink); padding: 16px 18px; min-height: 100px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid var(--hairline-dark);">
+          <img src="../assets/3.png" style="height: 16px; filter: invert(1);" alt=""/>
+          <div style="font-family:'Space Grotesk'; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: #6a6660;">underdawg.com</div>
+        </div>
+        <div style="font-family:'Space Grotesk'; font-size: 10px; margin-top: 10px; color: #6a6660;">Date: 17 May 2026</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-12">LANDING PAGE &middot; HERO</div>
+      <div style="aspect-ratio: 16/9; background: var(--ink); border: 1px solid var(--hairline); padding: 24px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <img src="../assets/3.png" style="height: 14px;" alt=""/>
+          <div style="display: flex; gap: 14px; font-family:'Space Grotesk'; font-weight: 500; font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--mute);">
+            <span>CREATORS</span><span>BRANDS</span><span>PRESS</span><span style="background: var(--acid); color: var(--ink); padding: 4px 10px; border-radius: 999px; font-weight: 700;">JOIN</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'Space Grotesk'; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--acid); margin-bottom: 10px;">— HOME BASE FOR EMERGING CREATORS</div>
+          <div style="font-family:'Archivo'; font-weight: 900; font-size: 40px; line-height: 0.88; text-transform: uppercase; letter-spacing: -0.025em;">For the ones<br/>still <em class="italic-serif acid-text" style="font-size: 48px;">climbing.</em></div>
+          <div style="font-family:'Space Grotesk'; font-size: 11px; color: var(--mute); margin-top: 10px; max-width: 360px; line-height: 1.4;">Portfolio. Merch. Gigs. Analytics. Payouts. The whole climb &mdash; in one app.</div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <div style="background: var(--acid); color: var(--ink); font-family:'Space Grotesk'; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; padding: 8px 14px; border-radius: 4px;">JOIN THE WAITLIST</div>
+          <div style="border: 1px solid var(--bone); color: var(--bone); font-family:'Space Grotesk'; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; padding: 7px 14px; border-radius: 4px;">WATCH THE FILM</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">I. APPLICATIONS &middot; <b>57</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 58 — SWAG & EVENT ASSETS
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>I. Applications &middot; Swag &amp; Events</div>
+  </div>
+  <div class="eyebrow">Creator Meetups</div>
+  <h2 class="h1" style="margin-bottom: 32px;">Show up. Hand it over.</h2>
+
+  <div class="grid-4 gap-16">
+    <div>
+      <div class="label mb-12">LANYARD</div>
+      <div style="aspect-ratio: 3/5; background: var(--ink); border: 1px solid var(--hairline); padding: 18px; display: flex; flex-direction: column; align-items: center;">
+        <div style="width: 70%; height: 4px; background: var(--acid); margin-bottom: 14px;"></div>
+        <div style="background: var(--bone); color: var(--ink); width: 100%; padding: 18px; text-align: center;">
+          <img src="../assets/3.png" style="height: 12px; filter: invert(1); margin-bottom: 12px;" alt=""/>
+          <div style="font-family:'Archivo'; font-weight: 900; font-size: 18px; line-height: 0.9; text-transform: uppercase;">SOLA<br/>ROUX</div>
+          <div style="font-family:'Space Grotesk'; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase; color: #6a6660; margin-top: 8px;">CREATOR &middot; @SOLAROUX</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-12">TOTE</div>
+      <div style="aspect-ratio: 4/5; background: var(--bone); color: var(--ink); padding: 22px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="font-family:'Space Grotesk'; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: #6a6660;">EST. 2026 &middot; FOR THE DAWGS</div>
+        <div style="font-family:'Archivo'; font-weight: 900; font-size: 26px; line-height: 0.88; text-transform: uppercase; letter-spacing: -0.02em;">Built<br/>for the<br/>come-up.</div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+          <img src="../assets/1.png" style="width: 18px; height: 18px; filter: invert(1);" alt=""/>
+          <div style="font-family:'Space Grotesk'; font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;">UNDERDAWG</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-12">POSTCARD</div>
+      <div style="aspect-ratio: 1.5/1; background: var(--acid); color: var(--ink); padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="font-family:'Space Grotesk'; font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;">DROP &middot; KICK-OFF '26</div>
+        <div style="font-family:'Archivo'; font-weight: 900; font-size: 22px; line-height: 0.88; text-transform: uppercase; letter-spacing: -0.02em;">Welcome,<br/>dawg.</div>
+        <div style="font-family:'Space Grotesk'; font-size: 10px;">Three months of Underdawg Pro on us. Use code: <strong>FIRST100</strong></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-12">EVENT POSTER</div>
+      <div style="aspect-ratio: 2/3; background: var(--ink); padding: 16px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;">
+        <div style="display: flex; justify-content: space-between;">
+          <img src="../assets/1.png" style="width: 16px; height: 16px;" alt=""/>
+          <div style="font-family:'Space Grotesk'; font-size: 7px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mute);">MUMBAI &middot; 21.06.26</div>
+        </div>
+        <img src="../src/objects/obj-5.png" style="width: 60%; position: absolute; right: -10%; top: 30%; opacity: 0.7;" alt=""/>
+        <div>
+          <div style="font-family:'Archivo'; font-weight: 900; font-size: 22px; line-height: 0.88; text-transform: uppercase; letter-spacing: -0.02em;">FIRST<br/><span class="acid-text">DAWGS</span><br/>MIXER</div>
+        </div>
+        <div style="font-family:'Space Grotesk'; font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase;">RSVP: UNDERDAWG.COM/MIX</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">I. APPLICATIONS &middot; <b>58</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SECTION J DIVIDER — GOVERNANCE
+     ============================================================ -->
+<section class="slide divider">
+  <div class="top-meta"><img src="../assets/1.png" alt=""/><span>UNDERDAWG &middot; BRAND GUIDELINES V1.0</span></div>
+  <div class="letter-massive">J</div>
+  <div class="section-title">Governance.</div>
+  <div class="desc">How the brand stays the brand. Co-branding, file naming, approval flow, version history, and one final word from the team.</div>
+  <img class="obj" src="../src/objects/obj-3.png" alt=""/>
+  <div class="corner">SECTION J &middot; 59 / 62</div>
+</section>
+
+<!-- ============================================================
+     SLIDE 60 — CO-BRANDING + FILE NAMING
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>J. Governance &middot; Co-Branding &amp; File Naming</div>
+  </div>
+  <div class="eyebrow">Partnerships &amp; Files</div>
+  <h2 class="h1" style="margin-bottom: 32px;">Rules for the file system.</h2>
+
+  <div class="grid-2 gap-32">
+    <div>
+      <div class="label mb-16">Co-branding lockup</div>
+      <div class="card-flat" style="padding: 28px; display: flex; align-items: center; justify-content: center; gap: 22px; min-height: 120px;">
+        <img src="../assets/3.png" style="height: 24px;" alt=""/>
+        <div style="height: 24px; width: 1px; background: var(--hairline);"></div>
+        <div style="font-family:'Archivo'; font-weight: 900; font-size: 22px; text-transform: uppercase; letter-spacing: -0.01em; color: var(--mute);">PARTNER LOGO</div>
+      </div>
+      <table class="spec mt-16">
+        <tr><td class="k">Order</td><td>Underdawg first, then partner</td></tr>
+        <tr><td class="k">Separator</td><td>1px vertical hairline, equal to wordmark cap-height</td></tr>
+        <tr><td class="k">Sizing</td><td>Both logos optically balanced &mdash; never matched in pixels</td></tr>
+        <tr><td class="k">Clear space</td><td>Always 1X around the full lockup</td></tr>
+        <tr><td class="k">Approvals</td><td>All co-brand assets require sign-off from brand@underdawg.com</td></tr>
+      </table>
+    </div>
+
+    <div>
+      <div class="label mb-16">Asset file naming</div>
+      <table class="spec">
+        <tr><th>Pattern</th><th>Example</th></tr>
+        <tr><td>ud_logo_[variant]_[bg]_[size].[ext]</td><td>ud_logo_horizontal_ink_2x.png</td></tr>
+        <tr><td>ud_icon_[variant]_[size].[ext]</td><td>ud_icon_acid_1024.png</td></tr>
+        <tr><td>ud_color_[role].[ext]</td><td>ud_color_acid.svg</td></tr>
+        <tr><td>ud_poster_[campaign]_[size].[ext]</td><td>ud_poster_climbing_a1.pdf</td></tr>
+        <tr><td>ud_social_[network]_[format].[ext]</td><td>ud_social_ig_story.png</td></tr>
+        <tr><td>ud_template_[doc].[ext]</td><td>ud_template_letterhead.indd</td></tr>
+      </table>
+      <div class="card mt-16" style="background: rgba(216,255,61,0.04); border-color: var(--acid);">
+        <div class="label acid-text">Source of truth</div>
+        <div class="body mt-8">All approved assets live in the Underdawg Brand Drive. Anything else &mdash; treat as draft.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">J. GOVERNANCE &middot; <b>60</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 61 — CONTACT + VERSION HISTORY
+     ============================================================ -->
+<section class="slide">
+  <div class="s-header">
+    <div class="brand"><img src="../assets/1.png" alt=""/><b>UNDERDAWG</b></div>
+    <div>J. Governance &middot; Contact &amp; Version History</div>
+  </div>
+  <div class="eyebrow">Approval &amp; History</div>
+  <h2 class="h1" style="margin-bottom: 32px;">Who to ask. What changed.</h2>
+
+  <div class="grid-2 gap-32">
+    <div>
+      <div class="label mb-16">Contact &amp; approvals</div>
+      <table class="spec">
+        <tr><td class="k">Brand questions</td><td>brand@underdawg.com</td></tr>
+        <tr><td class="k">Press &amp; media</td><td>press@underdawg.com</td></tr>
+        <tr><td class="k">Co-marketing</td><td>partners@underdawg.com</td></tr>
+        <tr><td class="k">Asset requests</td><td>brand@underdawg.com &middot; 48h turnaround</td></tr>
+        <tr><td class="k">Logo misuse</td><td>brand@underdawg.com &middot; flag, don't fix</td></tr>
+      </table>
+      <div class="card mt-16">
+        <div class="label acid-text">When in doubt</div>
+        <div class="body mt-8">Don't guess. Ask. Brand erosion happens one well-intentioned exception at a time.</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="label mb-16">Version history</div>
+      <table class="spec">
+        <tr><th>Version</th><th>Date</th><th>Change</th></tr>
+        <tr><td><strong>v1.0</strong></td><td>May 2026</td><td>First release. All 10 sections published.</td></tr>
+        <tr><td>v0.9</td><td>Apr 2026</td><td>Pre-release review with founding team.</td></tr>
+        <tr><td>v0.5</td><td>Mar 2026</td><td>Internal draft. Visual system locked.</td></tr>
+        <tr><td>v0.1</td><td>Feb 2026</td><td>Word list and voice document only.</td></tr>
+      </table>
+      <div class="body muted mt-16" style="font-size: 11px;">Major versions ship every 6 months. Minor patches as needed. Subscribe to brand-changelog@underdawg.com for notifications.</div>
+    </div>
+  </div>
+
+  <div class="s-footer"><div><span class="accent"></span></div><div class="num">J. GOVERNANCE &middot; <b>61</b> / 62</div></div>
+</section>
+
+<!-- ============================================================
+     SLIDE 62 — CLOSING
+     ============================================================ -->
+<section class="slide manifesto">
+  <img class="obj-bg" src="../src/objects/obj-1.png" alt=""/>
+  <img class="obj-bg-2" src="../src/objects/obj-2.png" alt=""/>
+  <div>
+    <div class="eyebrow" style="margin-bottom: 30px;">End of the book</div>
+    <h1>Stay <em>underrated.</em><br/>For now.</h1>
+    <div class="lede" style="max-width: 720px; margin-top: 36px;">
+      The brand is only as strong as the team that defends it. If you've read this far &mdash; you're it. <span class="acid-text">Hold the line on the small things, and the big things take care of themselves.</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 14px; margin-top: 40px;">
+      <img src="../assets/1.png" style="width: 28px; height: 28px;" alt=""/>
+      <div style="font-family:'Space Grotesk'; font-weight: 500; font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--mute);">UNDERDAWG &middot; BRAND GUIDELINES V1.0 &middot; MMXXVI</div>
+    </div>
+  </div>
+  <div class="s-footer">
+    <div><span class="accent"></span></div>
+    <div class="num">FIN &middot; <b>62</b> / 62</div>
+  </div>
+</section>
+
+</body>
+</html>

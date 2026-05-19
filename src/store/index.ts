@@ -83,6 +83,174 @@ type UIState = {
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 
+// --------------------------------------------------------------------------
+// Store Customization (creator storefront)
+// --------------------------------------------------------------------------
+
+export type StoreHeadingFontKey =
+  | 'archivo-black'
+  | 'archivo-extrabold'
+  | 'archivo-black-italic'
+  | 'anton'
+  | 'instrument-italic'
+  | 'space-bold';
+
+export type StoreBodyFontKey =
+  | 'space-regular'
+  | 'space-medium'
+  | 'space-bold'
+  | 'instrument-regular';
+
+export type StoreAccentKey = 'acid' | 'electric' | 'blush' | 'ember' | 'ink';
+
+export type StoreLayoutKey = 'grid' | 'stack' | 'mag';
+
+export type StoreBackgroundMode = 'image' | 'video' | 'color';
+
+export type StoreSectionType =
+  | 'hero'
+  | 'marquee'
+  | 'featured'
+  | 'grid'
+  | 'about'
+  | 'contact'
+  | 'faq'
+  | 'shipping'
+  | 'footer';
+
+export type StoreSection = {
+  id: string;
+  type: StoreSectionType;
+  enabled: boolean;
+  // shared
+  title?: string;
+  body?: string;
+  // hero
+  eyebrow?: string;
+  ctaLabel?: string;
+  // marquee
+  marqueeItems?: string[];
+  // featured
+  featuredProductId?: string;
+  featuredLabel?: string;
+  // contact
+  email?: string;
+  instagram?: string;
+  twitter?: string;
+  whatsapp?: string;
+  // faq
+  items?: { q: string; a: string }[];
+  // footer
+  footerTagline?: string;
+  copyright?: string;
+};
+
+export type CustomCategory = {
+  key: string;
+  name: string;
+  baseCost: number;
+  custom: true;
+};
+
+export type StoreCustomization = {
+  storeName: string;
+  tagline: string;
+  headingFont: StoreHeadingFontKey;
+  bodyFont: StoreBodyFontKey;
+  accent: StoreAccentKey;
+  layout: StoreLayoutKey;
+  backgroundMode: StoreBackgroundMode;
+  backgroundValue: string;
+  logo: string;
+  sections: StoreSection[];
+  customCategories: CustomCategory[];
+  siteEnabled: boolean;
+  lastPublishedAt: number | null;
+};
+
+const defaultSections: StoreSection[] = [
+  {
+    id: 'sec-marquee',
+    type: 'marquee',
+    enabled: true,
+    marqueeItems: ['LIVE · SHIPS WORLDWIDE', 'TAP TO VISIT', 'NEW DROP THIS WEEK'],
+  },
+  {
+    id: 'sec-hero',
+    type: 'hero',
+    enabled: true,
+    eyebrow: 'STOREFRONT',
+    ctaLabel: 'SHOP THE DROP',
+  },
+  {
+    id: 'sec-featured',
+    type: 'featured',
+    enabled: true,
+    eyebrow: 'FEATURED',
+    featuredLabel: 'NEW · LIMITED',
+  },
+  { id: 'sec-grid', type: 'grid', enabled: true, title: 'ALL PRODUCTS' },
+  {
+    id: 'sec-about',
+    type: 'about',
+    enabled: true,
+    title: 'ABOUT THE STORE',
+    body:
+      'Made by a creator, for the people who get it. Every drop ships from a real studio — not a warehouse.',
+  },
+  {
+    id: 'sec-shipping',
+    type: 'shipping',
+    enabled: true,
+    title: 'SHIPPING',
+    body: 'Ships in 3–5 days. Returns within 14 days. Worldwide via DHL.',
+  },
+  {
+    id: 'sec-faq',
+    type: 'faq',
+    enabled: false,
+    title: 'FAQ',
+    items: [
+      { q: 'When will I get it?', a: '3–5 business days within India, 7–14 international.' },
+      { q: 'Returns?', a: 'Yes — within 14 days, original condition.' },
+    ],
+  },
+  {
+    id: 'sec-contact',
+    type: 'contact',
+    enabled: true,
+    title: 'GET IN TOUCH',
+    email: 'hi@yourstore.com',
+    instagram: '',
+    twitter: '',
+    whatsapp: '',
+  },
+  {
+    id: 'sec-footer',
+    type: 'footer',
+    enabled: true,
+    footerTagline: 'POWERED BY UNDERDAWG · MMXXVI',
+    copyright: '',
+  },
+];
+
+const initialStoreCustomization: StoreCustomization = {
+  storeName: 'SOLA.STORE',
+  tagline: 'For the ones still climbing.',
+  headingFont: 'archivo-black',
+  bodyFont: 'space-regular',
+  accent: 'acid',
+  layout: 'grid',
+  backgroundMode: 'image',
+  backgroundValue:
+    'https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=900&q=80&auto=format&fit=crop',
+  logo: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80&auto=format&fit=crop&crop=faces',
+  sections: defaultSections,
+  customCategories: [],
+  siteEnabled: true,
+  lastPublishedAt: null,
+};
+
 type StoreState = {
   profile: Profile;
   setProfile: (patch: Partial<Profile>) => void;
@@ -122,7 +290,20 @@ type StoreState = {
   products: Product[];
   addProduct: (p: Omit<Product, 'id' | 'sold'>) => void;
   toggleProductPublished: (id: string) => void;
+  updateProduct: (id: string, patch: Partial<Omit<Product, 'id'>>) => void;
+  removeProduct: (id: string) => void;
   merchOrders: typeof merchOrdersSeed;
+
+  // store customization (creator storefront)
+  storeCustomization: StoreCustomization;
+  setStoreField: <K extends keyof StoreCustomization>(key: K, value: StoreCustomization[K]) => void;
+  reorderStoreSection: (id: string, direction: 'up' | 'down') => void;
+  toggleStoreSection: (id: string) => void;
+  updateStoreSection: (id: string, patch: Partial<StoreSection>) => void;
+  addCustomCategory: (cat: Omit<CustomCategory, 'custom'>) => void;
+  removeCustomCategory: (key: string) => void;
+  publishStore: () => void;
+  resetStoreCustomization: () => void;
 
   // art
   artworks: Artwork[];
@@ -355,7 +536,87 @@ export const useStore = create<StoreState>()(
             p.id === id ? { ...p, published: !p.published } : p
           ),
         })),
+      updateProduct: (id, patch) =>
+        set((s) => ({
+          products: s.products.map((p) =>
+            p.id === id ? { ...p, ...patch } : p
+          ),
+        })),
+      removeProduct: (id) =>
+        set((s) => ({
+          products: s.products.filter((p) => p.id !== id),
+        })),
       merchOrders: [...merchOrdersSeed],
+
+      storeCustomization: { ...initialStoreCustomization, sections: defaultSections.map((sx) => ({ ...sx })) },
+      setStoreField: (key, value) =>
+        set((s) => ({
+          storeCustomization: { ...s.storeCustomization, [key]: value },
+        })),
+      reorderStoreSection: (id, direction) =>
+        set((s) => {
+          const list = [...s.storeCustomization.sections];
+          const idx = list.findIndex((sx) => sx.id === id);
+          if (idx < 0) return s;
+          const next = direction === 'up' ? idx - 1 : idx + 1;
+          if (next < 0 || next >= list.length) return s;
+          [list[idx], list[next]] = [list[next], list[idx]];
+          return { storeCustomization: { ...s.storeCustomization, sections: list } };
+        }),
+      toggleStoreSection: (id) =>
+        set((s) => ({
+          storeCustomization: {
+            ...s.storeCustomization,
+            sections: s.storeCustomization.sections.map((sx) =>
+              sx.id === id ? { ...sx, enabled: !sx.enabled } : sx,
+            ),
+          },
+        })),
+      updateStoreSection: (id, patch) =>
+        set((s) => ({
+          storeCustomization: {
+            ...s.storeCustomization,
+            sections: s.storeCustomization.sections.map((sx) =>
+              sx.id === id ? { ...sx, ...patch } : sx,
+            ),
+          },
+        })),
+      addCustomCategory: (cat) =>
+        set((s) => {
+          // dedupe on key
+          if (s.storeCustomization.customCategories.find((c) => c.key === cat.key)) return s;
+          return {
+            storeCustomization: {
+              ...s.storeCustomization,
+              customCategories: [
+                ...s.storeCustomization.customCategories,
+                { ...cat, custom: true as const },
+              ],
+            },
+          };
+        }),
+      removeCustomCategory: (key) =>
+        set((s) => ({
+          storeCustomization: {
+            ...s.storeCustomization,
+            customCategories: s.storeCustomization.customCategories.filter((c) => c.key !== key),
+          },
+        })),
+      publishStore: () =>
+        set((s) => ({
+          storeCustomization: {
+            ...s.storeCustomization,
+            siteEnabled: true,
+            lastPublishedAt: Date.now(),
+          },
+        })),
+      resetStoreCustomization: () =>
+        set({
+          storeCustomization: {
+            ...initialStoreCustomization,
+            sections: defaultSections.map((sx) => ({ ...sx })),
+          },
+        }),
 
       artworks: artSeed.map((a) => ({ ...a })),
       addArtwork: (a) =>
@@ -516,6 +777,10 @@ export const useStore = create<StoreState>()(
           rateCardCustom: {},
           products: productsSeed.map((p) => ({ ...p })),
           merchOrders: [...merchOrdersSeed],
+          storeCustomization: {
+            ...initialStoreCustomization,
+            sections: defaultSections.map((sx) => ({ ...sx })),
+          },
           artworks: artSeed.map((a) => ({ ...a })),
           commissions: [...commissionsSeed],
           transactions: transactionsSeed.map((t) => ({ ...t })),
@@ -545,6 +810,7 @@ export const useStore = create<StoreState>()(
         deals: s.deals,
         rateCardCustom: s.rateCardCustom,
         products: s.products,
+        storeCustomization: s.storeCustomization,
         artworks: s.artworks,
         commissions: s.commissions,
         transactions: s.transactions,

@@ -469,11 +469,7 @@ function BrowseByCraft({
               CLEAR
             </RNText>
           </Tap>
-        ) : (
-          <RNText style={styles.craftCount} maxFontSizeMultiplier={1.15}>
-            {categoriesGrid.length} CRAFTS
-          </RNText>
-        )}
+        ) : null}
       </View>
 
       <ScrollView

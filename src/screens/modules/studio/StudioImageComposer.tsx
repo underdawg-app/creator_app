@@ -5,9 +5,11 @@ import {
   TextInput,
   Text as RNText,
   ScrollView,
+  Image,
 } from 'react-native';
+import Video from 'react-native-video';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from '@/navigation';
+import { router, useLocalSearchParams } from '@/navigation';
 import { palette as staticPalette } from '@/theme/colors';
 import { useTheme } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
@@ -37,6 +39,13 @@ const COLOR_PICKS = [
 export default function ImageComposer() {
   const { scheme } = useTheme();
   const inverse = scheme === 'light';
+
+  const { uri: capturedUri, type: capturedType } = useLocalSearchParams<{
+    uri?: string;
+    type?: 'photo' | 'video';
+  }>();
+  const hasMedia = !!capturedUri;
+  const isVideo = capturedType === 'video';
 
   const [caption, setCaption] = useState('');
   const [tags, setTags] = useState<string[]>([]);
@@ -91,15 +100,38 @@ export default function ImageComposer() {
         </View>
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           <View style={[styles.preview, { backgroundColor: pick.bg }]}>
-            <View style={[styles.previewBlob, { backgroundColor: pick.c }]} />
+            {hasMedia ? (
+              isVideo ? (
+                <Video
+                  source={{ uri: capturedUri! }}
+                  style={StyleSheet.absoluteFill}
+                  resizeMode="cover"
+                  repeat
+                  muted
+                  paused={false}
+                />
+              ) : (
+                <Image
+                  source={{ uri: capturedUri! }}
+                  style={StyleSheet.absoluteFill}
+                  resizeMode="cover"
+                />
+              )
+            ) : (
+              <View style={[styles.previewBlob, { backgroundColor: pick.c }]} />
+            )}
             <RNText
-              style={[styles.previewText, { color: pick.fg }]}
+              style={[
+                styles.previewText,
+                { color: pick.fg },
+                hasMedia && styles.previewTextOverMedia,
+              ]}
               numberOfLines={3}
               adjustsFontSizeToFit
               minimumFontScale={0.7}
               maxFontSizeMultiplier={1.1}
             >
-              {caption || 'your caption appears here as art.'}
+              {caption || (hasMedia ? '' : 'your caption appears here as art.')}
             </RNText>
           </View>
 
@@ -254,6 +286,12 @@ const styles = StyleSheet.create({
     fontSize: 30,
     lineHeight: 32,
     letterSpacing: -0.8,
+  },
+  previewTextOverMedia: {
+    color: '#F2EFE6',
+    textShadowColor: 'rgba(0,0,0,0.55)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
   },
 
   field: { marginTop: 22, gap: 10 },
