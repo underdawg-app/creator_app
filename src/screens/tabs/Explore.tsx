@@ -354,7 +354,6 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
           >
             {t}
           </RNText>
-          {active === t ? <View style={styles.tabUnderline} /> : null}
         </Tap>
       ))}
     </View>
@@ -900,31 +899,42 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingVertical: 0,
   },
 
-  /* ─── Top segmented tabs ── */
+  /* ─── Top segmented tabs (pill style) ── */
   tabBar: {
     flexDirection: 'row',
     justifyContent: 'center',
-    paddingHorizontal: 20,
-    gap: 18,
-  },
-  tabItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 10,
+    gap: 6,
     alignItems: 'center',
   },
-  tabItemActive: {},
-  tabLabel: {
-    ...T.label,
-    color: palette.ink,
-    opacity: 0.45,
+  tabItem: {
+    paddingHorizontal: 14,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
-  tabLabelActive: { opacity: 1 },
+  tabItemActive: {
+    backgroundColor: palette.ink,
+  },
+  tabLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.6,
+    color: palette.ink,
+    opacity: 0.5,
+    textTransform: 'uppercase',
+  },
+  tabLabelActive: {
+    color: palette.bone,
+    opacity: 1,
+  },
   tabUnderline: {
-    height: 3,
-    width: '100%',
-    backgroundColor: palette.acid,
-    marginTop: 6,
-    borderRadius: 2,
+    width: 0,
+    height: 0,
   },
 
   /* ─── Stories strip ── */

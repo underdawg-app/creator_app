@@ -35,7 +35,6 @@ const STATIC: Record<string, ParseResult> = {
   '/(onboarding)/user-type': { stack: 'Onboarding', screen: 'UserType' },
   '/(onboarding)/creator-type': { stack: 'Onboarding', screen: 'CreatorType' },
   '/(onboarding)/identity': { stack: 'Onboarding', screen: 'Identity' },
-  '/(onboarding)/complete': { stack: 'Onboarding', screen: 'Complete' },
 
   '/(modules)/camera': { stack: 'Modules', screen: 'Camera' },
 

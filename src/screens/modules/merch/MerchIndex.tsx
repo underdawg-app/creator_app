@@ -62,9 +62,9 @@ const ACCENTS: { key: StoreAccentKey; label: string; hex: string }[] = [
 ];
 
 const HEADING_FONTS: { key: StoreHeadingFontKey; label: string; family: string }[] = [
-  { key: 'archivo-black', label: 'ARCHIVO BLACK', family: fonts.displayBold },
-  { key: 'archivo-extrabold', label: 'ARCHIVO X-BOLD', family: fonts.displayHeavy },
-  { key: 'archivo-black-italic', label: 'ARCHIVO ITALIC', family: fonts.displayBoldItalic },
+  { key: 'archivo-black', label: 'CABINET BLACK', family: fonts.displayBold },
+  { key: 'archivo-extrabold', label: 'CABINET X-BOLD', family: fonts.displayHeavy },
+  { key: 'archivo-black-italic', label: 'CABINET ITALIC', family: fonts.displayBoldItalic },
   { key: 'anton', label: 'ANTON', family: fonts.display },
   { key: 'instrument-italic', label: 'INSTRUMENT', family: fonts.editorialItalic },
   { key: 'space-bold', label: 'SPACE BOLD', family: fonts.bodyBold },

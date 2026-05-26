@@ -7,6 +7,7 @@ import {
   Dimensions,
   TextInput,
   KeyboardAvoidingView,
+  Keyboard,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,38 +24,24 @@ import Animated, {
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
-import { RevealText } from '@/components/ui/RevealText';
 import { TapBurst } from '@/components/ui/TapBurst';
-import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
-import { ArrowMark, Asterisk, RuleDot } from '@/components/svg/Marks';
-// Firebase phone auth disabled for now — any 10-digit number is treated as
-// a demo number and the OTP screen accepts 123456.
-// import { sendPhoneCode } from '@/lib/firebase';
 import { signInWithGoogle, GoogleSignInCancelled } from '@/lib/googleSignIn';
 import { useAuth } from '@/auth/AuthContext';
 import { useStore } from '@/store';
 
 const authObject = require('@/objects/obj-4.png');
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const DEMO_PHONE = '9999999999';
 const DEMO_OTP = '123456';
 
-// Sentinel confirmation that lets the OTP screen bypass Firebase when the
-// user is signing in with the demo number. Mirrors the shape Firebase
-// returns (`confirm(code)` resolves on success) so Otp.tsx needs no changes
-// beyond accepting our demo code.
 function makeDemoConfirmation(): any {
   return {
     __demo: true,
     phoneNumber: '+91' + DEMO_PHONE,
     verificationId: 'demo',
-    // Accept any 6-digit code — the OTP screen already enforces length=6
-    // via its TextInput maxLength. No content check here.
-    confirm: async (_code: string) => {
-      return { user: null };
-    },
+    confirm: async (_code: string) => ({ user: null }),
   };
 }
 
@@ -71,8 +58,6 @@ export default function Auth() {
     if (busy) return;
     setBusy(true);
     try {
-      // No phone validation — every tap advances to the OTP screen. Firebase
-      // phone auth is disabled; the OTP screen accepts any 6-digit code.
       setPendingOtp(makeDemoConfirmation());
       router.push('/(onboarding)/otp');
     } finally {
@@ -94,10 +79,20 @@ export default function Auth() {
     }
   };
 
-  // Idle float — mirrors the welcome carousel so the motion language is shared.
+  // Track keyboard visibility so we can show a dismiss button while it's up.
+  const [kbOpen, setKbOpen] = useState(false);
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setKbOpen(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKbOpen(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
+  // Idle float for the background object — keeps the screen alive.
   const idleA = useSharedValue(0);
   const idleB = useSharedValue(0);
-
   useEffect(() => {
     idleA.value = withRepeat(
       withTiming(1, { duration: 3400, easing: Easing.inOut(Easing.sin) }),
@@ -112,10 +107,10 @@ export default function Auth() {
   }, []);
 
   const objStyle = useAnimatedStyle(() => {
-    const y = (idleA.value - 0.5) * 44;
-    const x = (idleB.value - 0.5) * 22;
-    const rot = (idleA.value - 0.5) * 10 + (idleB.value - 0.5) * 4;
-    const sc = 1 + (idleA.value - 0.5) * 0.05;
+    const y = (idleA.value - 0.5) * 32;
+    const x = (idleB.value - 0.5) * 16;
+    const rot = (idleA.value - 0.5) * 8 + (idleB.value - 0.5) * 3;
+    const sc = 1 + (idleA.value - 0.5) * 0.04;
     return {
       transform: [
         { translateX: x },
@@ -128,46 +123,30 @@ export default function Auth() {
 
   return (
     <View style={styles.root}>
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <SkiaWaveField
-          width={width}
-          height={height}
-          color="rgba(242,239,230,0.055)"
-          lines={18}
-          amplitude={12}
-          frequency={0.02}
-          speed={0.3}
-          strokeWidth={1}
-        />
+      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+        <Animated.View style={[styles.objAnchor, objStyle]}>
+          <Image
+            source={authObject}
+            style={{ width: 320, height: 320 }}
+            contentFit="contain"
+          />
+        </Animated.View>
       </View>
 
-      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 12 }}>
+      <SafeAreaView edges={['top']} style={styles.topSafe}>
         <View style={styles.topRow}>
           <Pressable onPress={() => router.back()} hitSlop={12} style={styles.back}>
             <Ionicons name="arrow-back" size={18} color={palette.ink} />
           </Pressable>
-          <View style={styles.stepRow}>
-            <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
-            <RNText style={styles.step}>STEP 01 / 05</RNText>
-          </View>
           <Pressable
             onPress={() => router.push('/(onboarding)/user-type')}
             hitSlop={12}
             style={styles.skip}
           >
             <RNText style={styles.skipLabel}>SKIP</RNText>
-            <Ionicons name="arrow-forward" size={14} color={palette.ink} />
           </Pressable>
         </View>
       </SafeAreaView>
-
-      <Animated.View style={[styles.blobAnchor, objStyle]} pointerEvents="none">
-        <Image
-          source={authObject}
-          style={{ width: 320, height: 320 }}
-          contentFit="contain"
-        />
-      </Animated.View>
 
       <KeyboardAvoidingView
         style={styles.kav}
@@ -175,62 +154,38 @@ export default function Auth() {
         keyboardVerticalOffset={0}
       >
         <View style={styles.heading}>
-          <RevealText
-            text="pull"
-            splitBy="char"
-            style={{
-              fontFamily: fonts.editorialItalic,
-              fontSize: 44,
-              lineHeight: 44,
-              color: palette.ink,
-              letterSpacing: -0.6,
-            }}
-          />
-          <RevealText
-            text="UP A"
-            delay={120}
-            style={{
-              fontFamily: fonts.displayBold,
-              fontSize: 58,
-              lineHeight: 56,
-              color: palette.ink,
-              letterSpacing: -2.4,
-            }}
-          />
-          <RevealText
-            text="CHAIR."
-            delay={260}
-            style={{
-              fontFamily: fonts.displayBold,
-              fontSize: 58,
-              lineHeight: 56,
-              color: '#D8FF3D',
-              letterSpacing: -2.4,
-            }}
-          />
-        </View>
-
-        <RNText style={styles.subheading} numberOfLines={2}>
-          Choose how you'd like to sign in. Your profile is public only when
-          you say so.
-        </RNText>
-
-        <View style={styles.rule}>
-          <RuleDot width={width - 48} color={palette.lineDark} dotColor={palette.acid} />
-        </View>
-
-        <View style={styles.phoneBlock}>
-          <RNText style={[styles.fieldLabel, { textAlign: 'center' }]}>
-            PHONE NUMBER
+          <View style={styles.headingRule} />
+          <RNText
+            allowFontScaling={false}
+            style={[styles.title, { color: palette.ink }]}
+          >
+            SIGN
           </RNText>
+          <RNText
+            allowFontScaling={false}
+            style={[styles.title, { color: palette.ink }]}
+          >
+            IN<RNText style={{ color: '#D8FF3D' }}>.</RNText>
+          </RNText>
+          <RNText style={styles.subheading}>
+            Continue with your phone or Google. Your profile stays private until
+            you publish it.
+          </RNText>
+        </View>
+
+        <View style={styles.form}>
+          <RNText style={styles.fieldLabel}>PHONE NUMBER</RNText>
           <View style={styles.phoneRow}>
-            <RNText style={styles.dialText}>+91</RNText>
+            <View style={styles.dialBox}>
+              <RNText style={styles.dialText}>+91</RNText>
+              <Ionicons name="chevron-down" size={14} color={palette.ink} />
+            </View>
             <View style={styles.dialDivider} />
             <TextInput
               value={phone}
               onChangeText={setPhone}
               placeholder="98765 43210"
-              placeholderTextColor={palette.mute}
+              placeholderTextColor={'rgba(10,10,10,0.32)'}
               keyboardType="phone-pad"
               autoComplete="tel"
               textContentType="telephoneNumber"
@@ -241,221 +196,295 @@ export default function Auth() {
 
           <TapBurst
             style={[styles.primaryBtn, !phoneValid && styles.primaryBtnDisabled]}
-            burstColor={palette.acid}
+            burstColor={palette.ink}
             onPress={submitPhone}
             haptic="light"
           >
-            <Ionicons name="call-outline" size={16} color={palette.ink} />
-            <RNText style={styles.primaryBtnText}>CONTINUE WITH PHONE</RNText>
-            <ArrowMark size={16} color={palette.ink} strokeWidth={1.6} />
+            <RNText style={styles.primaryBtnText}>CONTINUE</RNText>
+            <View style={styles.primaryBtnArrowWrap}>
+              <Ionicons name="arrow-forward" size={16} color={palette.ink} />
+            </View>
           </TapBurst>
-        </View>
 
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-          <RNText style={styles.dividerText}>OR CONTINUE WITH GOOGLE</RNText>
-          <View style={styles.dividerLine} />
-        </View>
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+            <RNText style={styles.dividerText}>OR</RNText>
+            <View style={styles.dividerLine} />
+          </View>
 
-        <TapBurst
-          style={styles.googleBtn}
-          burstColor={palette.acid}
-          onPress={submitGoogle}
-          haptic="light"
-        >
-          <Ionicons name="logo-google" size={18} color={palette.ink} />
-          <RNText style={styles.googleBtnText}>SIGN IN WITH GOOGLE</RNText>
-          <ArrowMark size={16} color={palette.ink} strokeWidth={1.5} />
-        </TapBurst>
+          <TapBurst
+            style={styles.googleBtn}
+            burstColor={palette.acid}
+            onPress={submitGoogle}
+            haptic="light"
+          >
+            <Ionicons name="logo-google" size={18} color={palette.ink} />
+            <RNText style={styles.googleBtnText}>CONTINUE WITH GOOGLE</RNText>
+          </TapBurst>
 
-        <View style={styles.legal}>
-          <Asterisk size={12} color={palette.mute} strokeWidth={1.2} />
-          <RNText style={styles.legalText} numberOfLines={3}>
-            By continuing you agree to our Terms, Privacy policy, and our
-            commitment to paying creators fairly.
+          <RNText style={styles.legalText}>
+            By continuing you agree to our Terms & Privacy.
           </RNText>
         </View>
       </KeyboardAvoidingView>
+
+      {kbOpen && (
+        <Pressable
+          onPress={() => Keyboard.dismiss()}
+          hitSlop={12}
+          style={styles.kbDismiss}
+        >
+          <Ionicons name="chevron-down" size={16} color={palette.ink} />
+          <RNText style={styles.kbDismissLabel}>DONE</RNText>
+        </Pressable>
+      )}
     </View>
   );
 }
 
 const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bone },
+
+  objAnchor: {
+    position: 'absolute',
+    right: -70,
+    top: 80,
+    opacity: 0.9,
+  },
+
+  topSafe: { paddingHorizontal: 20 },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 6,
-    paddingBottom: 6,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   back: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: palette.line,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: palette.ink,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: palette.paper,
   },
-  stepRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  step: {
-    ...T.label,
-    color: palette.ink,
-    opacity: 0.65,
-  },
-  skip: {
+  counter: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    height: 36,
-    borderRadius: 18,
+    gap: 10,
+    paddingHorizontal: 14,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: palette.paper,
     borderWidth: 1,
     borderColor: palette.line,
+  },
+  counterDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  counterText: {
+    ...T.label,
+    letterSpacing: 2.2,
+    color: palette.ink,
+  },
+  skip: {
+    paddingHorizontal: 14,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
   skipLabel: {
     ...T.label,
     color: palette.ink,
-    letterSpacing: 1.8,
+    opacity: 0.6,
   },
-  blobAnchor: {
-    position: 'absolute',
-    right: -80,
-    top: 90,
-  },
+
   kav: {
     flex: 1,
-    paddingHorizontal: 12,
-    paddingTop: 16,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 56,
+    paddingBottom: 24,
   },
-  heading: { gap: 0 },
+
+  heading: {
+    gap: 0,
+  },
+  headingRule: {
+    width: 36,
+    height: 3,
+    backgroundColor: '#D8FF3D',
+    marginBottom: 16,
+  },
+  title: {
+    fontFamily: fonts.displayBold,
+    fontSize: 72,
+    lineHeight: 70,
+    letterSpacing: -2.4,
+    includeFontPadding: false,
+  },
   subheading: {
-    ...T.body,
+    fontFamily: fonts.body,
+    fontSize: 16,
+    lineHeight: 24,
+    letterSpacing: -0.1,
     color: palette.ink,
-    opacity: 0.72,
-    marginTop: 12,
+    opacity: 0.78,
+    marginTop: 18,
     maxWidth: 340,
-    fontSize: 13,
   },
-  rule: { marginTop: 16, alignItems: 'center' },
-  phoneBlock: {
-    marginTop: 14,
-    gap: 10,
+
+  form: {
+    marginTop: 40,
+    gap: 14,
   },
   fieldLabel: {
     ...T.label,
-    color: palette.mute,
-    letterSpacing: 1.4,
+    color: palette.ink,
+    opacity: 0.55,
+    letterSpacing: 2.2,
   },
   phoneRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    height: 58,
-    borderWidth: 2,
-    borderColor: palette.ink,
-    borderRadius: 16,
+    height: 64,
+    borderRadius: 18,
     backgroundColor: palette.paper,
-    alignSelf: 'center',
-    minWidth: 260,
-    maxWidth: 340,
-    width: '85%',
+    borderWidth: 1.5,
+    borderColor: palette.ink,
+    paddingHorizontal: 16,
+  },
+  dialBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingRight: 8,
   },
   dialText: {
     fontFamily: fonts.displayBold,
     fontSize: 20,
     color: palette.ink,
-    letterSpacing: -0.3,
+    letterSpacing: -0.4,
   },
   dialDivider: {
     width: 1.5,
-    height: 26,
+    height: 28,
     backgroundColor: palette.ink,
-    marginHorizontal: 12,
-    opacity: 0.4,
+    opacity: 0.18,
+    marginRight: 12,
   },
   phoneInput: {
     flex: 1,
-    height: 56,
+    height: 60,
     fontFamily: fonts.displayBold,
     fontSize: 22,
-    letterSpacing: 1.2,
+    letterSpacing: 0.6,
     color: palette.ink,
     paddingVertical: 0,
-    textAlign: 'center',
   },
+
   primaryBtn: {
     marginTop: 6,
-    height: 56,
-    borderRadius: 28,
+    height: 64,
+    borderRadius: 18,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
+    justifyContent: 'space-between',
     paddingHorizontal: 22,
-    backgroundColor: palette.paper,
-    borderWidth: 2,
-    borderColor: palette.ink,
-    alignSelf: 'center',
-    minWidth: 260,
-    maxWidth: 340,
-    width: '85%',
+    backgroundColor: palette.ink,
   },
   primaryBtnDisabled: {
     opacity: 0.4,
   },
   primaryBtnText: {
-    ...T.label,
-    color: palette.ink,
-    flex: 0,
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+    letterSpacing: 2.4,
+    color: palette.bone,
+    textTransform: 'uppercase',
   },
+  primaryBtnArrowWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.bone,
+  },
+
   divider: {
-    marginTop: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
+    marginTop: 10,
+    marginBottom: 4,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: palette.lineDark,
+    backgroundColor: palette.line,
   },
   dividerText: {
-    ...T.small,
-    color: palette.mute,
-    letterSpacing: 1.6,
+    ...T.label,
+    color: palette.ink,
+    opacity: 0.45,
+    letterSpacing: 2.4,
   },
+
   googleBtn: {
-    marginTop: 12,
-    height: 56,
-    borderRadius: 28,
+    height: 64,
+    borderRadius: 18,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
     paddingHorizontal: 22,
-    borderWidth: 1,
-    borderColor: palette.lineDark,
+    borderWidth: 1.5,
+    borderColor: palette.ink,
     backgroundColor: 'transparent',
   },
   googleBtnText: {
-    ...T.label,
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+    letterSpacing: 2.2,
     color: palette.ink,
-    flex: 0,
+    textTransform: 'uppercase',
   },
-  legal: {
-    marginTop: 'auto',
-    paddingTop: 12,
-    flexDirection: 'row',
-    gap: 10,
-    alignItems: 'flex-start',
-  },
+
   legalText: {
-    ...T.small,
-    color: palette.mute,
-    maxWidth: 320,
-    flex: 1,
+    fontFamily: fonts.body,
+    fontSize: 12,
+    lineHeight: 18,
+    color: palette.ink,
+    opacity: 0.45,
+    textAlign: 'center',
+    marginTop: 4,
+  },
+
+  kbDismiss: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 64 : 24,
+    right: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: palette.paper,
+    borderWidth: 1,
+    borderColor: palette.ink,
+  },
+  kbDismissLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 2,
+    color: palette.ink,
+    textTransform: 'uppercase',
   },
 });

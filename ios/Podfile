@@ -31,5 +31,14 @@ target 'Underdawgs' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # CocoaPods re-saves Underdawgs.xcodeproj after this block during
+    # "Integrating client project", so we can't add build phases here.
+    # Inject the hermes dSYM build phase via a standalone script run after
+    # pod install:
+    #
+    #   ruby ios/scripts/inject-hermes-dsym-phase.rb
+    #
+    # See ios/scripts/copy-hermes-dsym.sh for what the phase does.
   end
 end

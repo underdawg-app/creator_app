@@ -8,11 +8,11 @@ const f = (ios: string, android: string) => (Platform.OS === 'ios' ? ios : andro
 
 export const fonts = {
   display: f('Anton-Regular', 'Anton_400Regular'),
-  displayBold: f('Archivo-Black', 'Archivo_900Black'),
-  displayBoldItalic: f('Archivo-BlackItalic', 'Archivo_900Black_Italic'),
-  displayHeavy: f('Archivo-ExtraBold', 'Archivo_800ExtraBold'),
-  editorial: f('InstrumentSerif-Regular', 'InstrumentSerif_400Regular'),
-  editorialItalic: f('InstrumentSerif-Italic', 'InstrumentSerif_400Regular_Italic'),
+  displayBold: f('CabinetGrotesk-Black', 'CabinetGrotesk-Black'),
+  displayBoldItalic: f('CabinetGrotesk-Black', 'CabinetGrotesk-Black'),
+  displayHeavy: f('CabinetGrotesk-Extrabold', 'CabinetGrotesk-Extrabold'),
+  editorial: f('SpaceGrotesk-Medium', 'SpaceGrotesk_500Medium'),
+  editorialItalic: f('SpaceGrotesk-Medium', 'SpaceGrotesk_500Medium'),
   body: f('SpaceGrotesk-Regular', 'SpaceGrotesk_400Regular'),
   bodyMedium: f('SpaceGrotesk-Medium', 'SpaceGrotesk_500Medium'),
   bodyBold: f('SpaceGrotesk-Bold', 'SpaceGrotesk_700Bold'),

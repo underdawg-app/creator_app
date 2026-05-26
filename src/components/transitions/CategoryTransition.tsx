@@ -58,21 +58,19 @@ const MEDIA: Record<TransitionKey, { kind: MediaKind; source: any }> = {
   multi:     { kind: null,    source: null },
 };
 
-// Editorial-magazine style overlay per category. Kicker sits top-left in
-// uppercase tracked caps; headline sits centered/lower in italic display
-// serif; footer is a small uppercase strip with the brand mark.
-type Copy = { kicker: string; headline: string; footer: string };
+// One-line title (large display) + a short editorial quote underneath.
+type Copy = { title: string; quote: string };
 const COPY: Record<TransitionKey, Copy> = {
-  visual:    { kicker: 'N° 01 — VISUAL ART',  headline: 'The frame is the world.',     footer: 'IMAGE · PAINT · PRINT' },
-  musician:  { kicker: 'N° 02 — MUSIC',       headline: 'Notes, before words.',        footer: 'NOTE · LOOP · LIVE' },
-  video:     { kicker: 'N° 03 — VIDEO',       headline: 'Tell it in motion.',          footer: 'FRAME · CUT · SHIP' },
-  writer:    { kicker: 'N° 04 — WRITING',     headline: 'Pages before voices.',        footer: 'PAGE · INK · VOICE' },
-  performer: { kicker: 'N° 05 — PERFORMER',   headline: 'The body remembers.',         footer: 'STAGE · BODY · SHOW' },
-  educator:  { kicker: 'N° 06 — EDUCATOR',    headline: 'What you give, multiplies.',  footer: 'BOOK · CLASS · Q & A' },
-  podcaster: { kicker: 'N° 07 — PODCASTER',   headline: 'Voices in the dark.',         footer: 'MIC · TAPE · TALK' },
-  streamer:  { kicker: 'N° 08 — STREAMER',    headline: 'Live. Always live.',          footer: 'LIVE · CHAT · PLAY' },
-  fashion:   { kicker: 'N° 09 — FASHION',     headline: 'Worn, then known.',           footer: 'CLOTH · FIT · FEEL' },
-  multi:     { kicker: 'N° 10 — MULTI',       headline: 'All of it. At once.',         footer: 'CRAFT · CROSS · CODE' },
+  visual:    { title: 'VISUAL\nART',   quote: 'The frame is the world.' },
+  musician:  { title: 'MUSIC',         quote: 'Notes, before words.' },
+  video:     { title: 'VIDEO',         quote: 'Tell it in motion.' },
+  writer:    { title: 'WRITING',       quote: 'Pages before voices.' },
+  performer: { title: 'PERFORMER',     quote: 'The body remembers.' },
+  educator:  { title: 'EDUCATOR',      quote: 'What you give, multiplies.' },
+  podcaster: { title: 'PODCASTER',     quote: 'Voices in the dark.' },
+  streamer:  { title: 'STREAMER',      quote: 'Live. Always live.' },
+  fashion:   { title: 'FASHION',       quote: 'Worn, then known.' },
+  multi:     { title: 'MULTI',         quote: 'All of it. At once.' },
 };
 
 type Props = {
@@ -92,6 +90,8 @@ export function CategoryTransition({
 }: Props) {
   // 0 = off-screen LEFT, 1 = covering, 2 = off-screen RIGHT.
   const slide = useSharedValue(0);
+  // 0 → 1 across the visible hold; drives the progress bar at the bottom.
+  const progress = useSharedValue(0);
   const [mediaReady, setMediaReady] = useState(false);
 
   // Mount the media element as soon as `active` flips. The slide doesn't run
@@ -100,13 +100,12 @@ export function CategoryTransition({
   useEffect(() => {
     if (!active || !category) {
       slide.value = 0;
+      progress.value = 0;
       setMediaReady(false);
       return;
     }
 
     const media = MEDIA[category];
-    // GIFs and "no media" categories have nothing meaningful to preload —
-    // start the slide immediately.
     if (media.kind !== 'video') {
       setMediaReady(true);
       return;
@@ -122,10 +121,15 @@ export function CategoryTransition({
     if (!active || !category || !mediaReady) return;
 
     slide.value = 0;
+    progress.value = 0;
     slide.value = withTiming(
       1,
       { duration: ENTER_MS, easing: Easing.bezier(0.5, 0, 0.2, 1) },
     );
+    progress.value = withTiming(1, {
+      duration: ENTER_MS + HOLD_MS,
+      easing: Easing.linear,
+    });
 
     const exitTimer = setTimeout(() => {
       slide.value = withTiming(
@@ -165,10 +169,6 @@ export function CategoryTransition({
             playInBackground={false}
             ignoreSilentSwitch="ignore"
             controls={false}
-            // `onReadyForDisplay` fires when the player has actually composited
-            // its first frame — `onLoad` fires earlier (metadata-only) and was
-            // letting the colored panel flash for a frame before the video
-            // surface had pixels.
             onReadyForDisplay={() => setMediaReady(true)}
             onError={() => setMediaReady(true)}
           />
@@ -181,7 +181,11 @@ export function CategoryTransition({
           />
         ) : null}
         <View style={styles.scrim} pointerEvents="none" />
-        <EditorialOverlay copy={COPY[category]} />
+        <EditorialOverlay
+          copy={COPY[category]}
+          accent={color}
+          progress={progress}
+        />
       </SlidingPanel>
     </View>
   );
@@ -209,98 +213,140 @@ function SlidingPanel({
   );
 }
 
-function EditorialOverlay({ copy }: { copy: Copy }) {
+function EditorialOverlay({
+  copy,
+  accent,
+  progress,
+}: {
+  copy: Copy;
+  accent: string;
+  progress: SharedValue<number>;
+}) {
+  const progressStyle = useAnimatedStyle(() => ({
+    width: `${progress.value * 100}%`,
+  }));
+
   return (
     <View style={styles.overlay} pointerEvents="none">
-      <View style={styles.kickerRow}>
-        <View style={styles.kickerDot} />
-        <RNText style={styles.kickerText}>{copy.kicker}</RNText>
-        <View style={styles.kickerRule} />
+      <View style={styles.top}>
+        <View style={[styles.accentSquare, { backgroundColor: accent }]} />
+        <RNText style={styles.kicker}>YOU MAKE</RNText>
       </View>
 
-      <View style={styles.headlineWrap}>
-        <RNText style={styles.headline} adjustsFontSizeToFit numberOfLines={2} minimumFontScale={0.6}>
-          {copy.headline}
+      <View style={styles.middle}>
+        <RNText
+          allowFontScaling={false}
+          style={styles.title}
+          adjustsFontSizeToFit
+          numberOfLines={2}
+          minimumFontScale={0.7}
+        >
+          {copy.title}
+          <RNText style={{ color: accent }}>.</RNText>
+        </RNText>
+        <RNText
+          allowFontScaling={false}
+          style={styles.quote}
+          numberOfLines={2}
+        >
+          {copy.quote}
         </RNText>
       </View>
 
-      <View style={styles.footerRow}>
-        <RNText style={styles.footerText}>{copy.footer}</RNText>
-        <View style={styles.footerRule} />
-        <RNText style={styles.footerText}>UNDERDAWG · MMXXVI</RNText>
+      <View style={styles.bottom}>
+        <View style={styles.bottomRow}>
+          <RNText style={styles.brand}>UNDERDAWG</RNText>
+          <RNText style={styles.brand}>LOADING</RNText>
+        </View>
+        <View style={styles.progressTrack}>
+          <Animated.View
+            style={[styles.progressFill, { backgroundColor: accent }, progressStyle]}
+          />
+        </View>
       </View>
     </View>
   );
 }
 
-// Editorial overlay sits on top of the video. To read cleanly we treat the
-// whole overlay area as a black surface — heavy scrim, soft off-white type,
-// hairline rules at low opacity. No bright-white blocks, no neon accents.
-const INK = 'rgba(255,255,255,0.92)';
-const RULE = 'rgba(255,255,255,0.28)';
+const INK = 'rgba(255,255,255,0.96)';
+const INK_SOFT = 'rgba(255,255,255,0.6)';
+const RULE = 'rgba(255,255,255,0.18)';
 
 const styles = StyleSheet.create({
   scrim: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.62)',
+    backgroundColor: 'rgba(0,0,0,0.55)',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    paddingHorizontal: 28,
-    paddingTop: 96,
-    paddingBottom: 80,
+    paddingHorizontal: 24,
+    paddingTop: 64,
+    paddingBottom: 56,
     justifyContent: 'space-between',
   },
-  kickerRow: {
+
+  top: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  kickerDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    borderWidth: 1,
-    borderColor: INK,
-    backgroundColor: 'transparent',
+  accentSquare: {
+    width: 10,
+    height: 10,
   },
-  kickerText: {
+  kicker: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 3.2,
+    color: INK,
+    textTransform: 'uppercase',
+  },
+
+  middle: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 12,
+  },
+  title: {
+    fontFamily: fonts.displayBold,
+    fontSize: 56,
+    lineHeight: 58,
+    letterSpacing: -2,
+    color: INK,
+    includeFontPadding: false,
+  },
+  quote: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 16,
+    lineHeight: 24,
+    letterSpacing: -0.1,
+    color: INK_SOFT,
+    marginTop: 20,
+    maxWidth: 320,
+  },
+
+  bottom: {
+    gap: 10,
+  },
+  bottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  brand: {
     fontFamily: fonts.bodyBold,
     fontSize: 11,
     letterSpacing: 2.6,
     color: INK,
     textTransform: 'uppercase',
   },
-  kickerRule: {
-    flex: 1,
-    height: 1,
+  progressTrack: {
+    height: 2,
     backgroundColor: RULE,
+    overflow: 'hidden',
   },
-  headlineWrap: {
-    paddingRight: 16,
-  },
-  headline: {
-    fontFamily: fonts.editorialItalic,
-    fontSize: 56,
-    lineHeight: 60,
-    letterSpacing: -1.2,
-    color: INK,
-  },
-  footerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
-  },
-  footerText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 2.4,
-    color: INK,
-    textTransform: 'uppercase',
-  },
-  footerRule: {
-    flex: 1,
-    height: 1,
-    backgroundColor: RULE,
+  progressFill: {
+    height: 2,
+    width: '0%',
   },
 });

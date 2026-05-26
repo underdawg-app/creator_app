@@ -7,33 +7,19 @@ import {
   Text as RNText,
   TextInput,
   KeyboardAvoidingView,
+  Keyboard,
   Platform,
-  Dimensions,
   Image as RNImage,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
 import { Ionicons } from '@/icons';
 import ImageCropPicker from 'react-native-image-crop-picker';
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-} from 'react-native-reanimated';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
-import { Image } from '@/components/ui/Image';
-import { MagneticButton } from '@/components/ui/MagneticButton';
-import { RevealText } from '@/components/ui/RevealText';
-import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
-import { Asterisk } from '@/components/svg/Marks';
 import { useStore } from '@/store';
 import { getAuth } from '@/lib/firebase';
-
-const identityObject = require('@/objects/obj-6.png');
 
 const AVATAR_CROP_OPTS = {
   width: 720,
@@ -51,21 +37,17 @@ const AVATAR_CROP_OPTS = {
   cropperToolbarWidgetColor: staticPalette.bone,
 };
 
-const { width, height } = Dimensions.get('window');
-
 export default function Identity() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
   const setProfile = useStore((s) => s.setProfile);
   const toast = useStore((s) => s.toast);
+
   const [name, setName] = useState('');
   const [handle, setHandle] = useState('');
-  const [bio, setBio] = useState('');
   const [avatar, setAvatar] = useState<string | null>(null);
 
-  const handleValid = handle.length >= 3;
-  const nameValid = name.length >= 2;
-  const ready = handleValid && nameValid;
+  const ready = name.trim().length >= 2 && handle.length >= 3;
 
   const pickAvatar = async () => {
     try {
@@ -79,126 +61,81 @@ export default function Identity() {
 
   const removeAvatar = () => setAvatar(null);
 
-  // Idle float — mirrors the motion language of Auth/Welcome decorative objects.
-  const idleA = useSharedValue(0);
-  const idleB = useSharedValue(0);
+  // Track keyboard so we can show a "Done" dismiss chip (same pattern as Auth).
+  const [kbOpen, setKbOpen] = useState(false);
   useEffect(() => {
-    idleA.value = withRepeat(
-      withTiming(1, { duration: 3400, easing: Easing.inOut(Easing.sin) }),
-      -1,
-      true,
-    );
-    idleB.value = withRepeat(
-      withTiming(1, { duration: 2500, easing: Easing.inOut(Easing.sin) }),
-      -1,
-      true,
-    );
+    const show = Keyboard.addListener('keyboardDidShow', () => setKbOpen(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKbOpen(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
   }, []);
 
-  const objStyle = useAnimatedStyle(() => {
-    const y = (idleA.value - 0.5) * 36;
-    const x = (idleB.value - 0.5) * 18;
-    const rot = (idleA.value - 0.5) * 8 + (idleB.value - 0.5) * 3;
-    const sc = 1 + (idleA.value - 0.5) * 0.04;
-    return {
-      transform: [
-        { translateX: x },
-        { translateY: y },
-        { rotate: `${rot}deg` },
-        { scale: sc },
-      ],
-    };
-  });
+  const onSubmit = () => {
+    if (!ready) return;
+    let fbUser: any = null;
+    try {
+      fbUser = getAuth().currentUser;
+    } catch {}
+    setProfile({
+      name,
+      handle: handle.startsWith('@') ? handle : `@${handle}`,
+      avatar,
+      uid: fbUser?.uid ?? null,
+      phone: fbUser?.phoneNumber ?? null,
+    });
+    useStore.getState().setOnboarded(true);
+    router.replace('/(tabs)');
+  };
 
   return (
     <View style={styles.root}>
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <SkiaWaveField
-          width={width}
-          height={height}
-          color="rgba(10,10,10,0.035)"
-          lines={14}
-          amplitude={12}
-          frequency={0.02}
-          speed={0.22}
-          strokeWidth={1}
-        />
-      </View>
-
-      <Animated.View style={[styles.blobAnchor, objStyle]} pointerEvents="none">
-        <Image
-          source={identityObject}
-          style={{ width: 280, height: 280 }}
-          contentFit="contain"
-        />
-      </Animated.View>
-
-      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 12 }}>
+      <SafeAreaView edges={['top']} style={styles.topSafe}>
         <View style={styles.topRow}>
-          <Pressable
-            onPress={() => router.back()}
-            hitSlop={12}
-            style={styles.back}
-          >
+          <Pressable onPress={() => router.back()} hitSlop={12} style={styles.back}>
             <Ionicons name="arrow-back" size={18} color={palette.ink} />
           </Pressable>
-          <View style={styles.stepRow}>
-            <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
-            <RNText style={styles.step}>STEP 04 / 05</RNText>
-          </View>
           <Pressable
-            onPress={() => router.push('/(onboarding)/complete')}
+            onPress={() => {
+              useStore.getState().setOnboarded(true);
+              router.replace('/(tabs)');
+            }}
             hitSlop={12}
             style={styles.skip}
           >
             <RNText style={styles.skipLabel}>SKIP</RNText>
-            <Ionicons name="arrow-forward" size={14} color={palette.ink} />
           </Pressable>
         </View>
       </SafeAreaView>
 
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         <ScrollView
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <View style={styles.headingBlock}>
-            <View style={styles.headingTopRow}>
-              <View style={styles.headingHair} />
-              <RNText style={styles.headingKicker}>YOUR PROFILE</RNText>
-            </View>
-            <RevealText
-              text="meet"
-              splitBy="char"
-              style={{
-                fontFamily: fonts.editorialItalic,
-                fontSize: 48,
-                lineHeight: 50,
-                color: palette.ink,
-                letterSpacing: -0.6,
-              }}
-            />
-            <RevealText
-              text="THE WORLD."
-              delay={140}
-              style={{
-                fontFamily: fonts.displayBold,
-                fontSize: 64,
-                lineHeight: 62,
-                color: palette.ink,
-                letterSpacing: -2.6,
-              }}
-            />
+          <View style={styles.heading}>
+            <RNText style={styles.kicker}>YOUR PROFILE</RNText>
+            <RNText
+              allowFontScaling={false}
+              style={[styles.title, { color: palette.ink }]}
+            >
+              MEET
+            </RNText>
+            <RNText
+              allowFontScaling={false}
+              style={[styles.title, { color: palette.ink }]}
+            >
+              THE WORLD<RNText style={{ color: '#D8FF3D' }}>.</RNText>
+            </RNText>
+            <RNText style={styles.body}>
+              Two basics. Change them later anytime.
+            </RNText>
           </View>
-
-          <RNText style={styles.sub}>
-            A name, a handle, a face — the basics people will find you by. You
-            can change all of it later.
-          </RNText>
 
           <View style={styles.avatarBlock}>
             <Pressable onPress={pickAvatar} style={styles.avatarRing}>
@@ -206,275 +143,185 @@ export default function Identity() {
                 <RNImage source={{ uri: avatar }} style={styles.avatarImage} />
               ) : (
                 <View style={styles.avatarPlaceholder}>
-                  <Ionicons name="camera-outline" size={28} color={palette.ink} />
+                  <Ionicons name="camera-outline" size={26} color={palette.ink} />
                 </View>
               )}
               <View style={styles.avatarBadge}>
                 <Ionicons
                   name={avatar ? 'pencil' : 'add'}
-                  size={16}
+                  size={14}
                   color={palette.bone}
                 />
               </View>
             </Pressable>
-            <View style={styles.avatarMeta}>
-              <RNText style={styles.avatarTitle}>
-                {avatar ? 'PHOTO ADDED' : 'ADD PROFILE PHOTO'}
+            <Pressable
+              onPress={avatar ? removeAvatar : pickAvatar}
+              hitSlop={8}
+              style={styles.avatarAction}
+            >
+              <RNText style={styles.avatarActionText}>
+                {avatar ? 'REMOVE PHOTO' : 'ADD PHOTO · OPTIONAL'}
               </RNText>
-              <RNText style={styles.avatarHint}>
-                Optional · you can do this later.
-              </RNText>
-              {avatar ? (
-                <Pressable onPress={removeAvatar} hitSlop={8}>
-                  <RNText style={styles.avatarRemove}>REMOVE</RNText>
-                </Pressable>
-              ) : null}
-            </View>
+            </Pressable>
           </View>
 
           <View style={styles.fields}>
-            <Field
-              index="01"
-              label="DISPLAY NAME"
-              value={name}
-              onChangeText={setName}
-              placeholder=""
-              valid={nameValid}
-            />
-            <Field
-              index="02"
-              label="HANDLE"
-              value={handle}
-              onChangeText={(v) => setHandle(v.replace(/\s/g, '').toLowerCase())}
-              placeholder=""
-              prefix="underdawgs.com/"
-              valid={handleValid}
-              autoCapitalize="none"
-            />
-            <Field
-              index="03"
-              label="ONE LINE ABOUT YOU"
-              value={bio}
-              onChangeText={setBio}
-              placeholder=""
-              multiline
-              valid={undefined}
-            />
+            <View style={styles.field}>
+              <RNText style={styles.fieldLabel}>YOUR NAME</RNText>
+              <TextInput
+                value={name}
+                onChangeText={setName}
+                placeholder=""
+                style={styles.input}
+                autoCapitalize="words"
+                selectionColor={palette.ink}
+              />
+            </View>
+
+            <View style={styles.field}>
+              <RNText style={styles.fieldLabel}>USERNAME</RNText>
+              <View style={styles.inputRow}>
+                <RNText style={styles.prefix}>@</RNText>
+                <TextInput
+                  value={handle}
+                  onChangeText={(v) =>
+                    setHandle(v.replace(/[^a-zA-Z0-9_]/g, '').toLowerCase())
+                  }
+                  placeholder=""
+                  style={[styles.input, { flex: 1 }]}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  selectionColor={palette.ink}
+                />
+              </View>
+            </View>
           </View>
         </ScrollView>
 
         <SafeAreaView edges={['bottom']} style={styles.footerSafe}>
-          <View style={styles.hairline} />
-          <View style={styles.footer}>
-            <View style={{ flex: 1 }}>
-              <RNText style={styles.step}>ALMOST THERE</RNText>
-              <RNText style={styles.footerLabel}>
-                {ready ? "YOU'RE ON THE LIST" : 'FILL IT IN'}
-              </RNText>
+          <Pressable
+            onPress={onSubmit}
+            disabled={!ready}
+            style={[styles.cta, !ready && { opacity: 0.4 }]}
+          >
+            <RNText style={styles.ctaText}>CONTINUE</RNText>
+            <View style={styles.ctaArrow}>
+              <Ionicons name="arrow-forward" size={16} color={palette.ink} />
             </View>
-            <MagneticButton
-              label="NEXT"
-              background={palette.ink}
-              foreground={palette.bone}
-              size="lg"
-              disabled={!ready}
-              onPress={() => {
-                let fbUser = null;
-                try {
-                  fbUser = getAuth().currentUser;
-                } catch {}
-                setProfile({
-                  name,
-                  handle: handle.startsWith('@') ? handle : `@${handle}`,
-                  bio,
-                  avatar,
-                  uid: fbUser?.uid ?? null,
-                  phone: fbUser?.phoneNumber ?? null,
-                });
-                router.push('/(onboarding)/complete');
-              }}
-            />
-          </View>
+          </Pressable>
         </SafeAreaView>
       </KeyboardAvoidingView>
+
+      {kbOpen && (
+        <Pressable
+          onPress={() => Keyboard.dismiss()}
+          hitSlop={12}
+          style={styles.kbDismiss}
+        >
+          <Ionicons name="chevron-down" size={16} color={palette.ink} />
+          <RNText style={styles.kbDismissLabel}>DONE</RNText>
+        </Pressable>
+      )}
     </View>
   );
 }
 
-function Field({
-  index,
-  label,
-  value,
-  onChangeText,
-  placeholder,
-  prefix,
-  multiline,
-  valid,
-  autoCapitalize,
-}: {
-  index: string;
-  label: string;
-  value: string;
-  onChangeText: (v: string) => void;
-  placeholder: string;
-  prefix?: string;
-  multiline?: boolean;
-  valid?: boolean;
-  autoCapitalize?: 'none' | 'sentences' | 'words';
-}) {
-  const palette = useThemedPalette();
-  const styles = useThemedPaletteStyles(makeStyles);
-  return (
-    <View style={styles.field}>
-      <View style={styles.fieldHead}>
-        <View style={styles.fieldHeadLeft}>
-          <RNText style={styles.fieldIndex}>{index}</RNText>
-          <RNText style={styles.fieldLabel}>{label}</RNText>
-        </View>
-        {valid !== undefined ? (
-          <View
-            style={[
-              styles.pill,
-              {
-                backgroundColor: valid ? staticPalette.acid : 'transparent',
-                borderColor: valid ? staticPalette.acid : palette.line,
-              },
-            ]}
-          >
-            <RNText
-              style={[
-                styles.pillText,
-                { color: valid ? staticPalette.ink : palette.mute },
-              ]}
-            >
-              {valid ? 'OK' : 'REQUIRED'}
-            </RNText>
-          </View>
-        ) : null}
-      </View>
-      <View style={styles.inputRow}>
-        {prefix ? <RNText style={styles.prefix}>{prefix}</RNText> : null}
-        <TextInput
-          style={[
-            styles.input,
-            multiline && { minHeight: 60, textAlignVertical: 'top' },
-          ]}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor={palette.mute}
-          multiline={multiline}
-          autoCapitalize={autoCapitalize ?? 'sentences'}
-          selectionColor={palette.ink}
-        />
-      </View>
-    </View>
-  );
-}
+const H_PADDING = 20;
 
 const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bone },
+
+  topSafe: { paddingHorizontal: H_PADDING },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 6,
-    paddingBottom: 6,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   back: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: palette.line,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: palette.ink,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  stepRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  step: {
-    ...T.label,
-    color: palette.ink,
-    opacity: 0.7,
+    backgroundColor: palette.paper,
   },
   skip: {
-    flexDirection: 'row',
+    paddingHorizontal: 14,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: palette.line,
+    justifyContent: 'center',
   },
   skipLabel: {
     ...T.label,
     color: palette.ink,
-    letterSpacing: 1.8,
+    opacity: 0.6,
   },
-  scroll: { paddingHorizontal: 12, paddingTop: 20, paddingBottom: 20 },
-  blobAnchor: {
-    position: 'absolute',
-    right: -30,
-    top: 60,
-    opacity: 0.85,
+
+  scroll: {
+    paddingHorizontal: H_PADDING,
+    paddingTop: 14,
+    paddingBottom: 24,
   },
-  headingBlock: { gap: 2 },
-  headingTopRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 14,
+
+  heading: {
+    marginBottom: 8,
   },
-  headingHair: {
-    width: 32,
-    height: 1.5,
-    backgroundColor: palette.ink,
-    opacity: 0.65,
-  },
-  headingKicker: {
-    ...T.label,
+  kicker: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 3.2,
     color: palette.ink,
-    opacity: 0.7,
-    letterSpacing: 2,
+    opacity: 0.5,
+    textTransform: 'uppercase',
+    marginBottom: 6,
   },
-  sub: {
-    ...T.body,
+  title: {
+    fontFamily: fonts.displayBold,
+    fontSize: 56,
+    lineHeight: 56,
+    letterSpacing: -2,
+    includeFontPadding: false,
+  },
+  body: {
+    fontFamily: fonts.body,
+    fontSize: 16,
+    lineHeight: 24,
+    letterSpacing: -0.1,
     color: palette.ink,
-    opacity: 0.72,
-    marginTop: 16,
-    maxWidth: 360,
+    opacity: 0.78,
+    marginTop: 10,
   },
+
   avatarBlock: {
-    marginTop: 26,
-    flexDirection: 'row',
+    marginTop: 28,
     alignItems: 'center',
-    gap: 18,
-    padding: 16,
-    borderRadius: 22,
-    borderWidth: 1.5,
-    borderColor: palette.ink,
-    backgroundColor: palette.paper,
+    gap: 12,
   },
   avatarRing: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     borderWidth: 2,
     borderColor: palette.ink,
-    backgroundColor: palette.bone,
+    backgroundColor: palette.boneSoft,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'visible',
   },
   avatarImage: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 116,
+    height: 116,
+    borderRadius: 58,
   },
   avatarPlaceholder: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 116,
+    height: 116,
+    borderRadius: 58,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -482,88 +329,118 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     position: 'absolute',
     right: -2,
     bottom: -2,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: palette.ink,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: palette.paper,
+    borderColor: palette.bone,
   },
-  avatarMeta: { flex: 1, gap: 4 },
-  avatarTitle: {
-    ...T.label,
-    color: palette.ink,
-    letterSpacing: 1.4,
+  avatarAction: {
+    paddingVertical: 4,
+    paddingHorizontal: 4,
   },
-  avatarHint: {
-    ...T.small,
-    color: palette.mute,
-  },
-  avatarRemove: {
-    ...T.small,
-    color: palette.ink,
-    letterSpacing: 1.4,
-    textDecorationLine: 'underline',
-    marginTop: 4,
-  },
-  fields: { marginTop: 24 },
-  field: {
-    borderTopWidth: 1,
-    borderTopColor: palette.line,
-    paddingVertical: 16,
-  },
-  fieldHead: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  fieldHeadLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  fieldIndex: { ...T.micro, color: palette.mute, width: 24 },
-  fieldLabel: { ...T.label, color: palette.ink, opacity: 0.8 },
-  pill: {
-    paddingHorizontal: 10,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pillText: {
+  avatarActionText: {
     fontFamily: fonts.bodyBold,
-    fontSize: 9,
-    letterSpacing: 2,
+    fontSize: 11,
+    letterSpacing: 2.4,
+    color: palette.ink,
+    opacity: 0.6,
+    textTransform: 'uppercase',
+  },
+
+  fields: {
+    marginTop: 28,
+    gap: 14,
+  },
+  field: {
+    backgroundColor: palette.paper,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: palette.ink,
+    paddingHorizontal: 18,
+    paddingTop: 12,
+    paddingBottom: 14,
+  },
+  fieldLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 2.4,
+    color: palette.ink,
+    opacity: 0.55,
+    textTransform: 'uppercase',
+    marginBottom: 2,
   },
   inputRow: {
     flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginTop: 12,
+    alignItems: 'center',
   },
   prefix: {
-    ...T.body,
-    color: palette.mute,
+    fontFamily: fonts.displayBold,
+    fontSize: 22,
+    color: palette.ink,
+    opacity: 0.45,
     marginRight: 2,
   },
   input: {
-    flex: 1,
     fontFamily: fonts.displayBold,
-    fontSize: 28,
-    letterSpacing: -0.8,
+    fontSize: 22,
+    letterSpacing: -0.4,
     color: palette.ink,
-    paddingVertical: 0,
+    paddingVertical: 4,
   },
-  footerSafe: { paddingHorizontal: 12, paddingBottom: 6 },
-  hairline: { height: 1, backgroundColor: palette.line },
-  footer: {
+
+  footerSafe: {
+    paddingHorizontal: H_PADDING,
+    paddingBottom: 6,
+    paddingTop: 10,
+  },
+  cta: {
+    height: 64,
+    borderRadius: 18,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 16,
+    justifyContent: 'space-between',
+    paddingHorizontal: 22,
+    backgroundColor: palette.ink,
   },
-  footerLabel: {
-    ...T.title2,
+  ctaText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+    letterSpacing: 2.4,
+    color: palette.bone,
+    textTransform: 'uppercase',
+  },
+  ctaArrow: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.bone,
+  },
+
+  kbDismiss: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 64 : 24,
+    right: H_PADDING,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 14,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: palette.paper,
+    borderWidth: 1,
+    borderColor: palette.ink,
+  },
+  kbDismissLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 2,
     color: palette.ink,
-    marginTop: 4,
+    textTransform: 'uppercase',
   },
 });

@@ -117,10 +117,6 @@ export default function Otp() {
           <Pressable onPress={() => router.back()} hitSlop={12} style={styles.back}>
             <Ionicons name="arrow-back" size={18} color={palette.ink} />
           </Pressable>
-          <View style={styles.stepRow}>
-            <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
-            <RNText style={styles.step}>STEP 01 / 05</RNText>
-          </View>
         </View>
       </SafeAreaView>
 

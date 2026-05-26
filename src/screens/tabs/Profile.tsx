@@ -42,7 +42,7 @@ const VIDEO_GAP = 10;
 // strip — progress bar fill, percent badge, count accent, and each step's
 // checkmark badge. Never used for any other UI state so the user can
 // always read "neon green = done".
-const NEON_GREEN = '#39FF14';
+const NEON_GREEN = '#9C988A';
 const POST_TILE_SIZE = (width - SCREEN_PADDING * 2 - GRID_GAP * 2) / 3;
 const VIDEO_TILE_W = Math.floor((width - SCREEN_PADDING * 2 - VIDEO_GAP) / 2);
 const VIDEO_TILE_H = VIDEO_TILE_W * 1.45;
@@ -192,8 +192,8 @@ export default function Profile() {
             </View>
 
             <View style={styles.pillRow}>
-              <BadgePill tier="RISING" accent={palette.acid} inverse />
-              <BadgePill label="VERIFIED" accent={palette.electric} inverse />
+              <BadgePill tier="RISING" accent={palette.mute} inverse />
+              <BadgePill label="VERIFIED" accent={palette.mute} inverse />
             </View>
 
             <RNText
@@ -229,7 +229,7 @@ export default function Profile() {
             {/* View Analytics — wide, short, Instagram-like */}
             <Tap
               style={styles.analyticsCard}
-              burstColor={palette.acid}
+              burstColor={palette.mute}
               onPress={() => router.push('/(modules)/analytics')}
             >
               <View style={styles.analyticsLeft}>
@@ -247,7 +247,7 @@ export default function Profile() {
               </View>
               <View style={styles.analyticsRight}>
                 <MiniSpark />
-                <Ionicons name="arrow-forward" size={14} color={staticPalette.bone} />
+                <Ionicons name="arrow-forward" size={14} color="#39FF14" />
               </View>
             </Tap>
 
@@ -434,7 +434,7 @@ const previewStyles = StyleSheet.create({
   frame: {
     overflow: 'hidden',
     borderWidth: 3,
-    borderColor: staticPalette.acid,
+    borderColor: staticPalette.mute,
     backgroundColor: staticPalette.ink,
   },
   image: {
@@ -462,7 +462,7 @@ function FeedTabBtn({
     <Tap
       style={[styles.tabBtn, active && styles.tabBtnActive]}
       onPress={onPress}
-      burstColor={palette.acid}
+      burstColor={palette.mute}
     >
       <Ionicons
         name={icon}
@@ -605,7 +605,7 @@ function LevelUpList() {
       {/* Progress summary card */}
       <Tap
         style={styles.levelUpSummary}
-        burstColor={palette.acid}
+        burstColor={palette.mute}
         variant="heavy"
         onPress={() => router.push('/(modules)/learning' as any)}
       >
@@ -621,7 +621,7 @@ function LevelUpList() {
             <View
               style={[
                 styles.levelUpBarFill,
-                { width: `${pct}%`, backgroundColor: staticPalette.acid },
+                { width: `${pct}%`, backgroundColor: staticPalette.mute },
               ]}
             />
           </View>
@@ -699,7 +699,7 @@ function LevelUpList() {
 
       <Tap
         style={styles.levelUpAll}
-        burstColor={palette.acid}
+        burstColor={palette.mute}
         onPress={() => router.push('/(modules)/learning' as any)}
       >
         <Ionicons name="trophy-outline" size={14} color={palette.ink} />
@@ -732,7 +732,7 @@ function StatCol({
   return (
     <Tap style={styles.statCol} onPress={onPress} burstColor={staticPalette.bone}>
       <RNText
-        style={[styles.statValue, accent && { color: palette.acid }]}
+        style={[styles.statValue, accent && { color: palette.mute }]}
         numberOfLines={1}
         adjustsFontSizeToFit
         minimumFontScale={0.7}
@@ -766,6 +766,7 @@ type SetupStep = {
   key: string;
   title: string;
   sub: string;
+  subDone: string;
   icon: keyof typeof Ionicons.glyphMap;
   accent: string;
   route: string;
@@ -787,17 +788,19 @@ function ProfileSetupStrip() {
       key: 'photo',
       title: 'ADD PHOTO',
       sub: 'show your face',
+      subDone: 'photo added',
       icon: 'camera-outline',
-      accent: palette.blush,
+      accent: '#FF6BB5',
       route: '/(modules)/profile/edit',
-      done: !!profileMock.avatar,
+      done: !!profile.avatar && profile.avatar.trim().length > 0,
     },
     {
       key: 'bio',
       title: 'WRITE BIO',
       sub: 'one line on you',
+      subDone: 'bio written',
       icon: 'create-outline',
-      accent: palette.electric,
+      accent: '#2E5BFF',
       route: '/(modules)/profile/edit',
       done: !!profile.bio && profile.bio.trim().length > 0,
     },
@@ -805,6 +808,7 @@ function ProfileSetupStrip() {
       key: 'craft',
       title: 'PICK CRAFT',
       sub: 'what you make',
+      subDone: 'craft picked',
       icon: 'sparkles-outline',
       accent: '#A78BFA',
       route: '/(onboarding)/creator-type',
@@ -814,6 +818,7 @@ function ProfileSetupStrip() {
       key: 'location',
       title: 'LOCATION',
       sub: 'where you are',
+      subDone: 'location set',
       icon: 'location-outline',
       accent: '#06B6D4',
       route: '/(modules)/profile/edit',
@@ -823,8 +828,9 @@ function ProfileSetupStrip() {
       key: 'follow',
       title: 'FOLLOW 5',
       sub: `${followingCount} so far`,
+      subDone: `${followingCount} followed`,
       icon: 'person-add-outline',
-      accent: palette.acid,
+      accent: '#FF5A1F',
       route: '/(tabs)/explore',
       done: followingCount >= 5,
     },
@@ -832,8 +838,9 @@ function ProfileSetupStrip() {
       key: 'socials',
       title: 'CONNECT',
       sub: 'IG · TT · SP',
+      subDone: 'socials linked',
       icon: 'link-outline',
-      accent: palette.blush,
+      accent: '#FFD23F',
       route: '/(modules)/audience',
       done: false,
     },
@@ -841,8 +848,9 @@ function ProfileSetupStrip() {
       key: 'verified',
       title: 'GET VERIFIED',
       sub: 'claim the tick',
+      subDone: 'verified',
       icon: 'checkmark-circle-outline',
-      accent: palette.electric,
+      accent: '#39FF14',
       route: '/(modules)/reputation/verification',
       done: false,
     },
@@ -886,68 +894,59 @@ function ProfileSetupStrip() {
         contentContainerStyle={styles.setupScrollContent}
         style={styles.setupScroll}
       >
-        {steps.map((s) => (
-          <SetupCard key={s.key} step={s} />
+        {steps.map((s, i) => (
+          <SetupCard key={s.key} step={s} index={i} />
         ))}
       </ScrollView>
     </View>
   );
 }
 
-function SetupCard({ step }: { step: SetupStep }) {
+function SetupCard({ step, index }: { step: SetupStep; index: number }) {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  const c = step.done ? null : step;
+  const stepNumber = String(index + 1).padStart(2, '0');
 
   return (
     <Tap
       onPress={() => router.push(step.route as any)}
       burstColor={step.accent}
-      style={[
-        styles.setupCard,
-        step.done
-          ? { backgroundColor: palette.paper, borderColor: palette.line }
-          : { backgroundColor: step.accent, borderColor: step.accent },
-      ]}
+      style={[styles.setupCard, { backgroundColor: step.accent }]}
     >
-      <View
-        style={[
-          styles.setupIcon,
-          step.done
-            ? { backgroundColor: NEON_GREEN }
-            : { backgroundColor: 'rgba(10,10,10,0.12)' },
-        ]}
-      >
-        <Ionicons
-          name={step.done ? 'checkmark' : step.icon}
-          size={18}
-          color={staticPalette.ink}
-        />
+      <View style={styles.setupCardBlob} pointerEvents="none" />
+
+      <View style={styles.setupCardTopRow}>
+        <RNText style={styles.setupCardIndex} maxFontSizeMultiplier={1.1}>
+          {stepNumber}
+        </RNText>
+        {step.done ? (
+          <View style={styles.setupDoneBadge} pointerEvents="none">
+            <Ionicons name="checkmark" size={14} color={staticPalette.ink} />
+          </View>
+        ) : (
+          <View style={styles.setupTodoBadge} pointerEvents="none">
+            <Ionicons name="arrow-forward" size={12} color={staticPalette.ink} />
+          </View>
+        )}
       </View>
-      <RNText
-        style={[
-          styles.setupCardTitle,
-          { color: step.done ? palette.ink : staticPalette.ink },
-        ]}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.8}
-      >
-        {step.title}
-      </RNText>
-      <RNText
-        style={[
-          styles.setupCardSub,
-          {
-            color: step.done
-              ? palette.mute
-              : 'rgba(10,10,10,0.65)',
-          },
-        ]}
-        numberOfLines={1}
-      >
-        {step.done ? 'done' : step.sub}
-      </RNText>
+
+      <View style={styles.setupBigIcon}>
+        <Ionicons name={step.icon} size={26} color={staticPalette.ink} />
+      </View>
+
+      <View style={styles.setupCardCopy}>
+        <RNText
+          style={styles.setupCardTitle}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.85}
+        >
+          {step.title}
+        </RNText>
+        <RNText style={styles.setupCardSub} numberOfLines={1}>
+          {step.done ? step.subDone : step.sub}
+        </RNText>
+      </View>
     </Tap>
   );
 }
@@ -962,7 +961,7 @@ function MiniSpark() {
           key={i}
           style={[
             sparkStyles.bar,
-            { height: h, backgroundColor: i === heights.length - 1 ? staticPalette.acid : 'rgba(242,239,230,0.55)' },
+            { height: h, backgroundColor: i === heights.length - 1 ? '#39FF14' : 'rgba(57,255,20,0.55)' },
           ]}
         />
       ))}
@@ -1045,7 +1044,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     height: 96,
     borderRadius: 48,
     borderWidth: 2,
-    borderColor: staticPalette.acid,
+    borderColor: staticPalette.mute,
     padding: 3,
     backgroundColor: staticPalette.ink,
     overflow: 'hidden',
@@ -1063,7 +1062,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: staticPalette.acid,
+    backgroundColor: staticPalette.mute,
     borderWidth: 2,
     borderColor: staticPalette.ink,
   },
@@ -1077,7 +1076,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: staticPalette.acid,
+    backgroundColor: staticPalette.bone,
     borderWidth: 2,
     borderColor: staticPalette.ink,
     alignItems: 'center',
@@ -1097,7 +1096,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   handleText: {
     fontFamily: fonts.body,
     fontSize: 13,
-    color: staticPalette.acid,
+    color: staticPalette.mute,
     opacity: 0.85,
     marginTop: 6,
     letterSpacing: 0.2,
@@ -1121,7 +1120,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     fontFamily: fonts.displayBold,
     fontSize: 32,
     lineHeight: 34,
-    color: staticPalette.acid,
+    color: staticPalette.mute,
     letterSpacing: -1.2,
   },
 
@@ -1217,7 +1216,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: staticPalette.acid,
+    backgroundColor: staticPalette.mute,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1246,7 +1245,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: staticPalette.acid,
+    backgroundColor: staticPalette.mute,
     height: 48,
     borderRadius: 24,
   },
@@ -1291,7 +1290,6 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     marginTop: 4,
   },
   setupTitleAccent: {
-    fontFamily: fonts.editorialItalic,
     color: NEON_GREEN,
   },
   setupPctBadge: {
@@ -1323,30 +1321,79 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     gap: 10,
   },
   setupCard: {
-    width: 132,
+    width: 156,
+    height: 168,
     paddingVertical: 14,
     paddingHorizontal: 14,
-    borderRadius: 18,
-    borderWidth: 1,
-    gap: 8,
+    borderRadius: 22,
+    overflow: 'hidden',
+    justifyContent: 'space-between',
   },
-  setupIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  setupCardBlob: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    top: -50,
+    right: -50,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+  },
+  setupCardTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  setupCardIndex: {
+    fontFamily: fonts.displayBold,
+    fontSize: 18,
+    letterSpacing: -0.4,
+    color: 'rgba(10,10,10,0.55)',
+  },
+  setupBigIcon: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.55)',
+    borderWidth: 1,
+    borderColor: 'rgba(10,10,10,0.08)',
+  },
+  setupCardCopy: {
+    gap: 2,
+  },
+  setupDoneBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: NEON_GREEN,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: staticPalette.ink,
+  },
+  setupTodoBadge: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: 'rgba(255,255,255,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(10,10,10,0.18)',
   },
   setupCardTitle: {
     fontFamily: fonts.displayBold,
-    fontSize: 14,
-    lineHeight: 16,
+    fontSize: 15,
+    lineHeight: 17,
     letterSpacing: -0.3,
+    color: staticPalette.ink,
   },
   setupCardSub: {
     ...T.label,
     fontSize: 10,
     letterSpacing: 1.2,
+    color: 'rgba(10,10,10,0.6)',
   },
 
   /* ---------- Continuous marquee strip ---------- */
@@ -1375,7 +1422,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     color: palette.ink,
     marginTop: 12,
   },
-  feedItalic: { fontFamily: fonts.editorialItalic, color: palette.electric },
+  feedItalic: { fontFamily: fonts.editorialItalic, color: palette.mute },
 
   tabBar: {
     marginTop: 18,
@@ -1530,7 +1577,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   levelUpHeadlineAccent: {
     fontFamily: fonts.editorialItalic,
-    color: staticPalette.acid,
+    color: staticPalette.mute,
   },
   levelUpBar: {
     marginTop: 4,
@@ -1549,7 +1596,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: staticPalette.acid,
+    backgroundColor: staticPalette.mute,
     alignItems: 'center',
     justifyContent: 'center',
   },

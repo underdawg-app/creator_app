@@ -36,7 +36,7 @@ const PRELOAD_ASSETS = [
   require('@/objects/obj-9.png'),
   require('@/objects/obj-10.png'),
 ];
-import { RuleDot, Asterisk } from '@/components/svg/Marks';
+import { RuleDot } from '@/components/svg/Marks';
 import { prefetchImages } from '@/components/ui/Image';
 import { feedPosts, profileMock, userFeed } from '@/data/mock';
 import { useStore } from '@/store';
@@ -95,7 +95,6 @@ function prewarmImageCache() {
 export default function Splash() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  const headerP = useSharedValue(0);
   const markP = useSharedValue(0);
   const wordP = useSharedValue(0);
   const taglineP = useSharedValue(0);
@@ -104,7 +103,6 @@ export default function Splash() {
   useEffect(() => {
     const ease = Easing.bezier(0.22, 1, 0.36, 1);
 
-    headerP.value = withTiming(1, { duration: 520, easing: ease });
     markP.value = withDelay(200, withTiming(1, { duration: 640, easing: ease }));
     wordP.value = withDelay(900, withTiming(1, { duration: 820, easing: ease }));
     taglineP.value = withDelay(1500, withTiming(1, { duration: 560, easing: ease }));
@@ -152,10 +150,6 @@ export default function Splash() {
     return () => clearTimeout(t);
   }, []);
 
-  const headerStyle = useAnimatedStyle(() => ({
-    opacity: headerP.value,
-    transform: [{ translateY: (1 - headerP.value) * -8 }],
-  }));
   const markStyle = useAnimatedStyle(() => ({
     opacity: markP.value,
     transform: [{ scale: 0.9 + markP.value * 0.1 }],
@@ -189,22 +183,6 @@ export default function Splash() {
           />
         </View>
       )}
-
-      {/* Top meta */}
-      <Animated.View style={[styles.top, headerStyle]}>
-        <View style={styles.topRow}>
-          <View style={styles.metaCol}>
-            <RNText style={styles.metaLabel}>UD · CREATOR OS</RNText>
-            <RNText style={styles.metaValue}>N° 001</RNText>
-          </View>
-          <Asterisk size={18} color={palette.bone} strokeWidth={1.4} />
-          <View style={[styles.metaCol, { alignItems: 'flex-end' }]}>
-            <RNText style={styles.metaLabel}>VERSION</RNText>
-            <RNText style={styles.metaValue}>MMXXVI</RNText>
-          </View>
-        </View>
-        <View style={styles.hairline} />
-      </Animated.View>
 
       {/* Center wordmark */}
       <View style={styles.center}>
@@ -290,31 +268,6 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     backgroundColor: palette.bone,
   },
   waveAbs: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
-  top: {
-    paddingTop: 64,
-    paddingHorizontal: 12,
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingBottom: 14,
-  },
-  metaCol: {},
-  metaLabel: {
-    ...T.micro,
-    color: palette.ink,
-    opacity: 0.55,
-  },
-  metaValue: {
-    ...T.labelLarge,
-    color: palette.ink,
-    marginTop: 4,
-  },
-  hairline: {
-    height: 1,
-    backgroundColor: palette.lineDark,
-  },
 
   center: {
     flex: 1,

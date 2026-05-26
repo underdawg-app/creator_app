@@ -159,10 +159,6 @@ export default function Complete() {
       >
         <SafeAreaView style={{ flex: 1, paddingHorizontal: 12 }}>
           <View style={styles.top}>
-            <View style={styles.stepRow}>
-              <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
-              <RNText style={styles.step}>STEP 05 / 05</RNText>
-            </View>
             <View style={styles.dot} />
           </View>
 

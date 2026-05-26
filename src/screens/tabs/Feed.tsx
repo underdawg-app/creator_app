@@ -212,7 +212,6 @@ function TabBar({
           >
             {t}
           </RNText>
-          {active === t ? <View style={styles.tabUnderline} /> : null}
         </Tap>
       ))}
     </View>
@@ -327,195 +326,122 @@ function PostCardImpl({ post }: { post: Post }) {
   const toast = useStore((s) => s.toast);
   const liked = useStore((s) => !!s.likes[post.id]);
   const saved = useStore((s) => !!s.saves[post.id]);
-  const following = useStore((s) => !!s.following[post.handle]);
   const toggleLike = useStore((s) => s.toggleLike);
   const toggleSave = useStore((s) => s.toggleSave);
-  const toggleFollow = useStore((s) => s.toggleFollow);
 
   const likes = post.likes + (liked ? 1 : 0);
-  const avatarColor = post.color;
 
   return (
-    <View style={styles.post}>
-      {/* ── Header row ── */}
-      <View style={styles.postHead}>
-        <View style={[styles.avatar, { backgroundColor: avatarColor }]}>
-          {post.avatar ? (
-            <Image
-              source={{ uri: post.avatar }}
-              style={StyleSheet.absoluteFill as any}
-              contentFit="cover"
-              transition={180}
-              targetWidth={42}
-            />
-          ) : (
-            <RNText style={styles.avatarText} maxFontSizeMultiplier={1.1}>
-              {post.creator.slice(0, 1)}
-            </RNText>
-          )}
+    <View style={styles.ticketWrap}>
+      {post.rising ? (
+        <View style={styles.tape}>
+          <RNText style={styles.tapeText}>RISING FAST</RNText>
         </View>
-        <View style={{ flex: 1, gap: 2 }}>
-          <View style={styles.nameRow}>
+      ) : null}
+
+      <View style={styles.ticketCard}>
+        <View style={styles.ticketBody}>
+          <View style={styles.ticketLeft}>
+            <RNText style={styles.ticketKicker} numberOfLines={1}>
+              {post.category}
+            </RNText>
             <RNText
-              style={styles.postName}
-              numberOfLines={1}
+              style={styles.ticketCreator}
+              numberOfLines={2}
               adjustsFontSizeToFit
-              minimumFontScale={0.85}
-              maxFontSizeMultiplier={1.15}
+              minimumFontScale={0.7}
             >
               {post.creator}
             </RNText>
-            {post.rising ? (
-              <View style={styles.verified}>
-                <Ionicons name="checkmark" size={10} color={staticPalette.ink} />
+            <RNText style={styles.ticketTitle} numberOfLines={2}>
+              {post.title}
+            </RNText>
+
+            <View style={styles.metaBlock}>
+              <View style={styles.metaRow}>
+                <RNText style={styles.metaLabel}>Date</RNText>
+                <RNText style={styles.metaValue}>{post.postedAgo}</RNText>
+              </View>
+              <View style={styles.metaRow}>
+                <RNText style={styles.metaLabel}>Location</RNText>
+                <RNText style={styles.metaValue} numberOfLines={1}>
+                  {post.location}
+                </RNText>
+              </View>
+              <View style={styles.metaRow}>
+                <RNText style={styles.metaLabel}>Type</RNText>
+                <RNText style={styles.metaValue} numberOfLines={1}>
+                  {post.type}
+                </RNText>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.thumbWrap}>
+            {post.image ? (
+              <Image
+                source={{ uri: post.image }}
+                style={StyleSheet.absoluteFill as any}
+                contentFit="cover"
+                transition={240}
+                placeholder={{ blurhash: 'L6H2EC=PM+yV0g-mq.wG9c010J}I' }}
+                targetWidth={140}
+              />
+            ) : null}
+            {isVideo(post.type) ? (
+              <View style={styles.thumbPlay}>
+                <Ionicons name="play" size={16} color={palette.ink} />
               </View>
             ) : null}
           </View>
-          <RNText
-            style={styles.postMeta}
-            numberOfLines={1}
-            maxFontSizeMultiplier={1.15}
-          >
-            {post.handle} · {post.location} · {post.postedAgo}
-          </RNText>
         </View>
-        <Tap
-          onPress={() => {
-            toggleFollow(post.handle);
-            toast(
-              following ? `Unfollowed ${post.handle}.` : `Following ${post.handle}.`,
-              following ? 'default' : 'success'
-            );
-          }}
-          style={[
-            styles.followBtn,
-            following && { backgroundColor: palette.ink, borderColor: palette.ink },
-          ]}
-          burstColor={palette.acid}
-        >
-          <RNText
-            style={[
-              styles.followLabel,
-              following && { color: palette.bone },
-            ]}
-            maxFontSizeMultiplier={1.1}
+
+        <View style={styles.perforation} />
+
+        <View style={styles.ticketFooter}>
+          <Tap
+            onPress={() => toast('Post detail opening…', 'default')}
+            style={styles.detailsBtn}
+            burstColor={post.color}
           >
-            {following ? 'FOLLOWING' : 'FOLLOW'}
-          </RNText>
-        </Tap>
-      </View>
+            <RNText style={styles.detailsText}>DETAILS</RNText>
+            <Ionicons name="arrow-forward" size={12} color={palette.ink} />
+          </Tap>
 
-      {/* ── Caption ── */}
-      <View style={styles.captionBlock}>
-        <RNText
-          style={styles.captionTitle}
-          numberOfLines={2}
-          adjustsFontSizeToFit
-          minimumFontScale={0.8}
-          maxFontSizeMultiplier={1.1}
-        >
-          {post.title}
-        </RNText>
-        <RNText style={styles.captionNote} maxFontSizeMultiplier={1.2}>
-          {post.note}
-        </RNText>
-      </View>
-
-      {/* ── Media block — real image with content overlays ── */}
-      <Tap
-        onPress={() => toast('Post detail opening…', 'default')}
-        burstColor={post.color}
-      >
-        <View style={[styles.media, { backgroundColor: post.bg }]}>
-          {post.image ? (
-            <Image
-              source={{ uri: post.image }}
-              style={StyleSheet.absoluteFill as any}
-              contentFit="cover"
-              transition={240}
-              placeholder={{ blurhash: 'L6H2EC=PM+yV0g-mq.wG9c010J}I' }}
-              targetWidth={width}
-            />
-          ) : null}
-          {/* scrim for legibility of overlays */}
-          <View style={styles.mediaScrim} pointerEvents="none" />
-          <View style={styles.mediaCategoryPill}>
-            <RNText style={styles.mediaCategory} maxFontSizeMultiplier={1.1}>
-              {post.category}
-            </RNText>
-          </View>
-          {isVideo(post.type) ? (
-            <View style={styles.playBadge}>
-              <Ionicons name="play" size={20} color={palette.ink} />
-            </View>
-          ) : null}
-          <View style={styles.mediaBottomRow}>
-            <RNText style={styles.mediaType} numberOfLines={1} maxFontSizeMultiplier={1.1}>
-              {post.type}
-            </RNText>
-            <RNText style={styles.mediaLocation} numberOfLines={1} maxFontSizeMultiplier={1.1}>
-              {post.location}
-            </RNText>
+          <View style={styles.engageRow}>
+            <Tap
+              onPress={() => toggleLike(post.id)}
+              style={styles.engagePill}
+              burstColor={post.color}
+            >
+              <Ionicons
+                name={liked ? 'heart' : 'heart-outline'}
+                size={14}
+                color={liked ? palette.ember : palette.ink}
+              />
+              <RNText style={styles.engagePillText}>{compact(likes)}</RNText>
+            </Tap>
+            <Tap
+              onPress={() => toast('Comments opening…', 'default')}
+              style={styles.engagePill}
+              burstColor={post.color}
+            >
+              <Ionicons name="chatbubble-outline" size={13} color={palette.ink} />
+              <RNText style={styles.engagePillText}>{compact(post.comments)}</RNText>
+            </Tap>
+            <Tap
+              onPress={() => toggleSave(post.id)}
+              style={styles.engageIconPill}
+              burstColor={post.color}
+            >
+              <Ionicons
+                name={saved ? 'bookmark' : 'bookmark-outline'}
+                size={13}
+                color={palette.ink}
+              />
+            </Tap>
           </View>
         </View>
-      </Tap>
-
-      {/* ── Engagement bar ── */}
-      <View style={styles.engage}>
-        <Tap
-          onPress={() => toggleLike(post.id)}
-          burstColor={post.color}
-          variant="heavy"
-          style={styles.engageBtn}
-        >
-          <Ionicons
-            name={liked ? 'heart' : 'heart-outline'}
-            size={18}
-            color={liked ? palette.ember : palette.ink}
-          />
-          <RNText style={styles.engageCount} maxFontSizeMultiplier={1.15}>
-            {compact(likes)}
-          </RNText>
-        </Tap>
-        <Tap
-          onPress={() => toast('Comments opening…', 'default')}
-          burstColor={post.color}
-          style={styles.engageBtn}
-        >
-          <Ionicons name="chatbubble-outline" size={17} color={palette.ink} />
-          <RNText style={styles.engageCount} maxFontSizeMultiplier={1.15}>
-            {compact(post.comments)}
-          </RNText>
-        </Tap>
-        <Tap
-          onPress={() => toast('Reposted.', 'success')}
-          burstColor={post.color}
-          style={styles.engageBtn}
-        >
-          <Ionicons name="repeat" size={18} color={palette.ink} />
-          <RNText style={styles.engageCount} maxFontSizeMultiplier={1.15}>
-            {compact(post.reposts)}
-          </RNText>
-        </Tap>
-        <View style={{ flex: 1 }} />
-        <Tap
-          onPress={() => toggleSave(post.id)}
-          burstColor={post.color}
-          style={styles.engageIconBtn}
-        >
-          <Ionicons
-            name={saved ? 'bookmark' : 'bookmark-outline'}
-            size={17}
-            color={saved ? palette.acid : palette.ink}
-          />
-        </Tap>
-        <Tap
-          onPress={() => toast('Share sheet opened.', 'default')}
-          burstColor={post.color}
-          style={styles.engageIconBtn}
-        >
-          <Ionicons name="share-outline" size={17} color={palette.ink} />
-        </Tap>
       </View>
     </View>
   );
@@ -722,27 +648,39 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   tabBar: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
-    gap: 4,
-  },
-  tabItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 10,
+    justifyContent: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 10,
+    gap: 6,
     alignItems: 'center',
   },
-  tabItemActive: {},
-  tabLabel: {
-    ...T.label,
-    color: palette.ink,
-    opacity: 0.45,
+  tabItem: {
+    paddingHorizontal: 14,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
-  tabLabelActive: { opacity: 1 },
+  tabItemActive: {
+    backgroundColor: palette.ink,
+  },
+  tabLabel: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 1.6,
+    color: palette.ink,
+    opacity: 0.5,
+    textTransform: 'uppercase',
+  },
+  tabLabelActive: {
+    color: palette.bone,
+    opacity: 1,
+  },
   tabUnderline: {
-    height: 3,
-    width: '100%',
-    backgroundColor: palette.acid,
-    marginTop: 6,
-    borderRadius: 2,
+    width: 0,
+    height: 0,
   },
 
   /* ─── Stories strip ─── */
@@ -796,7 +734,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
 
   /* ─── Post ─── */
-  separator: { height: 1, backgroundColor: palette.line, marginHorizontal: 0 },
+  separator: { height: 0 },
   post: {
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -1058,5 +996,178 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     opacity: 0.55,
     textAlign: 'center',
     maxWidth: 300,
+  },
+
+  /* ─── Ticket-card post (redesign) ─── */
+  ticketWrap: {
+    marginHorizontal: 16,
+    marginVertical: 8,
+    position: 'relative',
+  },
+  tape: {
+    position: 'absolute',
+    top: -10,
+    right: 14,
+    zIndex: 5,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    backgroundColor: '#FCD34D',
+    borderWidth: 1.5,
+    borderColor: palette.ink,
+    transform: [{ rotate: '4deg' }],
+  },
+  tapeText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 1.8,
+    color: palette.ink,
+    textTransform: 'uppercase',
+  },
+  ticketCard: {
+    backgroundColor: palette.paper,
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: palette.ink,
+    overflow: 'hidden',
+  },
+  ticketBody: {
+    flexDirection: 'row',
+    padding: 16,
+    gap: 14,
+  },
+  ticketLeft: {
+    flex: 1,
+    minWidth: 0,
+  },
+  ticketKicker: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 2.2,
+    color: palette.ink,
+    opacity: 0.55,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  ticketCreator: {
+    fontFamily: fonts.displayBold,
+    fontSize: 22,
+    lineHeight: 24,
+    letterSpacing: -0.6,
+    color: palette.ink,
+    includeFontPadding: false,
+  },
+  ticketTitle: {
+    fontFamily: fonts.displayBold,
+    fontSize: 14,
+    lineHeight: 18,
+    letterSpacing: -0.3,
+    color: palette.ink,
+    opacity: 0.78,
+    marginTop: 4,
+  },
+  metaBlock: {
+    marginTop: 10,
+    gap: 3,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  metaLabel: {
+    fontFamily: fonts.body,
+    fontSize: 11,
+    color: palette.ink,
+    opacity: 0.5,
+    width: 56,
+  },
+  metaValue: {
+    flex: 1,
+    fontFamily: fonts.bodyMedium,
+    fontSize: 12,
+    color: palette.ink,
+  },
+  thumbWrap: {
+    width: 100,
+    height: 116,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: palette.boneSoft,
+    borderWidth: 1,
+    borderColor: palette.ink,
+    position: 'relative',
+  },
+  thumbPlay: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: palette.bone,
+    borderWidth: 1,
+    borderColor: palette.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  perforation: {
+    height: 1,
+    marginHorizontal: 12,
+    borderTopWidth: 1,
+    borderTopColor: palette.ink,
+    borderStyle: 'dashed',
+    opacity: 0.35,
+  },
+  ticketFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 10,
+  },
+  detailsBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  detailsText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 2.2,
+    color: palette.ink,
+    textTransform: 'uppercase',
+  },
+  engageRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  engagePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 10,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: palette.ink,
+    backgroundColor: 'transparent',
+  },
+  engagePillText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 0.4,
+    color: palette.ink,
+  },
+  engageIconPill: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: palette.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
   },
 });

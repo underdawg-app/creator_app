@@ -6,6 +6,8 @@
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
 	<string>Underdawgs</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -63,6 +65,9 @@
 		<string>Archivo_800ExtraBold.ttf</string>
 		<string>Archivo_900Black.ttf</string>
 		<string>Archivo_900Black_Italic.ttf</string>
+		<string>Syne-Bold.ttf</string>
+		<string>CabinetGrotesk-Black.ttf</string>
+		<string>CabinetGrotesk-Extrabold.ttf</string>
 		<string>AntDesign.ttf</string>
 		<string>Entypo.ttf</string>
 		<string>EvilIcons.ttf</string>

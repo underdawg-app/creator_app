@@ -13,7 +13,6 @@ export const linking: LinkingOptions<any> = {
           UserType: 'user-type',
           CreatorType: 'creator-type',
           Identity: 'identity',
-          Complete: 'complete',
         },
       },
       Tabs: {

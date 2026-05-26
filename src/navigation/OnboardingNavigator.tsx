@@ -7,7 +7,6 @@ import Otp from '@/screens/onboarding/Otp';
 import UserType from '@/screens/onboarding/UserType';
 import CreatorType from '@/screens/onboarding/CreatorType';
 import Identity from '@/screens/onboarding/Identity';
-import Complete from '@/screens/onboarding/Complete';
 
 const Stack = createNativeStackNavigator();
 
@@ -35,7 +34,6 @@ export default function OnboardingNavigator() {
       <Stack.Screen name="UserType" component={UserType} />
       <Stack.Screen name="CreatorType" component={CreatorType} />
       <Stack.Screen name="Identity" component={Identity} options={{ animation: 'none' }} />
-      <Stack.Screen name="Complete" component={Complete} />
     </Stack.Navigator>
   );
 }

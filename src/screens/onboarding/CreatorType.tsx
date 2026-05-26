@@ -5,7 +5,6 @@ import {
   Pressable,
   ScrollView,
   Text as RNText,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
@@ -14,334 +13,365 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
+  withTiming,
+  Easing,
 } from 'react-native-reanimated';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import { creatorTypes } from '@/data/mock';
-import { MagneticButton } from '@/components/ui/MagneticButton';
-import { RevealText } from '@/components/ui/RevealText';
-import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
 import { typeIconMap } from '@/components/svg/TypeIcons';
-import { Asterisk } from '@/components/svg/Marks';
 import { type TransitionKey } from '@/components/transitions/CategoryTransition';
 import { useTransition } from '@/components/transitions/TransitionProvider';
 import { useStore } from '@/store';
 
-const { width, height } = Dimensions.get('window');
+const H_PADDING = 20;
+const ROW_COLLAPSED = 56;
+const ROW_EXPANDED = 124;
 
 export default function CreatorType() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  // Single-select: exactly one category active at a time.
-  const [selected, setSelected] = useState<string>('visual');
+  // expandedKey is the single open row; null = all collapsed.
+  const [expandedKey, setExpandedKey] = useState<string | null>('visual');
   const { play, isPlaying } = useTransition();
 
-  const pick = (k: string) => setSelected(k);
+  const selectedMeta = expandedKey
+    ? creatorTypes.find((t) => t.key === expandedKey)
+    : null;
 
-  const selectedMeta = creatorTypes.find((t) => t.key === selected);
-  const transitionColor = selectedMeta?.color ?? palette.acid;
+  const toggle = (key: string) => {
+    setExpandedKey((prev) => (prev === key ? null : key));
+  };
 
   const handleNext = () => {
-    if (isPlaying) return;
-    if (selectedMeta) {
-      useStore.getState().setProfile({
-        niches: [selectedMeta.title],
-      });
-    }
+    if (isPlaying || !selectedMeta) return;
+    useStore.getState().setProfile({ niches: [selectedMeta.title] });
     play({
-      category: selected as TransitionKey,
-      color: transitionColor,
+      category: selectedMeta.key as TransitionKey,
+      color: selectedMeta.color ?? palette.acid,
       onMid: () => router.push('/(onboarding)/identity'),
     });
   };
 
+  const canContinue = !!selectedMeta && !isPlaying;
+
   return (
     <View style={styles.root}>
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <SkiaWaveField
-          width={width}
-          height={height}
-          color="rgba(242,239,230,0.04)"
-          lines={16}
-          amplitude={12}
-          frequency={0.02}
-          speed={0.25}
-          strokeWidth={1}
-        />
-      </View>
-
-      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 12 }}>
+      <SafeAreaView edges={['top']} style={styles.topSafe}>
         <View style={styles.topRow}>
-          <Pressable
-            onPress={() => router.back()}
-            hitSlop={12}
-            style={styles.back}
-          >
+          <Pressable onPress={() => router.back()} hitSlop={12} style={styles.back}>
             <Ionicons name="arrow-back" size={18} color={palette.ink} />
           </Pressable>
-          <View style={styles.stepRow}>
-            <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
-            <RNText style={styles.step}>STEP 03 / 05</RNText>
-          </View>
         </View>
       </SafeAreaView>
+
+      <View style={styles.headerBlock}>
+        <RNText style={styles.kicker}>I MAKE</RNText>
+        <RNText
+          allowFontScaling={false}
+          style={[styles.title, { color: palette.ink }]}
+        >
+          WHAT YOU
+        </RNText>
+        <RNText
+          allowFontScaling={false}
+          style={[styles.title, { color: palette.ink }]}
+        >
+          MAKE
+          <RNText style={{ color: selectedMeta?.color ?? '#D8FF3D' }}>.</RNText>
+        </RNText>
+        <RNText style={styles.body}>Pick a lane.</RNText>
+      </View>
 
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <View>
-          <RevealText
-            text="what"
-            splitBy="char"
-            style={{
-              fontFamily: fonts.editorialItalic,
-              fontSize: 52,
-              lineHeight: 52,
-              color: palette.ink,
-              letterSpacing: -0.8,
-            }}
+        {creatorTypes.map((t, i) => (
+          <Row
+            key={t.key}
+            item={t}
+            index={i}
+            expanded={expandedKey === t.key}
+            onPress={() => toggle(t.key)}
           />
-          <RevealText
-            text="DO YOU"
-            delay={120}
-            style={{
-              fontFamily: fonts.displayBold,
-              fontSize: 70,
-              lineHeight: 68,
-              color: palette.ink,
-              letterSpacing: -2.8,
-            }}
-          />
-          <RevealText
-            text="MAKE?"
-            delay={220}
-            style={{
-              fontFamily: fonts.displayBold,
-              fontSize: 70,
-              lineHeight: 68,
-              color: selectedMeta?.color ?? palette.blush,
-              letterSpacing: -2.8,
-            }}
-          />
-        </View>
-
-        <RNText style={styles.sub}>
-          Pick everything that fits. Multi-hyphenates welcome — we built this
-          for people who refuse to stay in one lane.
-        </RNText>
-
-        <View style={styles.chipsMeta}>
-          <RNText style={styles.chipsMetaLabel}>
-            {selectedMeta?.title ?? 'PICK ONE'}
-          </RNText>
-          <View style={styles.chipsMetaRule} />
-          <RNText style={styles.chipsMetaLabel}>CHOOSE ONE</RNText>
-        </View>
-
-        <View style={styles.grid}>
-          {creatorTypes.map((t) => (
-            <Chip
-              key={t.key}
-              item={t}
-              active={selected === t.key}
-              onPress={() => pick(t.key)}
-            />
-          ))}
-        </View>
+        ))}
       </ScrollView>
 
       <SafeAreaView edges={['bottom']} style={styles.footerSafe}>
-        <View style={styles.hairline} />
-        <View style={styles.footer}>
-          <View style={{ flex: 1 }}>
-            <RNText style={styles.step}>YOU ARE A</RNText>
-            <RNText style={styles.footerLabel}>{selectedMeta?.title}</RNText>
-          </View>
-          <MagneticButton
-            label="NEXT"
-            background={palette.ink}
-            foreground={palette.bone}
-            size="lg"
-            disabled={isPlaying}
-            onPress={handleNext}
-          />
+        <View style={styles.footerInfo}>
+          <RNText style={styles.footerKicker}>SELECTED</RNText>
+          <RNText style={styles.footerLabel} numberOfLines={1}>
+            {selectedMeta?.title ?? '—'}
+          </RNText>
         </View>
+        <Pressable
+          onPress={handleNext}
+          disabled={!canContinue}
+          style={[styles.cta, !canContinue && { opacity: 0.4 }]}
+        >
+          <RNText style={styles.ctaText}>CONTINUE</RNText>
+          <View style={styles.ctaArrow}>
+            <Ionicons name="arrow-forward" size={16} color={palette.ink} />
+          </View>
+        </Pressable>
       </SafeAreaView>
     </View>
   );
 }
 
-function Chip({
+function Row({
   item,
-  active,
+  index,
+  expanded,
   onPress,
 }: {
   item: (typeof creatorTypes)[0];
-  active: boolean;
+  index: number;
+  expanded: boolean;
   onPress: () => void;
 }) {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  // Drive only the icon flourish from the shared value; the card colors use
-  // direct props so there is zero chance of an "about-to-be-0.49-still-looks-
-  // selected" frame while another chip gains focus.
-  const s = useSharedValue(active ? 1 : 0);
-  React.useEffect(() => {
-    s.value = withSpring(active ? 1 : 0, { damping: 16, stiffness: 260 });
-  }, [active]);
+  const Icon = typeIconMap[item.key as keyof typeof typeIconMap];
 
-  const iconWrap = useAnimatedStyle(() => ({
-    transform: [
-      { rotate: `${s.value * -8}deg` },
-      { scale: 1 + s.value * 0.1 },
-    ],
+  const h = useSharedValue(expanded ? ROW_EXPANDED : ROW_COLLAPSED);
+  const open = useSharedValue(expanded ? 1 : 0);
+
+  React.useEffect(() => {
+    h.value = withSpring(expanded ? ROW_EXPANDED : ROW_COLLAPSED, {
+      damping: 22,
+      stiffness: 220,
+      mass: 0.7,
+    });
+    open.value = withTiming(expanded ? 1 : 0, {
+      duration: 280,
+      easing: Easing.bezier(0.22, 1, 0.36, 1),
+    });
+  }, [expanded]);
+
+  const containerStyle = useAnimatedStyle(() => ({ height: h.value }));
+  const subStyle = useAnimatedStyle(() => ({
+    opacity: open.value,
+    transform: [{ translateY: (1 - open.value) * 6 }],
   }));
 
-  const Icon = typeIconMap[item.key as keyof typeof typeIconMap];
-  // On the active (pink) chip, pin every glyph to always-black so the icon,
-  // label, subtitle, and radio tick all read against the neon accent in both
-  // light and dark mode. Inactive chips stay adaptive.
-  const iconColor = active ? staticPalette.ink : palette.ink;
-  const labelColor = active ? staticPalette.ink : palette.ink;
-  const subColor = active ? staticPalette.ink : palette.mute;
-  const checkBorder = active ? staticPalette.ink : palette.line;
-  const cardStyle = {
-    backgroundColor: active ? item.color : 'transparent',
-    borderColor: active ? item.color : palette.line,
-  };
+  // Active = bright accent fill, always-black text (every accent is bright
+  // enough that black reads on it). Inactive = adaptive surface tone that
+  // differs from the page bg in both light and dark mode.
+  const bg = expanded ? item.color : palette.boneSoft;
+  const fg = expanded ? staticPalette.ink : palette.ink;
 
   return (
-    <Pressable
-      onPress={onPress}
-      // Android applies ~130ms delay on Pressable to disambiguate scroll vs
-      // tap. Inside a ScrollView this swallows the first tap on a chip,
-      // forcing the user to tap twice to select. Fire immediately.
-      unstable_pressDelay={0}
-      hitSlop={4}
+    <Animated.View
+      style={[
+        styles.row,
+        {
+          backgroundColor: bg,
+          borderWidth: expanded ? 2 : 1.5,
+          borderColor: palette.ink,
+        },
+        containerStyle,
+      ]}
     >
-      <View style={[styles.chip, cardStyle]}>
-        <View style={styles.chipRow}>
-          {Icon ? (
-            <Animated.View style={[styles.chipIconWrap, iconWrap]}>
-              <Icon size={26} color={iconColor} strokeWidth={1.6} />
-            </Animated.View>
-          ) : null}
-          <View style={{ flex: 1 }}>
-            <RNText style={[styles.chipLabel, { color: labelColor }]}>
-              {item.title}
-            </RNText>
-            <RNText style={[styles.chipSub, { color: subColor }]}>
-              {item.subtitle}
-            </RNText>
-          </View>
+      <Pressable
+        onPress={onPress}
+        unstable_pressDelay={0}
+        hitSlop={4}
+        style={styles.rowInner}
+      >
+        <View style={styles.rowTopRow}>
           <View
             style={[
-              styles.check,
-              {
-                backgroundColor: active ? staticPalette.ink : 'transparent',
-                borderColor: checkBorder,
-              },
+              styles.numCircle,
+              expanded
+                ? { backgroundColor: 'rgba(10,10,10,0.18)' }
+                : { borderWidth: 1, borderColor: fg },
             ]}
           >
-            {active ? (
-              <Ionicons name="checkmark" size={12} color={item.color} />
-            ) : null}
+            <RNText style={[styles.numText, { color: fg }]}>
+              {String(index + 1).padStart(2, '0')}
+            </RNText>
           </View>
+          <RNText
+            allowFontScaling={false}
+            style={[styles.rowTitle, { color: fg }]}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+          >
+            {item.title}
+          </RNText>
+          {Icon ? (
+            <Icon size={24} color={fg} strokeWidth={1.7} />
+          ) : null}
         </View>
-      </View>
-    </Pressable>
+        <Animated.Text
+          allowFontScaling={false}
+          style={[styles.rowSub, { color: fg }, subStyle]}
+          numberOfLines={2}
+        >
+          {item.subtitle}
+        </Animated.Text>
+      </Pressable>
+    </Animated.View>
   );
 }
 
 const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bone },
+
+  topSafe: { paddingHorizontal: H_PADDING },
   topRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 6,
-    paddingBottom: 6,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   back: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: palette.line,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: palette.ink,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: palette.paper,
   },
-  stepRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  step: {
-    ...T.label,
+
+  headerBlock: {
+    paddingHorizontal: H_PADDING,
+    paddingTop: 14,
+    paddingBottom: 14,
+  },
+  kicker: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 3.2,
     color: palette.ink,
-    opacity: 0.65,
+    opacity: 0.5,
+    textTransform: 'uppercase',
+    marginBottom: 6,
   },
-  scroll: { paddingHorizontal: 12, paddingTop: 28, paddingBottom: 40 },
-  sub: {
-    ...T.body,
+  title: {
+    fontFamily: fonts.displayBold,
+    fontSize: 56,
+    lineHeight: 56,
+    letterSpacing: -2,
+    includeFontPadding: false,
+  },
+  body: {
+    fontFamily: fonts.body,
+    fontSize: 16,
+    lineHeight: 24,
+    letterSpacing: -0.1,
     color: palette.ink,
-    opacity: 0.72,
-    marginTop: 18,
-    maxWidth: 360,
+    opacity: 0.78,
+    marginTop: 10,
   },
-  chipsMeta: {
+
+  scroll: {
+    paddingHorizontal: H_PADDING,
+    paddingBottom: 14,
+    gap: 6,
+  },
+  row: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  rowInner: {
+    flex: 1,
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    paddingBottom: 14,
+  },
+  rowTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginTop: 26,
-    marginBottom: 12,
+    gap: 14,
+    height: 32,
   },
-  chipsMetaLabel: { ...T.micro, color: palette.ink, opacity: 0.6 },
-  chipsMetaRule: {
-    flex: 1,
-    height: 1,
-    backgroundColor: palette.line,
-  },
-  grid: { gap: 8 },
-  chip: {
-    borderWidth: 1,
-    borderRadius: 18,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-  },
-  chipRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  chipIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  numCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  chipLabel: {
+  numText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 11,
+    letterSpacing: 0.6,
+  },
+  rowTitle: {
+    flex: 1,
     fontFamily: fonts.displayBold,
     fontSize: 24,
     lineHeight: 26,
-    letterSpacing: -0.9,
+    letterSpacing: -0.8,
+    includeFontPadding: false,
   },
-  chipSub: { ...T.micro, marginTop: 4 },
-  check: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
+  rowSub: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 15,
+    lineHeight: 21,
+    letterSpacing: -0.1,
+    opacity: 0.92,
+    marginTop: 12,
+    marginLeft: 44,
   },
 
-  footerSafe: { paddingHorizontal: 12, paddingBottom: 6 },
-  hairline: { height: 1, backgroundColor: palette.line },
-  footer: {
+  footerSafe: {
+    paddingHorizontal: H_PADDING,
+    paddingBottom: 6,
+    paddingTop: 12,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingVertical: 16,
+  },
+  footerInfo: {
+    flex: 1,
+  },
+  footerKicker: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 10,
+    letterSpacing: 2.4,
+    color: palette.ink,
+    opacity: 0.5,
+    textTransform: 'uppercase',
   },
   footerLabel: {
-    ...T.title2,
+    fontFamily: fonts.displayBold,
+    fontSize: 22,
+    lineHeight: 24,
+    letterSpacing: -0.6,
     color: palette.ink,
-    marginTop: 4,
+    marginTop: 2,
+  },
+  cta: {
+    height: 56,
+    borderRadius: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingLeft: 22,
+    paddingRight: 8,
+    backgroundColor: palette.ink,
+  },
+  ctaText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    letterSpacing: 2.4,
+    color: palette.bone,
+    textTransform: 'uppercase',
+  },
+  ctaArrow: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.bone,
   },
 });

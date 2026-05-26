@@ -15,6 +15,7 @@ import Animated, {
   cancelAnimation,
   Easing,
   interpolate,
+  interpolateColor,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useDerivedValue,
@@ -32,11 +33,6 @@ import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import { welcomeSlides } from '@/data/mock';
 import { MagneticButton } from '@/components/ui/MagneticButton';
-import { RevealText } from '@/components/ui/RevealText';
-import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
-import { SkiaGrain } from '@/components/skia/SkiaGrain';
-import { Marquee } from '@/components/ui/Marquee';
-import { Asterisk, CornerBracket, StepDots } from '@/components/svg/Marks';
 
 const slideObjects = [
   require('@/objects/obj-1.png'),
@@ -44,9 +40,13 @@ const slideObjects = [
   require('@/objects/obj-3.png'),
 ];
 
-const BRAND_LOGO = require('@/objects/brand-wordmark.png');
+const SLIDE_ACCENTS = ['#D8FF3D', '#FF6BB5', '#FF5A1F'];
 
 const { width, height } = Dimensions.get('window');
+
+const HERO_HEIGHT = Math.min(height * 0.52, 480);
+const HALO_SIZE = Math.min(width * 0.78, 340);
+const OBJ_SIZE = Math.min(width * 0.74, 320);
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<any>);
 
@@ -63,8 +63,8 @@ export default function Welcome() {
     },
   });
 
-  // Continuous spring follower — derived so Reanimated tracks a single spring
-  // instance instead of restarting one per scroll event (which caused jitter).
+  // Spring-followed scroll position drives the parallax. One derived spring
+  // instance avoids the jitter of restarting one per scroll event.
   const scrollXFollow = useDerivedValue(() =>
     withSpring(scrollX.value, {
       damping: 18,
@@ -74,10 +74,7 @@ export default function Welcome() {
     })
   );
 
-  // Android requires onViewableItemsChanged + viewabilityConfig to be STABLE
-  // refs across renders — passing fresh closures triggers
-  // "Changing onViewableItemsChanged on the fly is not supported" and freezes
-  // the slide index at 0, which in turn makes the NEXT button no-op.
+  // Stable refs — Android freezes the slide index if either changes per render.
   const onViewRef = useRef((info: { viewableItems: ViewToken[] }) => {
     if (info.viewableItems[0]?.index != null) {
       setIndex(info.viewableItems[0].index!);
@@ -86,15 +83,10 @@ export default function Welcome() {
   const viewConfigRef = useRef({ itemVisiblePercentThreshold: 55 });
 
   const slide = welcomeSlides[index];
-  const isLight = slide.fg === palette.ink;
-  const hair = isLight ? 'rgba(10,10,10,0.28)' : 'rgba(242,239,230,0.32)';
 
   const goNext = () => {
     if (index < welcomeSlides.length - 1) {
       const next = index + 1;
-      // Optimistically update local state so the UI advances even if Android's
-      // viewability callback is debounced or never fires for the programmatic
-      // scroll. This prevents the "stuck on slide 1" bug.
       setIndex(next);
       ref.current?.scrollToIndex({ index: next, animated: true });
     } else {
@@ -102,19 +94,47 @@ export default function Welcome() {
     }
   };
 
+  // GLOBAL halo — one shape for the whole onboarding. Color interpolates
+  // across slide accents; horizontal scale ELONGATES at mid-scroll so the
+  // shape feels like a single drop of liquid stretching toward the next
+  // slide before settling back to a circle. No second satellite blob,
+  // no per-slide halos — one organism, never overlapping copies.
+  const globalHaloStyle = useAnimatedStyle(() => {
+    const color = interpolateColor(
+      scrollXFollow.value,
+      [0, width, 2 * width],
+      SLIDE_ACCENTS
+    );
+    // localProgress: 0 = on a slide, 1 = midway between two slides
+    const localProgress = Math.abs(
+      ((scrollX.value / width) % 1) * 2 - 1
+    );
+    // wobble peaks at midpoint (localProgress = 0).
+    // We want STRETCH at the midpoint, so invert: midpoint = 1 - localProgress.
+    const stretch = 1 - localProgress;
+    return {
+      backgroundColor: color,
+      transform: [
+        { scaleX: 1 + stretch * 0.42 },
+        { scaleY: 1 - stretch * 0.14 },
+      ],
+    };
+  });
+
   return (
     <View style={[styles.root, { backgroundColor: slide.bg }]}>
-      {/* SkiaWaveField removed — animated background lines were reading
-          as a screen glitch on device. Plain bg is calmer for onboarding. */}
+      <View pointerEvents="none" style={styles.haloLayer}>
+        <Animated.View style={[styles.globalHalo, globalHaloStyle]} />
+      </View>
 
       <SafeAreaView edges={['top']} style={styles.topSafe}>
         <View style={styles.topRow}>
-          <View style={styles.brand}>
-            <Image
-              source={BRAND_LOGO}
-              style={styles.brandLogo}
-              contentFit="contain"
-            />
+          <View style={styles.counter}>
+            <View style={[styles.counterDot, { backgroundColor: slide.accent }]} />
+            <RNText style={[styles.counterText, { color: slide.fg }]}>
+              {String(index + 1).padStart(2, '0')}
+              <RNText style={{ opacity: 0.4 }}>{` / 0${welcomeSlides.length}`}</RNText>
+            </RNText>
           </View>
           <Pressable
             onPress={() => router.replace('/(onboarding)/auth')}
@@ -125,7 +145,6 @@ export default function Welcome() {
             <View style={[styles.skipLine, { backgroundColor: slide.fg }]} />
           </Pressable>
         </View>
-        <View style={[styles.hairline, { backgroundColor: hair }]} />
       </SafeAreaView>
 
       <AnimatedFlatList
@@ -139,17 +158,12 @@ export default function Welcome() {
         scrollEventThrottle={16}
         onViewableItemsChanged={onViewRef.current}
         viewabilityConfig={viewConfigRef.current}
-        // getItemLayout + onScrollToIndexFailed make programmatic scrollToIndex
-        // reliable on Android, where unmeasured items would otherwise silently
-        // drop the call.
         getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
         onScrollToIndexFailed={({ index: i }) => {
           requestAnimationFrame(() => {
             ref.current?.scrollToOffset({ offset: i * width, animated: true });
           });
         }}
-        // Windowing: render the visible slide first; neighbors lazily.
-        // Keeps Reanimated worklet count low on Android.
         initialNumToRender={1}
         maxToRenderPerBatch={1}
         windowSize={3}
@@ -166,51 +180,34 @@ export default function Welcome() {
       />
 
       <SafeAreaView edges={['bottom']} style={styles.bottomSafe}>
-        <View style={[styles.hairline, { backgroundColor: hair }]} />
-
         <View style={styles.bottomRow}>
-          <View style={styles.dotsCol}>
-            <StepDots
-              total={welcomeSlides.length}
-              active={index}
-              activeColor={slide.accent}
-              inactiveColor={slide.fg}
-              size={8}
-              activeWidth={28}
-              gap={6}
-            />
-            <RNText style={[styles.progress, { color: slide.fg }]}>
-              {String(index + 1).padStart(2, '0')} / 0{welcomeSlides.length}
-            </RNText>
+          <View style={styles.dots}>
+            {welcomeSlides.map((_, di) => {
+              const isActive = di === index;
+              return (
+                <View
+                  key={di}
+                  style={[
+                    styles.dot,
+                    {
+                      backgroundColor: isActive ? slide.accent : slide.fg,
+                      opacity: isActive ? 1 : 0.28,
+                      width: isActive ? 28 : 8,
+                    },
+                  ]}
+                />
+              );
+            })}
           </View>
           <MagneticButton
-            label={index === welcomeSlides.length - 1 ? 'START' : 'NEXT'}
+            label={index === welcomeSlides.length - 1 ? 'GET STARTED' : 'CONTINUE'}
             onPress={goNext}
             background={slide.accent}
             foreground={slide.bg}
             size="lg"
           />
         </View>
-
-        <Marquee
-          items={['GET DISCOVERED', 'CONNECTED']}
-          speed={40}
-          separator="   ·   "
-          textStyle={{
-            fontFamily: fonts.displayBold,
-            color: slide.fg,
-            opacity: 0.85,
-            fontSize: 18,
-            lineHeight: 22,
-            letterSpacing: -0.4,
-            includeFontPadding: false,
-          }}
-          style={{ marginTop: 26, height: 26 }}
-        />
       </SafeAreaView>
-
-      {/* SkiaGrain disabled on this screen — its shader includes a slow
-          vertical sweep that read as a glitching scan-line on device. */}
     </View>
   );
 }
@@ -230,13 +227,8 @@ function Slide({
 }) {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  const titleLines = item.title.split('\n');
 
-  // Idle float — single continuous sine loop. Only runs for the ACTIVE slide;
-  // off-screen slides park their values at rest so we don't burn UI-thread
-  // cycles animating things the user can't see. This is the single biggest
-  // smoothness win on Android, where 3 simultaneous worklets per slide × 3
-  // slides was the dominant cost.
+  // Idle float — sine loop, only on the active slide.
   const idle = useSharedValue(0.5);
   const idle2 = useSharedValue(0.5);
   React.useEffect(() => {
@@ -263,21 +255,18 @@ function Slide({
     };
   }, [active]);
 
-  const blobStyle = useAnimatedStyle(() => {
+  const objStyle = useAnimatedStyle(() => {
     const input = [(i - 1) * width, i * width, (i + 1) * width];
     const followTx = interpolate(
       scrollXFollow.value,
       input,
-      [width * 0.8, 0, -width * 0.8]
+      [width * 0.9, 0, -width * 0.9]
     );
-    const followRot = interpolate(scrollXFollow.value, input, [-24, 0, 24]);
-    const followSc = interpolate(scrollXFollow.value, input, [0.86, 1, 0.86]);
-    // Idle float — wider radius, smoother sine loop. Wobble lag is intentionally
-    // dropped: it added extra worklet cost per frame for a subtle effect that
-    // disappears in the noise of the spring follower.
-    const idleY = (idle.value - 0.5) * 44;
-    const idleX = (idle2.value - 0.5) * 22;
-    const idleRot = (idle.value - 0.5) * 10 + (idle2.value - 0.5) * 4;
+    const followRot = interpolate(scrollXFollow.value, input, [-22, 0, 22]);
+    const followSc = interpolate(scrollXFollow.value, input, [0.82, 1, 0.82]);
+    const idleY = (idle.value - 0.5) * 32;
+    const idleX = (idle2.value - 0.5) * 18;
+    const idleRot = (idle.value - 0.5) * 8 + (idle2.value - 0.5) * 3;
     const idleSc = 1 + (idle.value - 0.5) * 0.05;
     return {
       transform: [
@@ -289,128 +278,91 @@ function Slide({
     };
   });
 
-  const editorialStyle = useAnimatedStyle(() => {
+
+  // Faint chapter glyph behind the hero. Slow drift; opacity dips off-screen.
+  const glyphStyle = useAnimatedStyle(() => {
     const input = [(i - 1) * width, i * width, (i + 1) * width];
-    const tx = interpolate(scrollX.value, input, [width * 0.4, 0, -width * 0.4]);
+    const tx = interpolate(scrollX.value, input, [width * 0.5, 0, -width * 0.5]);
+    const op = interpolate(scrollX.value, input, [0, 0.07, 0]);
+    return { transform: [{ translateX: tx }], opacity: op };
+  });
+
+  // Copy block enters from below — feels grounded after the swipe.
+  const copyStyle = useAnimatedStyle(() => {
+    const input = [(i - 1) * width, i * width, (i + 1) * width];
+    const tx = interpolate(scrollX.value, input, [width * 0.25, 0, -width * 0.25]);
     const op = interpolate(scrollX.value, input, [0, 1, 0]);
     return { transform: [{ translateX: tx }], opacity: op };
   });
 
   return (
-    <View style={{ width, paddingHorizontal: 12, flex: 1 }}>
-      {/* Kicker row with asterisk */}
-      <View style={styles.slideHeader}>
-        <Asterisk size={14} color={item.fg} strokeWidth={1.4} />
-        <RNText style={[styles.kicker, { color: item.fg }]}>
-          {item.kanji} · {item.kicker}
-        </RNText>
-        <View style={[styles.tick, { backgroundColor: item.fg }]} />
-        <RNText style={[styles.kicker, { color: item.fg, opacity: 0.6 }]}>
-          EDITION 26
-        </RNText>
-      </View>
-
-      {/* 3D object — floats, wobbles, parallaxes with swipe */}
-      <Animated.View style={[styles.blobWrap, blobStyle]} pointerEvents="none">
-        <Image
-          source={slideObjects[i % slideObjects.length]}
-          style={{ width: width * 0.78, height: width * 0.78 }}
-          contentFit="contain"
-        />
-      </Animated.View>
-
-      {/* Copy block */}
-      <View style={styles.slideCopy}>
-        {/* Framing brackets */}
-        <View style={styles.copyFrame}>
-          <CornerBracket
-            width={24}
-            height={24}
-            color={item.fg}
-            corner="tl"
-            style={{ position: 'absolute', top: -8, left: -8 }}
-          />
-          <CornerBracket
-            width={24}
-            height={24}
-            color={item.fg}
-            corner="br"
-            style={{ position: 'absolute', bottom: -8, right: -8 }}
-          />
-
-          <RNText
-            numberOfLines={titleLines.length}
-            adjustsFontSizeToFit
-            minimumFontScale={0.7}
-            allowFontScaling={false}
-            style={{
-              fontFamily: fonts.displayBold,
-              fontSize: 40,
-              lineHeight: 42,
-              letterSpacing: -1.0,
-              color: item.fg,
-              includeFontPadding: false,
-            }}
-          >
-            {item.title}
-          </RNText>
-        </View>
-
+    <View style={styles.slide}>
+      {/* Hero zone — accent halo + 3d object + faded chapter glyph */}
+      <View style={styles.hero}>
         <Animated.Text
           style={[
-            {
-              fontFamily: fonts.editorialItalic,
-              fontSize: 22,
-              lineHeight: 28,
-              letterSpacing: -0.3,
-              color: item.accent,
-              marginTop: 40,
-            },
-            editorialStyle,
+            styles.heroGlyph,
+            { color: item.fg },
+            glyphStyle,
           ]}
+          allowFontScaling={false}
         >
-          {item.editorial}
+          {item.kanji}
         </Animated.Text>
+
+        <Animated.View style={[styles.objWrap, objStyle]} pointerEvents="none">
+          <Image
+            source={slideObjects[i % slideObjects.length]}
+            style={{ width: OBJ_SIZE, height: OBJ_SIZE }}
+            contentFit="contain"
+          />
+        </Animated.View>
+      </View>
+
+      {/* Copy zone */}
+      <Animated.View style={[styles.copy, copyStyle]}>
+        <View style={[styles.accentRule, { backgroundColor: item.accent }]} />
         <RNText
-          style={{
-            fontFamily: fonts.body,
-            fontSize: 14,
-            lineHeight: 22,
-            color: item.fg,
-            opacity: 0.75,
-            marginTop: 20,
-            maxWidth: 360,
-          }}
+          allowFontScaling={false}
+          style={[styles.title, { color: item.fg }]}
+        >
+          {item.title}
+        </RNText>
+        <RNText
+          allowFontScaling={false}
+          style={[styles.desc, { color: item.fg }]}
         >
           {item.description}
         </RNText>
-      </View>
+      </Animated.View>
     </View>
   );
 }
 
 const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   root: { flex: 1 },
-  topSafe: { paddingHorizontal: 12 },
+
+  topSafe: { paddingHorizontal: 20 },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 6,
-    paddingBottom: 10,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
-  brand: {
-    width: 130,
-    height: 36,
-    justifyContent: 'center',
-    overflow: 'visible',
+  counter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
-  brandLogo: {
-    position: 'absolute',
-    left: -8,
-    top: -32,
-    width: 130,
-    height: 100,
+  counterDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  counterText: {
+    ...T.label,
+    letterSpacing: 2.4,
   },
   skipBtn: {
     flexDirection: 'row',
@@ -419,49 +371,93 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 4,
   },
-  skip: {
-    ...T.label,
-    opacity: 0.75,
-  },
+  skip: { ...T.label, opacity: 0.75 },
   skipLine: { width: 14, height: 1, opacity: 0.75 },
-  hairline: { height: 1 },
 
-  slideHeader: {
-    marginTop: 24,
-    marginBottom: 14,
-    flexDirection: 'row',
+  slide: {
+    width,
+    flex: 1,
+    paddingHorizontal: 24,
+  },
+  hero: {
+    height: HERO_HEIGHT,
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
+    marginTop: 8,
   },
-  tick: { width: 14, height: 2, opacity: 0.5 },
-  kicker: { ...T.label },
-  blobWrap: {
+  heroGlyph: {
     position: 'absolute',
-    right: -width * 0.2,
-    top: 56,
-    opacity: 0.94,
+    top: 20,
+    left: -8,
+    fontFamily: fonts.displayBold,
+    fontSize: 200,
+    lineHeight: 190,
+    letterSpacing: -6,
+    includeFontPadding: false,
   },
-  slideCopy: {
-    marginTop: 'auto',
-    marginBottom: 36,
+  haloLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    paddingTop: 140,
   },
-  copyFrame: {
-    paddingVertical: 14,
-    paddingHorizontal: 12,
+  globalHalo: {
+    width: HALO_SIZE,
+    height: HALO_SIZE,
+    borderRadius: HALO_SIZE / 2,
+    opacity: 0.92,
+  },
+  objWrap: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  copy: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 12,
+  },
+  accentRule: {
+    width: 44,
+    height: 3,
+    marginBottom: 18,
+  },
+  title: {
+    fontFamily: fonts.displayBold,
+    fontSize: 52,
+    lineHeight: 54,
+    letterSpacing: -1.6,
+    includeFontPadding: false,
+  },
+  desc: {
+    fontFamily: fonts.body,
+    fontSize: 16,
+    lineHeight: 24,
+    letterSpacing: -0.1,
+    opacity: 0.78,
+    marginTop: 16,
+    maxWidth: 340,
   },
 
   bottomSafe: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 24,
     paddingBottom: 16,
-    paddingTop: 0,
   },
   bottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    paddingTop: 28,
-    paddingBottom: 14,
+    alignItems: 'center',
+    paddingTop: 18,
   },
-  dotsCol: { gap: 12 },
-  progress: { ...T.micro, opacity: 0.6 },
+  dots: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  dot: {
+    height: 8,
+    borderRadius: 4,
+  },
 });

@@ -60,7 +60,7 @@ export default function ProfileEdit() {
     includeBase64: false,
     avoidEmptySpaceAroundImage: true,
     cropperToolbarTitle: 'Crop your profile photo',
-    cropperActiveWidgetColor: staticPalette.acid,
+    cropperActiveWidgetColor: staticPalette.mute,
     cropperStatusBarColor: staticPalette.ink,
     cropperToolbarColor: staticPalette.ink,
     cropperToolbarWidgetColor: staticPalette.bone,
@@ -153,7 +153,7 @@ export default function ProfileEdit() {
         <Tap
           onPress={openPhotoMenu}
           style={styles.changePhotoBtn}
-          burstColor={staticPalette.acid}
+          burstColor={staticPalette.mute}
         >
           <Ionicons name="camera-outline" size={14} color={staticPalette.ink} />
           <RNText style={styles.changePhotoLabel} maxFontSizeMultiplier={1.1}>
@@ -230,7 +230,7 @@ export default function ProfileEdit() {
         <Tap
           onPress={() => router.push('/(modules)/portfolio/edit')}
           style={styles.linkPill}
-          burstColor={staticPalette.acid}
+          burstColor={staticPalette.mute}
         >
           <RNText style={styles.linkPillLabel} maxFontSizeMultiplier={1.1}>
             FEATURED WORKS
@@ -243,7 +243,7 @@ export default function ProfileEdit() {
         <MagneticButton
           label="SAVE PROFILE"
           size="lg"
-          background={canSave ? staticPalette.acid : palette.line}
+          background={canSave ? staticPalette.mute : palette.line}
           foreground={staticPalette.ink}
           disabled={!canSave}
           onPress={save}
@@ -462,7 +462,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: staticPalette.acid,
+    backgroundColor: staticPalette.mute,
     borderWidth: 3,
     borderColor: palette.paper,
     alignItems: 'center',
@@ -476,7 +476,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 14,
-    backgroundColor: staticPalette.acid,
+    backgroundColor: staticPalette.mute,
   },
   changePhotoLabel: {
     ...T.label,
@@ -516,7 +516,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 10,
-    backgroundColor: staticPalette.acid,
+    backgroundColor: staticPalette.mute,
   },
   validPillLabel: {
     ...T.micro,
@@ -570,7 +570,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 14,
-    backgroundColor: staticPalette.acid,
+    backgroundColor: staticPalette.mute,
   },
   linkPillLabel: {
     ...T.label,
@@ -625,7 +625,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   sheetTitleItalic: {
     fontFamily: fonts.editorialItalic,
-    color: staticPalette.acid,
+    color: staticPalette.mute,
   },
   sheetRow: {
     flexDirection: 'row',
@@ -639,7 +639,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: staticPalette.acid,
+    backgroundColor: staticPalette.mute,
     alignItems: 'center',
     justifyContent: 'center',
   },

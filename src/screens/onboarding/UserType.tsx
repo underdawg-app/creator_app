@@ -5,312 +5,264 @@ import {
   Pressable,
   ScrollView,
   Text as RNText,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
 import { Ionicons } from '@/icons';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from 'react-native-reanimated';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import { userTypes } from '@/data/mock';
 import { useStore } from '@/store';
-import { MagneticButton } from '@/components/ui/MagneticButton';
-import { RevealText } from '@/components/ui/RevealText';
-import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
-import { Asterisk } from '@/components/svg/Marks';
-
-const { width, height } = Dimensions.get('window');
 
 export default function UserTypeScreen() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  const [selected, setSelected] = useState<string>('creator');
+  const [selectedKey, setSelectedKey] = useState('creator');
+
+  const selected =
+    userTypes.find((t) => t.key === selectedKey) ?? userTypes[0];
+  const isLocked = selectedKey !== 'creator';
+
+  const onNext = () => {
+    if (isLocked) return;
+    useStore.getState().setProfile({ type: selected.label });
+    router.push('/(onboarding)/creator-type');
+  };
 
   return (
     <View style={styles.root}>
-      <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <SkiaWaveField
-          width={width}
-          height={height}
-          color="rgba(10,10,10,0.04)"
-          lines={14}
-          amplitude={12}
-          frequency={0.02}
-          speed={0.25}
-          strokeWidth={1}
-        />
-      </View>
-
-      <SafeAreaView edges={['top']} style={{ paddingHorizontal: 12 }}>
+      <SafeAreaView edges={['top']} style={styles.topSafe}>
         <View style={styles.topRow}>
-          <Pressable
-            onPress={() => router.back()}
-            hitSlop={12}
-            style={styles.back}
-          >
+          <Pressable onPress={() => router.back()} hitSlop={12} style={styles.back}>
             <Ionicons name="arrow-back" size={18} color={palette.ink} />
           </Pressable>
-          <View style={styles.stepRow}>
-            <Asterisk size={10} color={palette.ink} strokeWidth={1.2} />
-            <RNText style={styles.step}>STEP 02 / 05</RNText>
-          </View>
         </View>
       </SafeAreaView>
 
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        showsVerticalScrollIndicator={false}
-      >
-        <View>
-          <RevealText
-            text="who"
-            splitBy="char"
-            style={{
-              fontFamily: fonts.editorialItalic,
-              fontSize: 56,
-              lineHeight: 56,
-              color: palette.ink,
-              letterSpacing: -0.8,
-            }}
-          />
-          <RevealText
-            text="ARE"
-            delay={100}
-            style={{
-              fontFamily: fonts.displayBold,
-              fontSize: 82,
-              lineHeight: 76,
-              color: palette.ink,
-              letterSpacing: -3.4,
-            }}
-          />
-          <RevealText
-            text="YOU?"
-            delay={200}
-            style={{
-              fontFamily: fonts.displayBold,
-              fontSize: 82,
-              lineHeight: 76,
-              color: palette.ink,
-              letterSpacing: -3.4,
-            }}
-          />
-        </View>
-
-        <RNText style={styles.sub}>
-          Pick the door you're walking through. You can change it later — but
-          it tunes everything you see.
+      <View style={styles.content}>
+        <RNText style={styles.kicker}>I AM A</RNText>
+        <RNText
+          allowFontScaling={false}
+          style={styles.bigLabel}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.55}
+        >
+          {selected.label}
+          <RNText style={{ color: '#D8FF3D' }}>.</RNText>
         </RNText>
 
-        <View style={styles.grid}>
-          {userTypes.map((item) => {
-            const disabled = item.key !== 'creator';
-            return (
-              <UserTypeCard
-                key={item.key}
-                item={item}
-                active={selected === item.key}
-                disabled={disabled}
-                onPress={() => {
-                  if (disabled) return;
-                  setSelected(item.key);
-                }}
-              />
-            );
-          })}
+        <View style={styles.tagRow}>
+          <View style={styles.tagBullet} />
+          <RNText style={styles.tagText}>{selected.tag}</RNText>
         </View>
-      </ScrollView>
+
+        <RNText style={styles.body}>{selected.body}</RNText>
+      </View>
 
       <SafeAreaView edges={['bottom']} style={styles.footerSafe}>
-        <View style={styles.hairline} />
-        <View style={styles.footer}>
-          <View style={{ flex: 1 }}>
-            <RNText style={styles.step}>CONTINUE AS</RNText>
-            <RNText style={styles.footerLabel}>
-              {userTypes.find((t) => t.key === selected)?.label}
-            </RNText>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.selectorRow}
+        >
+          {userTypes.map((t) => {
+            const isActive = t.key === selectedKey;
+            const disabled = t.key !== 'creator';
+            return (
+              <Pressable
+                key={t.key}
+                onPress={() => !disabled && setSelectedKey(t.key)}
+                style={[
+                  styles.chip,
+                  isActive && styles.chipActive,
+                  disabled && styles.chipDisabled,
+                ]}
+              >
+                <RNText
+                  style={[styles.chipText, isActive && styles.chipTextActive]}
+                >
+                  {t.label}
+                </RNText>
+                {disabled && (
+                  <Ionicons
+                    name="lock-closed"
+                    size={11}
+                    color={isActive ? palette.bone : palette.ink}
+                    style={{ opacity: 0.6 }}
+                  />
+                )}
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+
+        <Pressable
+          onPress={onNext}
+          style={[styles.cta, isLocked && styles.ctaDisabled]}
+        >
+          <RNText style={styles.ctaText}>
+            {isLocked ? 'COMING SOON' : 'CONTINUE'}
+          </RNText>
+          <View style={styles.ctaArrow}>
+            <Ionicons
+              name={isLocked ? 'lock-closed' : 'arrow-forward'}
+              size={16}
+              color={palette.ink}
+            />
           </View>
-          <MagneticButton
-            label="NEXT"
-            background={palette.ink}
-            foreground={palette.bone}
-            size="lg"
-            onPress={() => {
-              const picked = userTypes.find((t) => t.key === selected);
-              if (picked) {
-                useStore.getState().setProfile({ type: picked.label });
-              }
-              router.push('/(onboarding)/creator-type');
-            }}
-          />
-        </View>
+        </Pressable>
       </SafeAreaView>
     </View>
   );
 }
 
-function UserTypeCard({
-  item,
-  active,
-  disabled,
-  onPress,
-}: {
-  item: (typeof userTypes)[0];
-  active: boolean;
-  disabled?: boolean;
-  onPress: () => void;
-}) {
-  const palette = useThemedPalette();
-  const styles = useThemedPaletteStyles(makeStyles);
-  const s = useSharedValue(active ? 1 : 0);
-  React.useEffect(() => {
-    s.value = withSpring(active ? 1 : 0, { damping: 15, stiffness: 220 });
-  }, [active]);
-
-  const cardStyle = useAnimatedStyle(() => ({
-    backgroundColor: s.value > 0.5 ? item.accent : palette.paper,
-    borderColor: s.value > 0.5 ? staticPalette.ink : palette.line,
-    transform: [{ scale: 1 - s.value * 0.006 }],
-  }));
-
-  const textColor = active ? staticPalette.ink : palette.ink;
-  const borderColor = active ? staticPalette.ink : palette.ink;
-
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled}
-      style={{ marginBottom: 10, opacity: disabled ? 0.45 : 1 }}
-    >
-      <Animated.View style={[styles.card, cardStyle]}>
-        <View style={styles.cardTopRow}>
-          <RNText style={[styles.cardTag, { color: textColor }]}>{item.tag}</RNText>
-          {disabled ? (
-            <View style={styles.comingSoonPill}>
-              <RNText style={styles.comingSoonText}>COMING SOON</RNText>
-            </View>
-          ) : (
-            <View
-              style={[
-                styles.radio,
-                {
-                  borderColor,
-                  backgroundColor: active ? staticPalette.ink : 'transparent',
-                },
-              ]}
-            >
-              {active ? (
-                <Ionicons name="checkmark" size={12} color={item.accent} />
-              ) : null}
-            </View>
-          )}
-        </View>
-        <RNText style={[styles.cardLabel, { color: textColor }]}>{item.label}</RNText>
-        <RNText style={[styles.cardBody, { color: textColor }]}>{item.body}</RNText>
-      </Animated.View>
-    </Pressable>
-  );
-}
-
 const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bone },
+
+  topSafe: { paddingHorizontal: 20 },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 6,
-    paddingBottom: 6,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   back: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: palette.line,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: palette.ink,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: palette.paper,
   },
-  stepRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   step: {
     ...T.label,
-    color: palette.ink,
-    opacity: 0.7,
-  },
-  scroll: { paddingHorizontal: 12, paddingTop: 28, paddingBottom: 40 },
-  sub: {
-    ...T.body,
-    color: palette.ink,
-    opacity: 0.72,
-    marginTop: 20,
-    maxWidth: 340,
-  },
-  grid: { marginTop: 28 },
-  card: {
-    borderWidth: 1,
-    borderRadius: 22,
-    padding: 20,
-  },
-  cardTopRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  cardTag: { ...T.micro, color: palette.ink, opacity: 0.65 },
-  radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardLabel: {
-    fontFamily: fonts.displayBold,
-    fontSize: 40,
-    lineHeight: 40,
-    letterSpacing: -1.6,
-    marginTop: 18,
-    color: palette.ink,
-  },
-  cardBody: {
-    ...T.body,
-    color: palette.ink,
-    opacity: 0.78,
-    marginTop: 10,
-    maxWidth: 300,
-  },
-  comingSoonPill: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: palette.ink,
-    backgroundColor: palette.bone,
-  },
-  comingSoonText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.6,
+    letterSpacing: 2.4,
     color: palette.ink,
   },
 
-  footerSafe: { paddingHorizontal: 12, paddingBottom: 6 },
-  hairline: { height: 1, backgroundColor: palette.line },
-  footer: {
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 36,
+    justifyContent: 'center',
+  },
+  kicker: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    letterSpacing: 4,
+    color: palette.ink,
+    opacity: 0.45,
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  },
+  bigLabel: {
+    fontFamily: fonts.displayBold,
+    fontSize: 110,
+    lineHeight: 100,
+    letterSpacing: -4,
+    color: palette.ink,
+    includeFontPadding: false,
+  },
+  tagRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    paddingVertical: 16,
+    gap: 10,
+    marginTop: 24,
   },
-  footerLabel: {
-    ...T.title2,
+  tagBullet: {
+    width: 8,
+    height: 8,
+    backgroundColor: '#D8FF3D',
+  },
+  tagText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    letterSpacing: 2.4,
     color: palette.ink,
-    marginTop: 4,
+    textTransform: 'uppercase',
+    opacity: 0.85,
+  },
+  body: {
+    fontFamily: fonts.body,
+    fontSize: 16,
+    lineHeight: 24,
+    letterSpacing: -0.1,
+    color: palette.ink,
+    opacity: 0.78,
+    marginTop: 14,
+    maxWidth: 360,
+  },
+
+  footerSafe: {
+    paddingHorizontal: 20,
+    paddingBottom: 6,
+    gap: 14,
+  },
+  selectorRow: {
+    flexDirection: 'row',
+    gap: 10,
+    paddingVertical: 6,
+    paddingRight: 24,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 18,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderColor: palette.ink,
+    backgroundColor: 'transparent',
+  },
+  chipActive: {
+    backgroundColor: palette.ink,
+  },
+  chipDisabled: {
+    opacity: 0.45,
+  },
+  chipText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 2.4,
+    color: palette.ink,
+    textTransform: 'uppercase',
+  },
+  chipTextActive: {
+    color: palette.bone,
+  },
+
+  cta: {
+    height: 64,
+    borderRadius: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 22,
+    backgroundColor: palette.ink,
+  },
+  ctaDisabled: {
+    backgroundColor: palette.ink,
+    opacity: 0.5,
+  },
+  ctaText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 14,
+    letterSpacing: 2.4,
+    color: palette.bone,
+    textTransform: 'uppercase',
+  },
+  ctaArrow: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: palette.bone,
   },
 });
