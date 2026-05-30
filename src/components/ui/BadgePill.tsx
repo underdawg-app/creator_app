@@ -24,7 +24,7 @@ export function BadgePill({ tier, label, accent, inverse }: Props) {
   const styles = useThemedPaletteStyles(makeStyles);
   const txt = label ?? tier ?? 'NEW';
   const fill = accent ?? (tier ? tierColor[tier] ?? palette.mute : palette.mute);
-  const fg = inverse ? staticPalette.bone : staticPalette.ink;
+  const fg = inverse ? palette.bone : palette.ink;
 
   return (
     <View style={[styles.pill, { borderColor: fill }]}>

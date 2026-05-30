@@ -49,6 +49,18 @@ export default function SettingsHome() {
           subtitle="2FA, login activity, devices"
           onPress={() => router.push('/(modules)/settings/security')}
         />
+        <ListCell
+          icon="link-outline"
+          title="Connected accounts"
+          subtitle="Instagram, YouTube, TikTok & more"
+          onPress={() => router.push('/(modules)/audience/connections')}
+        />
+        <ListCell
+          icon="eye-outline"
+          title="Profile & visibility"
+          subtitle="Completeness, public/private, hide stats"
+          onPress={() => router.push('/(modules)/profile/visibility')}
+        />
       </Section>
 
       <Section eyebrow="APPEARANCE">
@@ -87,6 +99,27 @@ export default function SettingsHome() {
         </RNText>
       </Section>
 
+      <Section eyebrow="MONEY & WORK">
+        <ListCell
+          icon="cash-outline"
+          title="Finance"
+          subtitle="Payouts, transactions, invoices"
+          onPress={() => router.push('/(modules)/finance')}
+        />
+        <ListCell
+          icon="heart-outline"
+          title="Tips"
+          subtitle="Accept tips, set amounts, history"
+          onPress={() => router.push('/(modules)/tips')}
+        />
+        <ListCell
+          icon="people-outline"
+          title="Collab"
+          subtitle="Inbox, active collabs, find matches"
+          onPress={() => router.push('/(modules)/collab')}
+        />
+      </Section>
+
       <Section eyebrow="EXPERIENCE">
         <ListCell
           icon="notifications-outline"
@@ -112,12 +145,14 @@ export default function SettingsHome() {
         <ListCell
           icon="help-circle-outline"
           title="Help & FAQ"
-          onPress={() => toast('Help opened.', 'default')}
+          subtitle="Search, contact support, report a problem"
+          onPress={() => router.push('/(modules)/settings/help')}
         />
         <ListCell
           icon="document-outline"
           title="Legal & terms"
-          onPress={() => toast('Legal opened.', 'default')}
+          subtitle="Guidelines, terms, privacy policy"
+          onPress={() => router.push('/(modules)/settings/help')}
         />
         <ListCell
           icon="information-circle-outline"

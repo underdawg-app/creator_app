@@ -10,7 +10,10 @@ import {
   Keyboard,
   Platform,
   Image as RNImage,
+  Dimensions,
 } from 'react-native';
+
+const { width } = Dimensions.get('window');
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
 import { Ionicons } from '@/icons';
@@ -120,17 +123,11 @@ export default function Identity() {
         >
           <View style={styles.heading}>
             <RNText style={styles.kicker}>YOUR PROFILE</RNText>
-            <RNText
-              allowFontScaling={false}
-              style={[styles.title, { color: palette.ink }]}
-            >
+            <RNText style={[styles.title, { color: palette.ink }]} allowFontScaling={false}>
               MEET
             </RNText>
-            <RNText
-              allowFontScaling={false}
-              style={[styles.title, { color: palette.ink }]}
-            >
-              THE WORLD<RNText style={{ color: '#D8FF3D' }}>.</RNText>
+            <RNText style={[styles.title, { color: palette.ink }]} allowFontScaling={false}>
+              THE WORLD.
             </RNText>
             <RNText style={styles.body}>
               Two basics. Change them later anytime.

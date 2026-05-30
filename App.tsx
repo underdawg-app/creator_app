@@ -59,7 +59,7 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { error: Error
 
 const errStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#0A0A0A', alignItems: 'center', justifyContent: 'center', padding: 32 },
-  title: { color: '#D8FF3D', fontFamily: 'System', fontSize: 20, fontWeight: '700', marginBottom: 12 },
+  title: { color: '#FCD34D', fontFamily: 'System', fontSize: 20, fontWeight: '700', marginBottom: 12 },
   body: { color: '#F2EFE6', fontFamily: 'System', fontSize: 13, opacity: 0.7, textAlign: 'center' },
 });
 

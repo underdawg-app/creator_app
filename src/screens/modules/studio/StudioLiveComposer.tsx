@@ -8,8 +8,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
-import { palette as staticPalette } from '@/theme/colors';
-import { useTheme } from '@/theme/ThemeContext';
+import { palette as staticPalette, type Palette } from '@/theme/colors';
+import {
+  useTheme,
+  useThemedPalette,
+  useThemedPaletteStyles,
+} from '@/theme/ThemeContext';
+import { withOpacity } from '@/theme/colorUtils';
 import { fonts, type as T } from '@/theme/typography';
 import { ModuleHeader } from '@/components/ui/ModuleHeader';
 import { MagneticButton } from '@/components/ui/MagneticButton';
@@ -17,12 +22,6 @@ import { Chip } from '@/components/ui/Chip';
 import { Ionicons } from '@/icons';
 import { useStore } from '@/store';
 
-const SURFACE = staticPalette.ink;
-const FG = staticPalette.bone;
-const FG_DIM = 'rgba(242,239,230,0.65)';
-const FG_MUTED = 'rgba(242,239,230,0.45)';
-const CARD_BG = 'rgba(242,239,230,0.06)';
-const CARD_BORDER = 'rgba(242,239,230,0.16)';
 const ACCENT = staticPalette.acid;
 const LIVE = staticPalette.ember;
 
@@ -32,6 +31,8 @@ type Visibility = (typeof VISIBILITY)[number];
 export default function LiveComposer() {
   const { scheme } = useTheme();
   const inverse = scheme === 'light';
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
 
   const [title, setTitle] = useState('');
   const [visibility, setVisibility] = useState<Visibility>('PUBLIC');
@@ -66,7 +67,7 @@ export default function LiveComposer() {
               <RNText style={styles.liveText}>LIVE · PREVIEW</RNText>
             </View>
             <View style={styles.previewIconWrap}>
-              <Ionicons name="videocam" size={64} color={FG_DIM} />
+              <Ionicons name="videocam" size={64} color="rgba(242,239,230,0.65)" />
             </View>
             <RNText style={styles.previewHint}>
               when you tap GO LIVE, this is what your viewers see.
@@ -80,7 +81,7 @@ export default function LiveComposer() {
               value={title}
               onChangeText={setTitle}
               placeholder="late night studio session"
-              placeholderTextColor={FG_MUTED}
+              placeholderTextColor={withOpacity(palette.bone, 0.45)}
               maxFontSizeMultiplier={1.2}
             />
           </View>
@@ -162,10 +163,12 @@ function ToggleRow({
   on: boolean;
   onChange: (v: boolean) => void;
 }) {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
   return (
     <View style={styles.toggleRow}>
       <View style={styles.toggleIcon}>
-        <Ionicons name={icon} size={18} color={FG} />
+        <Ionicons name={icon} size={18} color={palette.bone} />
       </View>
       <View style={{ flex: 1 }}>
         <RNText style={styles.toggleLabel}>{label}</RNText>
@@ -174,14 +177,14 @@ function ToggleRow({
       <View
         style={[
           styles.switchTrack,
-          { backgroundColor: on ? ACCENT : 'rgba(242,239,230,0.18)' },
+          { backgroundColor: on ? ACCENT : withOpacity(palette.bone, 0.18) },
         ]}
         onTouchEnd={() => onChange(!on)}
       >
         <View
           style={[
             styles.switchKnob,
-            { left: on ? 22 : 2, backgroundColor: on ? staticPalette.ink : FG },
+            { left: on ? 22 : 2, backgroundColor: on ? palette.ink : palette.bone },
           ]}
         />
       </View>
@@ -189,8 +192,8 @@ function ToggleRow({
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: SURFACE },
+const makeStyles = (palette: Palette) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: palette.ink },
   headerPad: { paddingHorizontal: 12 },
   scroll: { paddingHorizontal: 12, paddingBottom: 140 },
 
@@ -201,7 +204,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: '#000',
     borderWidth: 1,
-    borderColor: CARD_BORDER,
+    borderColor: withOpacity(palette.bone, 0.16),
     alignItems: 'center',
     gap: 16,
   },
@@ -220,7 +223,7 @@ const styles = StyleSheet.create({
   liveDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: LIVE },
   liveText: {
     ...T.label,
-    color: FG,
+    color: staticPalette.bone,
     letterSpacing: 1.6,
     fontFamily: fonts.bodyBold,
     fontSize: 10,
@@ -231,31 +234,31 @@ const styles = StyleSheet.create({
     borderRadius: 55,
     backgroundColor: 'rgba(242,239,230,0.06)',
     borderWidth: 1,
-    borderColor: CARD_BORDER,
+    borderColor: 'rgba(242,239,230,0.16)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   previewHint: {
     ...T.small,
-    color: FG_DIM,
+    color: 'rgba(242,239,230,0.65)',
     textAlign: 'center',
     maxWidth: 240,
   },
 
   field: { marginTop: 22, gap: 10 },
-  label: { ...T.label, color: FG, opacity: 0.65, letterSpacing: 1.6 },
+  label: { ...T.label, color: palette.bone, opacity: 0.65, letterSpacing: 1.6 },
   chipRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap' },
 
   input: {
     borderWidth: 1,
-    borderColor: CARD_BORDER,
+    borderColor: withOpacity(palette.bone, 0.16),
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontFamily: fonts.body,
     fontSize: 16,
-    color: FG,
-    backgroundColor: CARD_BG,
+    color: palette.bone,
+    backgroundColor: withOpacity(palette.bone, 0.06),
   },
 
   optionsList: { gap: 10 },
@@ -266,9 +269,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     borderRadius: 16,
-    backgroundColor: CARD_BG,
+    backgroundColor: withOpacity(palette.bone, 0.06),
     borderWidth: 1,
-    borderColor: CARD_BORDER,
+    borderColor: withOpacity(palette.bone, 0.16),
   },
   toggleIcon: {
     width: 36,
@@ -276,15 +279,15 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(242,239,230,0.08)',
+    backgroundColor: withOpacity(palette.bone, 0.08),
   },
   toggleLabel: {
     fontFamily: fonts.displayBold,
     fontSize: 15,
     letterSpacing: -0.3,
-    color: FG,
+    color: palette.bone,
   },
-  toggleDesc: { ...T.micro, color: FG_DIM, marginTop: 2 },
+  toggleDesc: { ...T.micro, color: withOpacity(palette.bone, 0.65), marginTop: 2 },
   switchTrack: {
     width: 44,
     height: 24,

@@ -281,10 +281,20 @@ export default function MyDeals() {
               row={row}
               isFirst={i === 0}
               onOpen={() => {
-                if (row.kind === 'deal') {
-                  toast(`${row.title} — opening deal thread.`, 'default');
+                if (row.kind !== 'deal') {
+                  router.push('/(modules)/jobs/applications');
+                  return;
+                }
+                const s = String(row.status).toUpperCase();
+                if (s.includes('NEGOTIAT') || s.includes('SHORTLIST')) {
+                  router.push('/(modules)/jobs/negotiation');
+                } else if (s.includes('CONTRACT')) {
+                  router.push('/(modules)/jobs/contract');
+                } else if (s.includes('COMPLETE') || s.includes('PAID')) {
+                  router.push('/(modules)/jobs/payment');
                 } else {
-                  toast(`${row.title} — opening application.`, 'default');
+                  // ACTIVE / IN REVIEW / REVISION → deliverables workspace
+                  router.push('/(modules)/jobs/deliver');
                 }
               }}
             />

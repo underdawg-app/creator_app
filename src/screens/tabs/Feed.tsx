@@ -172,7 +172,7 @@ function HeaderBar() {
       <View style={styles.brandLockup}>
         <RNImage
           source={BRAND_LOGO}
-          style={styles.brandLogo}
+          style={[styles.brandLogo, { tintColor: palette.ink }]}
           resizeMode="contain"
         />
       </View>
@@ -709,8 +709,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     overflow: 'hidden',
   },
   storyInitial: {
-    fontFamily: fonts.displayBold,
-    fontSize: 22,
+    ...T.title3,
     color: staticPalette.ink,
   },
   storyAdd: {
@@ -750,15 +749,12 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     overflow: 'hidden',
   },
   avatarText: {
-    fontFamily: fonts.displayBold,
-    fontSize: 18,
+    ...T.title3,
     color: staticPalette.ink,
   },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   postName: {
-    fontFamily: fonts.displayBold,
-    fontSize: 16,
-    letterSpacing: -0.3,
+    ...T.body,
     color: palette.ink,
     flexShrink: 1,
   },
@@ -780,24 +776,17 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     borderColor: palette.acid,
   },
   followLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.4,
+    ...T.label,
     color: staticPalette.ink,
   },
 
   captionBlock: { gap: 6 },
   captionTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 22,
-    lineHeight: 26,
-    letterSpacing: -0.7,
+    ...T.title2,
     color: palette.ink,
   },
   captionNote: {
-    fontFamily: fonts.editorial,
-    fontSize: 16,
-    lineHeight: 22,
+    ...T.lead,
     color: palette.ink,
     opacity: 0.82,
   },
@@ -827,9 +816,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     backgroundColor: palette.bone,
   },
   mediaCategory: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.6,
+    ...T.label,
     color: staticPalette.ink,
   },
   playBadge: {
@@ -881,9 +868,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   engageIconBtn: { padding: 4 },
   engageCount: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 0.4,
+    ...T.small,
     color: staticPalette.ink,
   },
 
@@ -918,14 +903,11 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     justifyContent: 'center',
   },
   widgetAvatarText: {
-    fontFamily: fonts.displayBold,
-    fontSize: 16,
+    ...T.small,
     color: staticPalette.ink,
   },
   widgetName: {
-    fontFamily: fonts.displayBold,
-    fontSize: 14,
-    letterSpacing: -0.2,
+    ...T.body,
     color: staticPalette.ink,
   },
   widgetMeta: { ...T.micro, color: staticPalette.ink, opacity: 0.55, marginTop: 2 },
@@ -938,9 +920,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     borderColor: palette.acid,
   },
   widgetFollowLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.4,
+    ...T.label,
     color: staticPalette.ink,
   },
 
@@ -957,22 +937,16 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     alignItems: 'center',
   },
   challengeDays: {
-    fontFamily: fonts.displayBold,
-    fontSize: 13,
+    ...T.small,
     color: staticPalette.ink,
-    letterSpacing: -0.3,
   },
   challengeTag: {
-    fontFamily: fonts.displayBold,
-    fontSize: 26,
-    letterSpacing: -0.8,
+    ...T.display3,
     color: staticPalette.ink,
     marginTop: 4,
   },
   challengePrompt: {
-    fontFamily: fonts.editorialItalic,
-    fontSize: 19,
-    lineHeight: 24,
+    ...T.editorial3,
     color: staticPalette.ink,
   },
   challengeFoot: {
@@ -1017,11 +991,8 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     transform: [{ rotate: '4deg' }],
   },
   tapeText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.8,
+    ...T.label,
     color: palette.ink,
-    textTransform: 'uppercase',
   },
   ticketCard: {
     backgroundColor: palette.paper,
@@ -1040,27 +1011,18 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     minWidth: 0,
   },
   ticketKicker: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 2.2,
+    ...T.label,
     color: palette.ink,
     opacity: 0.55,
-    textTransform: 'uppercase',
     marginBottom: 6,
   },
   ticketCreator: {
-    fontFamily: fonts.displayBold,
-    fontSize: 22,
-    lineHeight: 24,
-    letterSpacing: -0.6,
+    ...T.title2,
     color: palette.ink,
     includeFontPadding: false,
   },
   ticketTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 14,
-    lineHeight: 18,
-    letterSpacing: -0.3,
+    ...T.body,
     color: palette.ink,
     opacity: 0.78,
     marginTop: 4,
@@ -1075,16 +1037,14 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     gap: 6,
   },
   metaLabel: {
-    fontFamily: fonts.body,
-    fontSize: 11,
+    ...T.small,
     color: palette.ink,
     opacity: 0.5,
     width: 56,
   },
   metaValue: {
     flex: 1,
-    fontFamily: fonts.bodyMedium,
-    fontSize: 12,
+    ...T.small,
     color: palette.ink,
   },
   thumbWrap: {
@@ -1132,11 +1092,8 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     gap: 6,
   },
   detailsText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    letterSpacing: 2.2,
+    ...T.label,
     color: palette.ink,
-    textTransform: 'uppercase',
   },
   engageRow: {
     flexDirection: 'row',
@@ -1155,9 +1112,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     backgroundColor: 'transparent',
   },
   engagePillText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    letterSpacing: 0.4,
+    ...T.small,
     color: palette.ink,
   },
   engageIconPill: {

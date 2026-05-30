@@ -10,8 +10,13 @@ import {
 import Video from 'react-native-video';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from '@/navigation';
-import { palette as staticPalette } from '@/theme/colors';
-import { useTheme } from '@/theme/ThemeContext';
+import { palette as staticPalette, type Palette } from '@/theme/colors';
+import {
+  useTheme,
+  useThemedPalette,
+  useThemedPaletteStyles,
+} from '@/theme/ThemeContext';
+import { withOpacity } from '@/theme/colorUtils';
 import { fonts, type as T } from '@/theme/typography';
 import { ModuleHeader } from '@/components/ui/ModuleHeader';
 import { MagneticButton } from '@/components/ui/MagneticButton';
@@ -20,25 +25,21 @@ import { Tap } from '@/components/ui/Tap';
 import { Ionicons } from '@/icons';
 import { useStore } from '@/store';
 
-const SURFACE = staticPalette.ink;
-const FG = staticPalette.bone;
-const FG_DIM = 'rgba(242,239,230,0.65)';
-const FG_MUTED = 'rgba(242,239,230,0.45)';
-const CARD_BG = 'rgba(242,239,230,0.06)';
-const CARD_BORDER = 'rgba(242,239,230,0.16)';
 const ACCENT = staticPalette.acid;
 
 const COLOR_PICKS = [
-  { c: '#D8FF3D', bg: '#0A0A0A', fg: '#F2EFE6' },
+  { c: '#FCD34D', bg: '#0A0A0A', fg: '#F2EFE6' },
   { c: '#2E5BFF', bg: '#F2EFE6', fg: '#0A0A0A' },
   { c: '#FF6BB5', bg: '#0A0A0A', fg: '#F2EFE6' },
   { c: '#FF5A1F', bg: '#F2EFE6', fg: '#0A0A0A' },
-  { c: '#0A0A0A', bg: '#D8FF3D', fg: '#0A0A0A' },
+  { c: '#0A0A0A', bg: '#FCD34D', fg: '#0A0A0A' },
 ];
 
 export default function ImageComposer() {
   const { scheme } = useTheme();
   const inverse = scheme === 'light';
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
 
   const { uri: capturedUri, type: capturedType } = useLocalSearchParams<{
     uri?: string;
@@ -147,7 +148,8 @@ export default function ImageComposer() {
                     styles.swatch,
                     {
                       backgroundColor: p.c,
-                      borderColor: pick.c === p.c ? FG : CARD_BORDER,
+                      borderColor:
+                        pick.c === p.c ? palette.bone : withOpacity(palette.bone, 0.16),
                     },
                   ]}
                 >
@@ -168,7 +170,7 @@ export default function ImageComposer() {
               multiline
               maxLength={2200}
               placeholder="write it like you mean it."
-              placeholderTextColor={FG_MUTED}
+              placeholderTextColor={withOpacity(palette.bone, 0.45)}
               maxFontSizeMultiplier={1.2}
             />
             <RNText style={styles.counter}>{caption.length} / 2200</RNText>
@@ -183,7 +185,7 @@ export default function ImageComposer() {
                 onChangeText={setTagInput}
                 onSubmitEditing={addTag}
                 placeholder="#hashtag"
-                placeholderTextColor={FG_MUTED}
+                placeholderTextColor={withOpacity(palette.bone, 0.45)}
                 autoCapitalize="none"
               />
               <Tap onPress={addTag} style={styles.addBtn} burstColor={ACCENT} variant="heavy">
@@ -259,8 +261,8 @@ export default function ImageComposer() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: SURFACE },
+const makeStyles = (palette: Palette) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: palette.ink },
   headerPad: { paddingHorizontal: 12 },
   scroll: { paddingHorizontal: 12, paddingBottom: 140 },
 
@@ -297,7 +299,7 @@ const styles = StyleSheet.create({
   field: { marginTop: 22, gap: 10 },
   label: {
     ...T.label,
-    color: FG,
+    color: palette.bone,
     opacity: 0.65,
     letterSpacing: 1.6,
   },
@@ -314,18 +316,18 @@ const styles = StyleSheet.create({
 
   input: {
     borderWidth: 1,
-    borderColor: CARD_BORDER,
+    borderColor: withOpacity(palette.bone, 0.16),
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontFamily: fonts.body,
     fontSize: 15,
-    color: FG,
-    backgroundColor: CARD_BG,
+    color: palette.bone,
+    backgroundColor: withOpacity(palette.bone, 0.06),
   },
   counter: {
     ...T.micro,
-    color: FG_MUTED,
+    color: withOpacity(palette.bone, 0.45),
     alignSelf: 'flex-end',
   },
   tagAdd: { flexDirection: 'row', gap: 10 },

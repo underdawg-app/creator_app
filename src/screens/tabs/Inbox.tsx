@@ -19,19 +19,13 @@ import Animated, {
   FadeOutUp,
 } from 'react-native-reanimated';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { palette as staticPalette } from '@/theme/colors';
+import { palette as staticPalette, type Palette } from '@/theme/colors';
+import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
+import { withOpacity } from '@/theme/colorUtils';
 import { useStore } from '@/store';
 import type { Thread } from '@/data/mock';
 import { Tap } from '@/components/ui/Tap';
-
-const BG = staticPalette.ink;
-const SURFACE = staticPalette.inkSoft;
-const SURFACE_HI = staticPalette.inkMuted;
-const FG = staticPalette.bone;
-const MUTE = 'rgba(242,239,230,0.55)';
-const HAIRLINE = 'rgba(242,239,230,0.08)';
-const ACID = staticPalette.acid;
 
 type Filter = 'ALL' | 'PRIMARY' | 'DEAL' | 'COLLAB' | 'REQUEST';
 const FILTERS: Filter[] = ['ALL', 'PRIMARY', 'DEAL', 'COLLAB', 'REQUEST'];
@@ -52,6 +46,8 @@ function formatTime(ago: string): string {
 }
 
 export default function Inbox() {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
   const threads = useStore((s) => s.threads);
   const archive = useStore((s) => s.archiveThread);
   const remove = useStore((s) => s.deleteThread);
@@ -83,16 +79,16 @@ export default function Inbox() {
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="dark-content" />
 
       <SafeAreaView edges={['top']} style={{ flex: 1 }}>
         <View style={styles.topRow}>
           <Tap
             onPress={() => {}}
             style={styles.topIcon}
-            burstColor={FG}
+            burstColor={palette.ink}
           >
-            <Ionicons name="menu" size={22} color={FG} />
+            <Ionicons name="menu" size={22} color={palette.ink} />
           </Tap>
           <Tap
             onPress={() => {
@@ -100,12 +96,12 @@ export default function Inbox() {
               if (searchOpen) setQuery('');
             }}
             style={styles.topIcon}
-            burstColor={FG}
+            burstColor={palette.ink}
           >
             <Ionicons
               name={searchOpen ? 'close' : 'search'}
               size={20}
-              color={FG}
+              color={palette.ink}
             />
           </Tap>
         </View>
@@ -116,20 +112,20 @@ export default function Inbox() {
             exiting={FadeOutUp.duration(180)}
             style={styles.searchBar}
           >
-            <Ionicons name="search" size={16} color={MUTE} />
+            <Ionicons name="search" size={16} color={palette.mute} />
             <TextInput
               value={query}
               onChangeText={setQuery}
               placeholder="search messages"
-              placeholderTextColor={MUTE}
+              placeholderTextColor={palette.mute}
               style={styles.searchInput}
               autoFocus
               returnKeyType="search"
-              selectionColor={ACID}
+              selectionColor={palette.acid}
             />
             {query ? (
-              <Tap onPress={() => setQuery('')} burstColor={FG}>
-                <Ionicons name="close-circle" size={16} color={MUTE} />
+              <Tap onPress={() => setQuery('')} burstColor={palette.ink}>
+                <Ionicons name="close-circle" size={16} color={palette.mute} />
               </Tap>
             ) : null}
           </Animated.View>
@@ -144,10 +140,10 @@ export default function Inbox() {
           <Tap
             onPress={() => router.push('/(modules)/studio')}
             style={styles.storyCol}
-            burstColor={ACID}
+            burstColor={palette.acid}
           >
             <View style={styles.storyAddCircle}>
-              <Ionicons name="add" size={26} color={ACID} />
+              <Ionicons name="add" size={26} color={palette.acid} />
             </View>
             <RNText
               style={styles.storyLabel}
@@ -219,16 +215,16 @@ export default function Inbox() {
                 style={[
                   styles.filterChip,
                   {
-                    backgroundColor: active ? FG : 'transparent',
-                    borderColor: active ? FG : 'rgba(242,239,230,0.22)',
+                    backgroundColor: active ? palette.ink : 'transparent',
+                    borderColor: active ? palette.ink : withOpacity(palette.bone, 0.22),
                   },
                 ]}
-                burstColor={ACID}
+                burstColor={palette.acid}
               >
                 <RNText
                   style={[
                     styles.filterText,
-                    { color: active ? BG : FG, opacity: active ? 1 : 0.85 },
+                    { color: active ? palette.bone : palette.ink, opacity: active ? 1 : 0.85 },
                   ]}
                 >
                   {f}
@@ -279,6 +275,8 @@ function ThreadRow({
   onArchive: () => void;
   onDelete: () => void;
 }) {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
   const isUnread = thread.unread > 0;
   const initial = thread.name.trim().charAt(0).toUpperCase() || '?';
   const avatarFg = readableOn(thread.accent);
@@ -292,11 +290,11 @@ function ThreadRow({
         swipeRef.current?.close();
         onArchive();
       }}
-      style={[styles.swipeAction, { backgroundColor: ACID }]}
-      burstColor={BG}
+      style={[styles.swipeAction, { backgroundColor: palette.acid }]}
+      burstColor={palette.ink}
     >
-      <Ionicons name="archive-outline" size={22} color={BG} />
-      <RNText style={[styles.swipeActionLabel, { color: BG }]}>ARCHIVE</RNText>
+      <Ionicons name="archive-outline" size={22} color={palette.ink} />
+      <RNText style={[styles.swipeActionLabel, { color: palette.ink }]}>ARCHIVE</RNText>
     </Tap>
   );
 
@@ -306,11 +304,11 @@ function ThreadRow({
         swipeRef.current?.close();
         onDelete();
       }}
-      style={[styles.swipeAction, { backgroundColor: staticPalette.ember }]}
-      burstColor={FG}
+      style={[styles.swipeAction, { backgroundColor: palette.ember }]}
+      burstColor={palette.ink}
     >
-      <Ionicons name="trash-outline" size={22} color={FG} />
-      <RNText style={[styles.swipeActionLabel, { color: FG }]}>DELETE</RNText>
+      <Ionicons name="trash-outline" size={22} color={palette.ink} />
+      <RNText style={[styles.swipeActionLabel, { color: palette.ink }]}>DELETE</RNText>
     </Tap>
   );
 
@@ -343,7 +341,7 @@ function ThreadRow({
           }
           router.push(`/(modules)/inbox/${thread.id}` as any);
         }}
-        burstColor={ACID}
+        burstColor={palette.acid}
         style={styles.row}
       >
         <View style={[styles.avatar, { backgroundColor: thread.accent }]}>
@@ -352,7 +350,7 @@ function ThreadRow({
           </RNText>
           {thread.verified ? (
             <View style={styles.verifiedBadge}>
-              <Ionicons name="checkmark" size={9} color={BG} />
+              <Ionicons name="checkmark" size={9} color={palette.bone} />
             </View>
           ) : null}
         </View>
@@ -375,7 +373,7 @@ function ThreadRow({
             style={[
               styles.preview,
               isUnread && styles.previewUnread,
-              isTyping && { color: ACID, fontStyle: 'italic' as const },
+              isTyping && { color: palette.acid, fontStyle: 'italic' as const },
             ]}
             numberOfLines={2}
             maxFontSizeMultiplier={1.2}
@@ -397,8 +395,8 @@ function ThreadRow({
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: BG },
+const makeStyles = (palette: Palette) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: palette.bone },
 
   topRow: {
     paddingHorizontal: 16,
@@ -425,19 +423,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 11,
     borderRadius: 14,
-    backgroundColor: SURFACE,
+    backgroundColor: palette.boneSoft,
   },
   searchInput: {
     flex: 1,
-    fontFamily: fonts.body,
-    fontSize: 15,
-    color: FG,
+    ...T.lead,
+    color: palette.ink,
     paddingVertical: 0,
   },
 
-  // Locks horizontal scrollers to their content height so they don't expand
-  // vertically and push the rest of the layout around when the list below
-  // is short.
   horizontalScroll: { flexGrow: 0, flexShrink: 0 },
   listScroll: { flex: 1 },
   storiesRow: {
@@ -460,16 +454,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   storyAvatarText: {
-    fontFamily: fonts.displayBold,
-    fontSize: 22,
-    letterSpacing: -0.4,
+    ...T.title2,
   },
   storyAddCircle: {
     width: 56,
     height: 56,
     borderRadius: 28,
     borderWidth: 1.5,
-    borderColor: ACID,
+    borderColor: palette.acid,
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
@@ -481,15 +473,13 @@ const styles = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    backgroundColor: ACID,
+    backgroundColor: palette.acid,
     borderWidth: 2.5,
-    borderColor: BG,
+    borderColor: palette.bone,
   },
   storyLabel: {
-    ...T.small,
-    color: FG,
-    fontSize: 11,
-    letterSpacing: 0.2,
+    ...T.label,
+    color: palette.ink,
     maxWidth: 64,
   },
 
@@ -502,25 +492,21 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   title: {
-    fontFamily: fonts.displayBold,
-    fontSize: 32,
-    letterSpacing: -1.2,
-    color: FG,
+    ...T.title1,
+    color: palette.ink,
   },
   unreadCount: {
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 999,
-    backgroundColor: ACID,
+    backgroundColor: palette.acid,
     minWidth: 24,
     alignItems: 'center',
     justifyContent: 'center',
   },
   unreadCountText: {
-    fontFamily: fonts.displayBold,
-    fontSize: 12,
-    color: BG,
-    letterSpacing: -0.2,
+    ...T.labelLarge,
+    color: palette.bone,
   },
 
   filterRow: {
@@ -539,10 +525,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   filterText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    lineHeight: 14,
-    letterSpacing: 1.4,
+    ...T.label,
     includeFontPadding: false,
     textAlignVertical: 'center',
   },
@@ -555,14 +538,14 @@ const styles = StyleSheet.create({
     gap: 14,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: BG,
+    backgroundColor: palette.bone,
   },
   swipeContainer: {
-    backgroundColor: BG,
+    backgroundColor: palette.bone,
     overflow: 'hidden',
   },
   swipeChild: {
-    backgroundColor: BG,
+    backgroundColor: palette.bone,
   },
   swipeAction: {
     width: 96,
@@ -573,9 +556,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   swipeActionLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    letterSpacing: 1.6,
+    ...T.label,
   },
   avatar: {
     width: 52,
@@ -585,9 +566,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   avatarText: {
-    fontFamily: fonts.displayBold,
-    fontSize: 22,
-    letterSpacing: -0.4,
+    ...T.title2,
   },
   verifiedBadge: {
     position: 'absolute',
@@ -598,9 +577,9 @@ const styles = StyleSheet.create({
     borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: FG,
+    backgroundColor: palette.ink,
     borderWidth: 2,
-    borderColor: BG,
+    borderColor: palette.bone,
   },
   rowContent: { flex: 1, gap: 3 },
   rowTop: {
@@ -610,26 +589,21 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   name: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 15,
-    color: FG,
+    ...T.lead,
+    color: palette.ink,
     flex: 1,
-    letterSpacing: -0.1,
   },
   nameUnread: { fontFamily: fonts.displayBold },
   time: {
-    ...T.small,
-    color: MUTE,
-    fontSize: 12,
+    ...T.labelLarge,
+    color: palette.mute,
   },
   preview: {
     ...T.body,
-    color: MUTE,
-    fontSize: 14,
-    lineHeight: 18,
+    color: palette.mute,
   },
   previewUnread: {
-    color: FG,
+    color: palette.ink,
     fontFamily: fonts.bodyMedium,
   },
   unreadDotWrap: {
@@ -642,12 +616,11 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: ACID,
+    backgroundColor: palette.acid,
   },
   unreadDotCount: {
-    fontFamily: fonts.displayBold,
-    fontSize: 10,
-    color: MUTE,
+    ...T.micro,
+    color: palette.mute,
   },
 
   empty: {
@@ -657,14 +630,12 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   emptyTitle: {
-    fontFamily: fonts.displayBold,
-    fontSize: 18,
-    color: FG,
-    letterSpacing: -0.4,
+    ...T.title3,
+    color: palette.ink,
   },
   emptyText: {
     ...T.body,
-    color: MUTE,
+    color: palette.mute,
     textAlign: 'center',
     maxWidth: 280,
   },

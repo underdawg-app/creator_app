@@ -251,6 +251,76 @@ const initialStoreCustomization: StoreCustomization = {
   lastPublishedAt: null,
 };
 
+// --------------------------------------------------------------------------
+// Store Builder — guided storefront wizard (Merch studio)
+// A focused, self-contained slice that drives every live preview in the
+// step-by-step store builder. Kept separate from `storeCustomization` so the
+// guided flow stays simple and never collides with the advanced editor.
+// --------------------------------------------------------------------------
+
+export type BuilderProduct = {
+  id: string;
+  type: string; // PRODUCT_TYPES key — 'TEE' | 'HOODIE' | 'MUG' | 'TOTE' | 'POSTER' | 'CAP'
+  color: string; // garment hex
+  design: string; // design label / preset name
+  name: string;
+  price: number;
+};
+
+export type StoreBannerStyle = 'GRADIENT' | 'SOLID' | 'PATTERN' | 'MINIMAL';
+
+export type StoreBuilder = {
+  built: boolean; // has the user finished building at least once
+  published: boolean;
+  publishedAt: number | null;
+  step: number; // furthest wizard step reached (for resume)
+  // identity
+  name: string;
+  handle: string;
+  tagline: string;
+  // theme
+  themeKey: string;
+  fontKey: string;
+  // banner / hero
+  bannerStyle: StoreBannerStyle;
+  headline: string;
+  subtext: string;
+  buttonLabel: string;
+  // layout toggles
+  showSearch: boolean;
+  showGrid: boolean;
+  showStory: boolean;
+  showFooter: boolean;
+  storyTitle: string;
+  storyBody: string;
+  // catalog
+  products: BuilderProduct[];
+};
+
+const defaultBuilder: StoreBuilder = {
+  built: false,
+  published: false,
+  publishedAt: null,
+  step: 0,
+  name: '',
+  handle: '',
+  tagline: '',
+  themeKey: 'midnight',
+  fontKey: 'grotesk',
+  bannerStyle: 'GRADIENT',
+  headline: 'THE NEW DROP',
+  subtext: 'Limited run. Ships worldwide.',
+  buttonLabel: 'SHOP NOW',
+  showSearch: true,
+  showGrid: true,
+  showStory: true,
+  showFooter: true,
+  storyTitle: 'THE STORY',
+  storyBody:
+    'Made by a creator, for the people who get it. Every piece ships from a real studio — not a warehouse.',
+  products: [],
+};
+
 type StoreState = {
   profile: Profile;
   setProfile: (patch: Partial<Profile>) => void;
@@ -304,6 +374,14 @@ type StoreState = {
   removeCustomCategory: (key: string) => void;
   publishStore: () => void;
   resetStoreCustomization: () => void;
+
+  // store builder (guided storefront wizard)
+  storeBuilder: StoreBuilder;
+  setBuilder: (patch: Partial<StoreBuilder>) => void;
+  addBuilderProduct: (p: Omit<BuilderProduct, 'id'>) => void;
+  removeBuilderProduct: (id: string) => void;
+  publishBuilder: () => void;
+  resetBuilder: () => void;
 
   // art
   artworks: Artwork[];
@@ -618,6 +696,37 @@ export const useStore = create<StoreState>()(
           },
         }),
 
+      storeBuilder: { ...defaultBuilder, products: [] },
+      setBuilder: (patch) =>
+        set((s) => ({ storeBuilder: { ...s.storeBuilder, ...patch } })),
+      addBuilderProduct: (p) =>
+        set((s) => ({
+          storeBuilder: {
+            ...s.storeBuilder,
+            products: [
+              { ...p, id: `bp${Date.now()}${Math.floor(p.price)}` },
+              ...s.storeBuilder.products,
+            ],
+          },
+        })),
+      removeBuilderProduct: (id) =>
+        set((s) => ({
+          storeBuilder: {
+            ...s.storeBuilder,
+            products: s.storeBuilder.products.filter((x) => x.id !== id),
+          },
+        })),
+      publishBuilder: () =>
+        set((s) => ({
+          storeBuilder: {
+            ...s.storeBuilder,
+            built: true,
+            published: true,
+            publishedAt: Date.now(),
+          },
+        })),
+      resetBuilder: () => set({ storeBuilder: { ...defaultBuilder, products: [] } }),
+
       artworks: artSeed.map((a) => ({ ...a })),
       addArtwork: (a) =>
         set((s) => ({
@@ -748,7 +857,7 @@ export const useStore = create<StoreState>()(
         })),
       confetti: () =>
         set((s) => ({ ui: { ...s.ui, confettiAt: Date.now() } })),
-      splash: (x, y, color = '#D8FF3D') =>
+      splash: (x, y, color = '#FCD34D') =>
         set((s) => ({ ui: { ...s.ui, splashAt: { ts: Date.now(), x, y, color } } })),
 
       themePreference: 'system',
@@ -781,6 +890,7 @@ export const useStore = create<StoreState>()(
             ...initialStoreCustomization,
             sections: defaultSections.map((sx) => ({ ...sx })),
           },
+          storeBuilder: { ...defaultBuilder, products: [] },
           artworks: artSeed.map((a) => ({ ...a })),
           commissions: [...commissionsSeed],
           transactions: transactionsSeed.map((t) => ({ ...t })),
@@ -811,6 +921,7 @@ export const useStore = create<StoreState>()(
         rateCardCustom: s.rateCardCustom,
         products: s.products,
         storeCustomization: s.storeCustomization,
+        storeBuilder: s.storeBuilder,
         artworks: s.artworks,
         commissions: s.commissions,
         transactions: s.transactions,

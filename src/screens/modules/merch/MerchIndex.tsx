@@ -51,10 +51,10 @@ const LOGO_OPTIONS = [
   'https://images.unsplash.com/photo-1614851099175-e5b30eb6f696?w=200&q=80&auto=format&fit=crop',
 ];
 
-const COLOR_BG_OPTIONS = ['#0A0A0A', '#F2EFE6', '#D8FF3D', '#2E5BFF', '#FF6BB5', '#FF5A1F'];
+const COLOR_BG_OPTIONS = ['#0A0A0A', '#F2EFE6', '#FCD34D', '#2E5BFF', '#FF6BB5', '#FF5A1F'];
 
 const ACCENTS: { key: StoreAccentKey; label: string; hex: string }[] = [
-  { key: 'acid', label: 'ACID', hex: '#D8FF3D' },
+  { key: 'acid', label: 'ACID', hex: '#FCD34D' },
   { key: 'electric', label: 'ELECTRIC', hex: '#2E5BFF' },
   { key: 'blush', label: 'BLUSH', hex: '#FF6BB5' },
   { key: 'ember', label: 'EMBER', hex: '#FF5A1F' },
@@ -1509,6 +1509,27 @@ export default function MerchStudio() {
         title="Orders"
         sub={`${orders.length} lifetime · ${orders.filter((o) => o.status === 'PRINTING').length} in production`}
         onPress={() => router.push('/(modules)/merch/orders')}
+        palette={palette}
+      />
+      <DomainRow
+        icon="sparkles-outline"
+        title="Create with AI"
+        sub="Upload art · generate product mockups"
+        onPress={() => router.push('/(modules)/merch/mockup')}
+        palette={palette}
+      />
+      <DomainRow
+        icon="bar-chart-outline"
+        title="Merch analytics"
+        sub="Sales, units sold, top products"
+        onPress={() => router.push('/(modules)/merch/analytics')}
+        palette={palette}
+      />
+      <DomainRow
+        icon="color-palette-outline"
+        title="Hire a designer"
+        sub="Pro mockups · quotes from vetted designers"
+        onPress={() => router.push('/(modules)/merch/designers')}
         palette={palette}
       />
       <DomainRow

@@ -5,7 +5,10 @@ import {
   Pressable,
   ScrollView,
   Text as RNText,
+  Dimensions,
 } from 'react-native';
+
+const { width } = Dimensions.get('window');
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
 import { Ionicons } from '@/icons';
@@ -68,18 +71,11 @@ export default function CreatorType() {
 
       <View style={styles.headerBlock}>
         <RNText style={styles.kicker}>I MAKE</RNText>
-        <RNText
-          allowFontScaling={false}
-          style={[styles.title, { color: palette.ink }]}
-        >
+        <RNText style={[styles.title, { color: palette.ink }]} allowFontScaling={false}>
           WHAT YOU
         </RNText>
-        <RNText
-          allowFontScaling={false}
-          style={[styles.title, { color: palette.ink }]}
-        >
-          MAKE
-          <RNText style={{ color: selectedMeta?.color ?? '#D8FF3D' }}>.</RNText>
+        <RNText style={[styles.title, { color: palette.ink }]} allowFontScaling={false}>
+          MAKE.
         </RNText>
         <RNText style={styles.body}>Pick a lane.</RNText>
       </View>
@@ -186,7 +182,7 @@ function Row({
             style={[
               styles.numCircle,
               expanded
-                ? { backgroundColor: 'rgba(10,10,10,0.18)' }
+                ? { backgroundColor: palette.inkMuted }
                 : { borderWidth: 1, borderColor: fg },
             ]}
           >
@@ -198,8 +194,6 @@ function Row({
             allowFontScaling={false}
             style={[styles.rowTitle, { color: fg }]}
             numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.7}
           >
             {item.title}
           </RNText>
@@ -246,26 +240,17 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingBottom: 14,
   },
   kicker: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 3.2,
+    ...T.labelLarge,
     color: palette.ink,
     opacity: 0.5,
-    textTransform: 'uppercase',
     marginBottom: 6,
   },
   title: {
-    fontFamily: fonts.displayBold,
-    fontSize: 56,
-    lineHeight: 56,
-    letterSpacing: -2,
+    ...T.display2,
     includeFontPadding: false,
   },
   body: {
-    fontFamily: fonts.body,
-    fontSize: 16,
-    lineHeight: 24,
-    letterSpacing: -0.1,
+    ...T.lead,
     color: palette.ink,
     opacity: 0.78,
     marginTop: 10,
@@ -300,23 +285,15 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     justifyContent: 'center',
   },
   numText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    letterSpacing: 0.6,
+    ...T.label,
   },
   rowTitle: {
     flex: 1,
-    fontFamily: fonts.displayBold,
-    fontSize: 24,
-    lineHeight: 26,
-    letterSpacing: -0.8,
+    ...T.title2,
     includeFontPadding: false,
   },
   rowSub: {
-    fontFamily: fonts.bodyMedium,
-    fontSize: 15,
-    lineHeight: 21,
-    letterSpacing: -0.1,
+    ...T.lead,
     opacity: 0.92,
     marginTop: 12,
     marginLeft: 44,
@@ -334,18 +311,12 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     flex: 1,
   },
   footerKicker: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 2.4,
+    ...T.label,
     color: palette.ink,
     opacity: 0.5,
-    textTransform: 'uppercase',
   },
   footerLabel: {
-    fontFamily: fonts.displayBold,
-    fontSize: 22,
-    lineHeight: 24,
-    letterSpacing: -0.6,
+    ...T.title2,
     color: palette.ink,
     marginTop: 2,
   },
@@ -360,11 +331,8 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     backgroundColor: palette.ink,
   },
   ctaText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 13,
-    letterSpacing: 2.4,
+    ...T.button,
     color: palette.bone,
-    textTransform: 'uppercase',
   },
   ctaArrow: {
     width: 40,

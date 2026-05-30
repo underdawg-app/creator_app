@@ -274,24 +274,15 @@ const makeStyles = (palette: typeof staticPalette) =>
 
     heading: { marginTop: 18, gap: 0 },
     headingItalic: {
-      fontFamily: fonts.editorialItalic,
-      fontSize: 56,
-      lineHeight: 56,
+      ...T.editorial1,
       color: palette.ink,
-      letterSpacing: -1.2,
     },
     headingLine1: {
-      fontFamily: fonts.displayBold,
-      fontSize: 64,
-      lineHeight: 60,
-      letterSpacing: -3,
+      ...T.display2,
       color: palette.ink,
     },
     headingAccent: {
-      fontFamily: fonts.displayBold,
-      fontSize: 64,
-      lineHeight: 60,
-      letterSpacing: -3,
+      ...T.display2,
       color: palette.acid,
     },
 
@@ -313,10 +304,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       letterSpacing: 1.6,
     },
     metricValue: {
-      fontFamily: fonts.displayBold,
-      fontSize: 28,
-      lineHeight: 30,
-      letterSpacing: -0.8,
+      ...T.title1,
     },
 
     sectionHead: {
@@ -335,10 +323,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       letterSpacing: 1.6,
     },
     sectionTitle: {
-      fontFamily: fonts.displayBold,
-      fontSize: 36,
-      lineHeight: 38,
-      letterSpacing: -1.2,
+      ...T.numeric,
       color: palette.ink,
       marginTop: 8,
       marginBottom: 14,
@@ -374,15 +359,10 @@ const makeStyles = (palette: typeof staticPalette) =>
     },
     composeBody: { gap: 2 },
     composeName: {
-      fontFamily: fonts.displayBold,
-      fontSize: 22,
-      lineHeight: 24,
-      letterSpacing: -0.6,
+      ...T.title2,
     },
     composeSub: {
       ...T.label,
-      letterSpacing: 1.4,
-      fontSize: 10,
     },
 
     manageList: { marginTop: 14, gap: 8 },
@@ -407,9 +387,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       justifyContent: 'center',
     },
     manageLabel: {
-      fontFamily: fonts.displayBold,
-      fontSize: 17,
-      letterSpacing: -0.4,
+      ...T.lead,
       color: palette.ink,
     },
     manageMeta: {

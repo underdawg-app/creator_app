@@ -8,8 +8,9 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
-import { palette as staticPalette } from '@/theme/colors';
+import { palette as staticPalette, type Palette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
+import { withOpacity } from '@/theme/colorUtils';
 import { fonts, type as T } from '@/theme/typography';
 import {
   challenges,
@@ -76,10 +77,6 @@ export default function Arena() {
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Segmented toggle                                                          */
-/* -------------------------------------------------------------------------- */
-
 function SegmentedToggle({
   value,
   onChange,
@@ -115,10 +112,6 @@ function SegmentedToggle({
   );
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Challenges grid                                                           */
-/* -------------------------------------------------------------------------- */
-
 function ChallengesGrid() {
   const styles = useThemedPaletteStyles(makeStyles);
   return (
@@ -131,6 +124,7 @@ function ChallengesGrid() {
 }
 
 function ChallengeCard({ c, large }: { c: Challenge; large?: boolean }) {
+  const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
   return (
     <Tap
@@ -139,7 +133,7 @@ function ChallengeCard({ c, large }: { c: Challenge; large?: boolean }) {
         { backgroundColor: c.color },
         large ? styles.cardLarge : styles.cardSmall,
       ]}
-      burstColor={staticPalette.ink}
+      burstColor={palette.ink}
       variant="heavy"
       onPress={() =>
         router.push(`/(modules)/community/challenges/${c.id}/reel`)
@@ -150,7 +144,7 @@ function ChallengeCard({ c, large }: { c: Challenge; large?: boolean }) {
           {c.tag}
         </RNText>
         <View style={styles.entriesPill}>
-          <Ionicons name="play" size={10} color={staticPalette.ink} />
+          <Ionicons name="play" size={10} color={palette.ink} />
           <RNText style={styles.entriesText}>{c.entries}</RNText>
         </View>
       </View>
@@ -184,10 +178,6 @@ function ChallengeCard({ c, large }: { c: Challenge; large?: boolean }) {
     </Tap>
   );
 }
-
-/* -------------------------------------------------------------------------- */
-/*  Leaderboard                                                               */
-/* -------------------------------------------------------------------------- */
 
 function LeaderboardView({
   window,
@@ -281,14 +271,9 @@ function formatRep(n: number) {
   return String(n);
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Styles                                                                    */
-/* -------------------------------------------------------------------------- */
-
-const makeStyles = (palette: typeof staticPalette) =>
+const makeStyles = (palette: Palette) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: palette.bone },
-
     topRow: {
       paddingHorizontal: 20,
       paddingTop: 6,
@@ -297,30 +282,19 @@ const makeStyles = (palette: typeof staticPalette) =>
       gap: 8,
     },
     kicker: { ...T.label, color: palette.ink, opacity: 0.7 },
-
     heading: { paddingHorizontal: 20, marginTop: 14, gap: 0 },
     headingItalic: {
-      fontFamily: fonts.editorialItalic,
-      fontSize: 48,
-      lineHeight: 50,
+      ...T.editorial2,
       color: palette.ink,
-      letterSpacing: -1.2,
     },
     headingLine: {
-      fontFamily: fonts.displayBold,
-      fontSize: 56,
-      lineHeight: 56,
-      letterSpacing: -2.5,
+      ...T.display2,
       color: palette.ink,
     },
     headingAccent: {
-      fontFamily: fonts.displayBold,
-      fontSize: 56,
-      lineHeight: 56,
-      letterSpacing: -2.5,
+      ...T.display2,
       color: palette.acid,
     },
-
     segRow: {
       flexDirection: 'row',
       marginTop: 22,
@@ -335,11 +309,9 @@ const makeStyles = (palette: typeof staticPalette) =>
     },
     segItemActive: {},
     segLabel: {
-      ...T.label,
+      ...T.labelLarge,
       color: palette.ink,
       opacity: 0.45,
-      letterSpacing: 2,
-      fontSize: 12,
     },
     segLabelActive: { opacity: 1, color: palette.ink },
     segUnderline: {
@@ -350,9 +322,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       height: 2,
       backgroundColor: palette.acid,
     },
-
     scroll: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 140 },
-
     grid: { gap: 14 },
     card: {
       borderRadius: 22,
@@ -372,10 +342,8 @@ const makeStyles = (palette: typeof staticPalette) =>
       justifyContent: 'space-between',
     },
     cardTag: {
-      fontFamily: fonts.displayBold,
-      fontSize: 26,
-      letterSpacing: -1.1,
-      color: staticPalette.ink,
+      ...T.editorial3,
+      color: palette.ink,
     },
     entriesPill: {
       flexDirection: 'row',
@@ -384,19 +352,17 @@ const makeStyles = (palette: typeof staticPalette) =>
       paddingHorizontal: 8,
       paddingVertical: 4,
       borderRadius: 99,
-      backgroundColor: 'rgba(10,10,10,0.12)',
+      backgroundColor: withOpacity(palette.ink, 0.12),
     },
     entriesText: {
       ...T.micro,
-      color: staticPalette.ink,
+      color: palette.ink,
       fontFamily: fonts.bodyBold,
       letterSpacing: 1,
     },
     cardPrompt: {
-      fontFamily: fonts.editorialItalic,
-      fontSize: 18,
-      lineHeight: 24,
-      color: staticPalette.ink,
+      ...T.title3,
+      color: palette.ink,
       opacity: 0.85,
     },
     audioStrip: {
@@ -405,7 +371,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       gap: 10,
       paddingTop: 8,
       borderTopWidth: 1,
-      borderTopColor: 'rgba(10,10,10,0.14)',
+      borderTopColor: withOpacity(palette.ink, 0.14),
     },
     waveformWrap: {
       flexDirection: 'row',
@@ -416,18 +382,18 @@ const makeStyles = (palette: typeof staticPalette) =>
     waveBar: {
       width: 2,
       borderRadius: 1,
-      backgroundColor: staticPalette.ink,
+      backgroundColor: palette.ink,
       opacity: 0.6,
     },
     audioTitle: {
       ...T.label,
       letterSpacing: 1.4,
-      color: staticPalette.ink,
+      color: palette.ink,
       fontFamily: fonts.bodyBold,
     },
     audioCreator: {
       ...T.micro,
-      color: staticPalette.ink,
+      color: palette.ink,
       opacity: 0.6,
       marginTop: 1,
     },
@@ -438,13 +404,12 @@ const makeStyles = (palette: typeof staticPalette) =>
     },
     cardMetaText: {
       ...T.micro,
-      color: staticPalette.ink,
+      color: palette.ink,
       opacity: 0.72,
       fontFamily: fonts.bodyBold,
       letterSpacing: 1.2,
     },
-    cardMetaDot: { color: staticPalette.ink, opacity: 0.4 },
-
+    cardMetaDot: { color: palette.ink, opacity: 0.4 },
     windowRow: { flexDirection: 'row', gap: 8, marginBottom: 16 },
     windowPill: {
       paddingHorizontal: 14,
@@ -460,13 +425,10 @@ const makeStyles = (palette: typeof staticPalette) =>
     },
     windowLabel: {
       ...T.label,
-      letterSpacing: 1.4,
       color: palette.ink,
       opacity: 0.7,
-      fontSize: 11,
     },
     windowLabelActive: { color: palette.acid, opacity: 1 },
-
     leaderRow: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -479,9 +441,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       borderColor: palette.line,
     },
     leaderRank: {
-      fontFamily: fonts.displayBold,
-      fontSize: 22,
-      letterSpacing: -0.8,
+      ...T.title2,
       color: palette.ink,
       width: 36,
     },
@@ -492,9 +452,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       backgroundColor: palette.line,
     },
     leaderName: {
-      fontFamily: fonts.displayBold,
-      fontSize: 15,
-      letterSpacing: -0.3,
+      ...T.body,
       color: palette.ink,
     },
     leaderHandle: {
@@ -505,9 +463,7 @@ const makeStyles = (palette: typeof staticPalette) =>
     },
     leaderRight: { alignItems: 'flex-end', gap: 4 },
     repScore: {
-      fontFamily: fonts.displayBold,
-      fontSize: 17,
-      letterSpacing: -0.4,
+      ...T.lead,
       color: palette.ink,
     },
     deltaChip: {
@@ -521,9 +477,6 @@ const makeStyles = (palette: typeof staticPalette) =>
     },
     deltaText: {
       ...T.micro,
-      color: staticPalette.ink,
-      fontFamily: fonts.bodyBold,
-      fontSize: 10,
-      letterSpacing: 0.6,
+      color: palette.ink,
     },
   });

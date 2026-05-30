@@ -133,7 +133,7 @@ export default function StudioHome() {
         label="Published"
         meta={`${published.length} live`}
         accent="#14B8A6"
-        onPress={() => router.push('/(modules)/studio/drafts')}
+        onPress={() => router.push('/(modules)/studio/content')}
       />
     </ScreenFrame>
   );

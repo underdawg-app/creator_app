@@ -159,6 +159,6 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     fontFamily: fonts.bodyBold,
     fontSize: 12,
     letterSpacing: 2.2,
-    color: staticPalette.ink,
+    color: palette.bone,
   },
 });

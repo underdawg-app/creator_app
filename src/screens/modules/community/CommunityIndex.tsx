@@ -27,11 +27,11 @@ import {
 const POST_TYPES: Array<{ key: CommunityPostKind; label: string; icon: string; accent: string }> = [
   { key: 'DISCUSSION', label: 'DISCUSSION', icon: 'chatbubbles-outline',   accent: '#2E5BFF' },
   { key: 'QUESTION',   label: 'QUESTION',   icon: 'help-circle-outline',   accent: '#FF6BB5' },
-  { key: 'WIN',        label: 'WIN',        icon: 'trophy-outline',        accent: '#D8FF3D' },
+  { key: 'WIN',        label: 'WIN',        icon: 'trophy-outline',        accent: '#FCD34D' },
   { key: 'STRUGGLE',   label: 'STRUGGLE',   icon: 'pulse-outline',         accent: '#FF5A1F' },
   { key: 'TIP',        label: 'TIP',        icon: 'bulb-outline',          accent: '#2E5BFF' },
   { key: 'RESOURCE',   label: 'RESOURCE',   icon: 'link-outline',          accent: '#FF6BB5' },
-  { key: 'COLLAB',     label: 'COLLAB',     icon: 'people-outline',        accent: '#D8FF3D' },
+  { key: 'COLLAB',     label: 'COLLAB',     icon: 'people-outline',        accent: '#FCD34D' },
   { key: 'FEEDBACK',   label: 'FEEDBACK',   icon: 'eye-outline',           accent: '#FF5A1F' },
 ];
 
@@ -285,7 +285,7 @@ export default function CommunityHome() {
         {communityGroupsSeed.map((g) => (
           <Tap
             key={g.id}
-            onPress={() => router.push('/(modules)/community/groups')}
+            onPress={() => router.push(`/(modules)/community/group?id=${g.id}` as any)}
             burstColor={g.accent}
             style={styles.groupRow}
           >
@@ -326,7 +326,7 @@ export default function CommunityHome() {
         {communityEventsSeed.map((e) => (
           <Tap
             key={e.id}
-            onPress={() => router.push('/(modules)/community/events')}
+            onPress={() => router.push(`/(modules)/community/event?id=${e.id}` as any)}
             burstColor={e.accent}
             style={styles.eventRow}
           >
@@ -365,7 +365,7 @@ export default function CommunityHome() {
               background={staticPalette.acid}
               foreground={staticPalette.ink}
               size="sm"
-              onPress={() => toast('Open mentor search.', 'success')}
+              onPress={() => router.push('/(modules)/community/mentorship')}
             />
           </View>
           <View style={{ flex: 1 }}>
@@ -374,14 +374,14 @@ export default function CommunityHome() {
               background={staticPalette.ink}
               foreground={staticPalette.acid}
               size="sm"
-              onPress={() => toast('Mentor onboarding.', 'success')}
+              onPress={() => router.push('/(modules)/community/mentorship')}
             />
           </View>
         </View>
         {mentorsSeed.map((m) => (
           <Tap
             key={m.id}
-            onPress={() => toast(`Open ${m.handle}'s mentor profile.`, 'success')}
+            onPress={() => router.push('/(modules)/community/mentorship')}
             burstColor={m.accent}
             style={styles.mentorRow}
           >
@@ -455,9 +455,19 @@ export default function CommunityHome() {
           icon="trophy-outline"
           title="Challenges"
           subtitle="Open prompts with prizes"
-          onPress={() =>
-            router.push(`/(modules)/community/challenges/${challenges[0]?.id ?? ''}` as any)
-          }
+          onPress={() => router.push('/(modules)/community/challenges')}
+        />
+        <ListCell
+          icon="people-circle-outline"
+          title="Creator directory"
+          subtitle="Find and follow creators in your orbit"
+          onPress={() => router.push('/(modules)/community/directory')}
+        />
+        <ListCell
+          icon="help-circle-outline"
+          title="Q&A and polls"
+          subtitle="Ask the community, vote on polls"
+          onPress={() => router.push('/(modules)/community/qa')}
         />
       </Section>
     </ScreenFrame>

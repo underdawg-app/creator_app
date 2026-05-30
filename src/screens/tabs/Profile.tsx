@@ -53,10 +53,8 @@ type FeedTab = 'POSTS' | 'VIDEOS' | 'WRITTEN' | 'LEVEL UP';
 const LOOP_HEIGHT = 44;
 
 const loopTextStyle = {
-  fontFamily: fonts.displayBold,
-  fontSize: 22,
+  ...T.title2,
   lineHeight: LOOP_HEIGHT,
-  letterSpacing: -0.6,
   color: staticPalette.bone,
 };
 
@@ -992,6 +990,10 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     overflow: 'hidden',
     borderBottomLeftRadius: 36,
     borderBottomRightRadius: 36,
+    // Sit above the setup strip so the rounded black bottom overlaps the
+    // light section below it, instead of the light bg covering the seam.
+    zIndex: 2,
+    elevation: 2,
   },
   heroWave: { position: 'absolute', top: 0, left: 0, right: 0 },
   heroSafe: {
@@ -1265,10 +1267,13 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   /* ---------- Profile setup strip ---------- */
   setupWrap: {
     paddingHorizontal: SCREEN_PADDING,
-    paddingTop: 10,
+    // Extra top padding clears the hero's rounded bottom, which now overlaps
+    // this strip from above (hero has the higher zIndex).
+    paddingTop: 26,
     paddingBottom: 14,
-    marginTop: -6,
+    marginTop: -18,
     backgroundColor: palette.bone,
+    zIndex: 1,
   },
   setupHead: {
     flexDirection: 'row',
@@ -1514,17 +1519,12 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     opacity: 0.7,
   },
   writtenTitle: {
-    fontFamily: fonts.editorialItalic,
-    fontSize: 22,
-    lineHeight: 26,
-    letterSpacing: -0.6,
+    ...T.editorial3,
     color: palette.ink,
     marginTop: 10,
   },
   writtenBody: {
-    fontFamily: fonts.editorial,
-    fontSize: 15,
-    lineHeight: 22,
+    ...T.lead,
     color: palette.ink,
     opacity: 0.85,
     marginTop: 8,

@@ -15,7 +15,6 @@ import Animated, {
   cancelAnimation,
   Easing,
   interpolate,
-  interpolateColor,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useDerivedValue,
@@ -40,12 +39,9 @@ const slideObjects = [
   require('@/objects/obj-3.png'),
 ];
 
-const SLIDE_ACCENTS = ['#D8FF3D', '#FF6BB5', '#FF5A1F'];
-
 const { width, height } = Dimensions.get('window');
 
 const HERO_HEIGHT = Math.min(height * 0.52, 480);
-const HALO_SIZE = Math.min(width * 0.78, 340);
 const OBJ_SIZE = Math.min(width * 0.74, 320);
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<any>);
@@ -82,7 +78,7 @@ export default function Welcome() {
   });
   const viewConfigRef = useRef({ itemVisiblePercentThreshold: 55 });
 
-  const slide = welcomeSlides[index];
+  const slide = { ...welcomeSlides[index], bg: palette.bone, fg: palette.ink };
 
   const goNext = () => {
     if (index < welcomeSlides.length - 1) {
@@ -94,39 +90,8 @@ export default function Welcome() {
     }
   };
 
-  // GLOBAL halo — one shape for the whole onboarding. Color interpolates
-  // across slide accents; horizontal scale ELONGATES at mid-scroll so the
-  // shape feels like a single drop of liquid stretching toward the next
-  // slide before settling back to a circle. No second satellite blob,
-  // no per-slide halos — one organism, never overlapping copies.
-  const globalHaloStyle = useAnimatedStyle(() => {
-    const color = interpolateColor(
-      scrollXFollow.value,
-      [0, width, 2 * width],
-      SLIDE_ACCENTS
-    );
-    // localProgress: 0 = on a slide, 1 = midway between two slides
-    const localProgress = Math.abs(
-      ((scrollX.value / width) % 1) * 2 - 1
-    );
-    // wobble peaks at midpoint (localProgress = 0).
-    // We want STRETCH at the midpoint, so invert: midpoint = 1 - localProgress.
-    const stretch = 1 - localProgress;
-    return {
-      backgroundColor: color,
-      transform: [
-        { scaleX: 1 + stretch * 0.42 },
-        { scaleY: 1 - stretch * 0.14 },
-      ],
-    };
-  });
-
   return (
     <View style={[styles.root, { backgroundColor: slide.bg }]}>
-      <View pointerEvents="none" style={styles.haloLayer}>
-        <Animated.View style={[styles.globalHalo, globalHaloStyle]} />
-      </View>
-
       <SafeAreaView edges={['top']} style={styles.topSafe}>
         <View style={styles.topRow}>
           <View style={styles.counter}>
@@ -168,15 +133,18 @@ export default function Welcome() {
         maxToRenderPerBatch={1}
         windowSize={3}
         style={{ flex: 1 }}
-        renderItem={({ item, index: i }: { item: any; index: number }) => (
-          <Slide
-            item={item as (typeof welcomeSlides)[0]}
-            i={i}
-            scrollX={scrollX}
-            scrollXFollow={scrollXFollow}
-            active={i === index}
-          />
-        )}
+        renderItem={({ item, index: i }: { item: any; index: number }) => {
+          const themeAwareItem = { ...item, bg: palette.bone, fg: palette.ink };
+          return (
+            <Slide
+              item={themeAwareItem}
+              i={i}
+              scrollX={scrollX}
+              scrollXFollow={scrollXFollow}
+              active={i === index}
+            />
+          );
+        }}
       />
 
       <SafeAreaView edges={['bottom']} style={styles.bottomSafe}>
@@ -203,7 +171,7 @@ export default function Welcome() {
             label={index === welcomeSlides.length - 1 ? 'GET STARTED' : 'CONTINUE'}
             onPress={goNext}
             background={slide.accent}
-            foreground={slide.bg}
+            foreground={palette.ink}
             size="lg"
           />
         </View>
@@ -321,11 +289,7 @@ function Slide({
 
       {/* Copy zone */}
       <Animated.View style={[styles.copy, copyStyle]}>
-        <View style={[styles.accentRule, { backgroundColor: item.accent }]} />
-        <RNText
-          allowFontScaling={false}
-          style={[styles.title, { color: item.fg }]}
-        >
+        <RNText style={[styles.title, { color: item.fg }]} allowFontScaling={false}>
           {item.title}
         </RNText>
         <RNText
@@ -394,20 +358,6 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     lineHeight: 190,
     letterSpacing: -6,
     includeFontPadding: false,
-  },
-  haloLayer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    alignItems: 'center',
-    paddingTop: 140,
-  },
-  globalHalo: {
-    width: HALO_SIZE,
-    height: HALO_SIZE,
-    borderRadius: HALO_SIZE / 2,
-    opacity: 0.92,
   },
   objWrap: {
     alignItems: 'center',

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, Text as RNText, TextInput } from 'react-native';
 import { router } from '@/navigation';
-import { palette as staticPalette } from '@/theme/colors';
+import { palette as staticPalette, type Palette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import { ScreenFrame } from '@/components/ui/ScreenFrame';
@@ -18,7 +18,7 @@ type CatOption = { key: string; name: string; baseCost: number; custom?: boolean
 
 const STEPS = ['TYPES', 'DESIGN', 'PRICING', 'PUBLISH'];
 const COLOR_PICKS = [
-  { c: '#D8FF3D', bg: '#0A0A0A', fg: '#F2EFE6' },
+  { c: '#FCD34D', bg: '#0A0A0A', fg: '#F2EFE6' },
   { c: '#2E5BFF', bg: '#F2EFE6', fg: '#0A0A0A' },
   { c: '#FF6BB5', bg: '#0A0A0A', fg: '#F2EFE6' },
   { c: '#FF5A1F', bg: '#F2EFE6', fg: '#0A0A0A' },
@@ -251,8 +251,8 @@ export default function CreateProduct() {
   );
 }
 
-const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
-  label: { ...T.label, color: staticPalette.ink, opacity: 0.65 },
+const makeStyles = (palette: Palette) => StyleSheet.create({
+  label: { ...T.label, color: palette.ink, opacity: 0.65 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
   swatches: { flexDirection: 'row', gap: 10 },
   swatch: { width: 44, height: 44, borderRadius: 22, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
@@ -267,7 +267,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingVertical: 14,
     fontFamily: fonts.body,
     fontSize: 15,
-    color: staticPalette.ink,
+    color: palette.ink,
     backgroundColor: palette.paper,
   },
   priceBox: {

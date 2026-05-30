@@ -1,6 +1,7 @@
-import React from 'react';
-import { View, StyleSheet, Text as RNText } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, Text as RNText, Pressable } from 'react-native';
 import { router } from '@/navigation';
+import { Ionicons } from '@/icons';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
@@ -8,78 +9,150 @@ import { ScreenFrame } from '@/components/ui/ScreenFrame';
 import { ModuleHeader } from '@/components/ui/ModuleHeader';
 import { Section } from '@/components/ui/Section';
 import { ListCell } from '@/components/ui/ListCell';
-import { BadgePill } from '@/components/ui/BadgePill';
-import { repBreakdown } from '@/data/mock';
+import { Tap } from '@/components/ui/Tap';
+import { Sheet } from '@/components/ui/Sheet';
+import { repBreakdown, analyticsSeed } from '@/data/mock';
 import { useStore } from '@/store';
 
-export default function ReputationHome() {
+const TIERS = [
+  { key: 'emerging', label: 'EMERGING', min: 0 },
+  { key: 'bronze', label: 'BRONZE', min: 31 },
+  { key: 'silver', label: 'SILVER', min: 51 },
+  { key: 'gold', label: 'GOLD', min: 71 },
+  { key: 'platinum', label: 'PLATINUM', min: 86 },
+];
+
+function tierIndex(score: number) {
+  let idx = 0;
+  for (let i = 0; i < TIERS.length; i++) if (score >= TIERS[i].min) idx = i;
+  return idx;
+}
+
+export default function ReputationIndex() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  const profile = useStore((s) => s.profile);
+  const toast = useStore((s) => s.toast);
   const badges = useStore((s) => s.badges);
-  const verification = useStore((s) => s.verification);
-  const done = verification.filter((v) => v.done).length;
-  const score = profile.reputation;
-  const tier =
-    score >= 90 ? 'ELITE' : score >= 80 ? 'TRUSTED' : score >= 60 ? 'ESTABLISHED' : score >= 40 ? 'RISING' : 'NEW';
+
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  const score = 82;
+  const curIdx = tierIndex(score);
+  const cur = TIERS[curIdx];
+  const next = TIERS[curIdx + 1];
+  const toNext = next ? next.min - score : 0;
+
+  // Progress within the current tier toward the next threshold.
+  const lo = cur.min;
+  const hi = next ? next.min : 100;
+  const tierPct = Math.min(100, Math.round(((score - lo) / (hi - lo)) * 100));
+
+  const barColor = (s: number) => (s >= 85 ? palette.acid : s >= 70 ? palette.ink : palette.mute);
+
+  const trend = analyticsSeed.trend;
+  const maxTrend = Math.max(...trend);
+  const minTrend = Math.min(...trend);
 
   return (
-    <ScreenFrame header={<ModuleHeader title="REPUTATION" />}>
-      <View style={styles.hero}>
-        <RNText
-          style={styles.score}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.7}
-          maxFontSizeMultiplier={1.1}
-        >
-          {score}
-        </RNText>
-        <View style={{ gap: 6 }}>
-          <BadgePill tier={tier} />
-          <RNText style={styles.scoreLabel} maxFontSizeMultiplier={1.15}>
-            YOUR SCORE · 100
-          </RNText>
+    <ScreenFrame header={<ModuleHeader eyebrow="STANDING" title="REPUTATION" />} waves={false}>
+      <RNText style={styles.title} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+        your standing.
+      </RNText>
+
+      {/* Score hero */}
+      <View style={styles.scoreCard}>
+        <View style={styles.scoreTop}>
+          <View style={styles.scoreNumWrap}>
+            <RNText style={styles.scoreNum}>{score}</RNText>
+            <RNText style={styles.scoreOf}>/ 100</RNText>
+          </View>
+          <View style={[styles.tierPill, { backgroundColor: palette.acid }]}>
+            <Ionicons name="ribbon-outline" size={13} color={palette.ink} />
+            <RNText style={styles.tierPillText}>{cur.label}</RNText>
+          </View>
+        </View>
+
+        <View style={styles.scoreBarTrack}>
+          <View style={[styles.scoreBarFill, { width: `${Math.max(tierPct, 4)}%`, backgroundColor: palette.acid }]} />
+        </View>
+        <View style={styles.scoreFoot}>
+          <RNText style={styles.scoreFootText}>{cur.label}</RNText>
+          {next ? (
+            <RNText style={styles.scoreFootText}>
+              +{toNext} to {next.label.charAt(0) + next.label.slice(1).toLowerCase()}
+            </RNText>
+          ) : (
+            <RNText style={styles.scoreFootText}>top tier</RNText>
+          )}
         </View>
       </View>
 
-      <RNText style={styles.body} maxFontSizeMultiplier={1.2}>
-        Reputation is portable. Brands, fans, and managers see the same number. Only you can move it.
-      </RNText>
-
-      <Section eyebrow="WHAT MOVES IT" title="your breakdown.">
-        <View style={{ gap: 12, marginTop: 4 }}>
+      {/* Factors */}
+      <Section
+        eyebrow="WHAT MOVES IT"
+        title="factors."
+        action={{ label: 'HISTORY', onPress: () => setHistoryOpen(true) }}
+      >
+        <View style={{ gap: 14, marginTop: 2 }}>
           {repBreakdown.map((r) => (
-            <View key={r.key} style={styles.row}>
-              <View style={{ flex: 1 }}>
-                <RNText style={styles.rowKey} maxFontSizeMultiplier={1.15}>
+            <View key={r.key} style={styles.factorRow}>
+              <View style={styles.factorHead}>
+                <RNText style={styles.factorLabel} numberOfLines={1}>
                   {r.label}
                 </RNText>
-                <RNText style={styles.rowWeight}>{r.weight}% of score</RNText>
+                <RNText style={styles.factorWeight}>{r.weight}%</RNText>
+                <RNText style={styles.factorScore}>{r.score}</RNText>
               </View>
-              <View style={styles.track}>
+              <View style={styles.barTrack}>
                 <View
-                  style={[
-                    styles.fill,
-                    { width: `${r.score}%`, backgroundColor: r.score >= 80 ? palette.acid : palette.electric },
-                  ]}
+                  style={[styles.barFill, { width: `${Math.max(r.score, 4)}%`, backgroundColor: barColor(r.score) }]}
                 />
               </View>
-              <RNText style={styles.rowVal} maxFontSizeMultiplier={1.1}>
-                {r.score}
-              </RNText>
             </View>
           ))}
         </View>
       </Section>
 
-      <Section eyebrow="GET DEEPER">
+      {/* Tiers strip */}
+      <Section eyebrow="TIERS">
+        <View style={styles.tierStrip}>
+          {TIERS.map((t, i) => {
+            const active = i === curIdx;
+            return (
+              <View key={t.key} style={[styles.tierStep, active && styles.tierStepActive]}>
+                <RNText style={[styles.tierStepText, active && styles.tierStepTextActive]}>{t.label}</RNText>
+                <RNText style={[styles.tierStepMin, active && styles.tierStepTextActive]}>{t.min}+</RNText>
+              </View>
+            );
+          })}
+        </View>
+      </Section>
+
+      {/* Improve */}
+      <Section eyebrow="MOVE THE NUMBER" title="improve.">
+        <ListCell
+          icon="time-outline"
+          title="Post weekly"
+          subtitle="Consistency is 74 — your lowest big factor"
+          onPress={() => toast('Streak goal set · post by Sunday.', 'success')}
+        />
         <ListCell
           icon="shield-checkmark-outline"
-          title="Verification"
-          subtitle={`${done} / ${verification.length} steps complete`}
+          title="Close a brand deal"
+          subtitle="Lifts Brand reliability + Community standing"
+          onPress={() => router.push('/(modules)/jobs')}
+        />
+        <ListCell
+          icon="finger-print-outline"
+          title="Get ID-verified"
+          subtitle="Adds a trust layer to your profile"
+          accent={palette.acid}
           onPress={() => router.push('/(modules)/reputation/verification')}
         />
+      </Section>
+
+      {/* Deeper links */}
+      <Section eyebrow="GO DEEP">
         <ListCell
           icon="trophy-outline"
           title="Badges"
@@ -87,30 +160,157 @@ export default function ReputationHome() {
           onPress={() => router.push('/(modules)/reputation/badges')}
         />
       </Section>
+
+      {/* Verify CTA */}
+      <Tap
+        onPress={() => router.push('/(modules)/reputation/verification')}
+        style={styles.cta}
+        burstColor={palette.bone}
+      >
+        <RNText style={styles.ctaLabel}>GET VERIFIED</RNText>
+        <View style={styles.ctaArrow}>
+          <Ionicons name="arrow-forward" size={16} color={palette.ink} />
+        </View>
+      </Tap>
+
+      {/* Score history sheet */}
+      <Sheet visible={historyOpen} onClose={() => setHistoryOpen(false)} eyebrow="LAST 12 WEEKS" title="score history.">
+        <View style={styles.sheetCard}>
+          <View style={styles.sparkRow}>
+            {trend.map((v, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.spark,
+                  {
+                    height: 14 + ((v - minTrend) / (maxTrend - minTrend || 1)) * 60,
+                    backgroundColor: i === trend.length - 1 ? palette.acid : palette.ink,
+                    opacity: i === trend.length - 1 ? 1 : 0.5,
+                  },
+                ]}
+              />
+            ))}
+          </View>
+          <View style={styles.sheetFoot}>
+            <RNText style={styles.sheetFootText}>Trending up</RNText>
+            <RNText style={styles.sheetDelta}>+{analyticsSeed.totals.growth30d.toFixed(1)}%</RNText>
+          </View>
+        </View>
+        <RNText style={styles.sheetNote}>
+          Reputation is portable. Brands, fans, and managers all see the same number.
+        </RNText>
+        <Pressable onPress={() => setHistoryOpen(false)} style={styles.sheetDone}>
+          <RNText style={styles.sheetDoneText}>DONE</RNText>
+        </Pressable>
+      </Sheet>
     </ScreenFrame>
   );
 }
 
-const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
-  hero: {
-    marginTop: 4,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 16,
-  },
-  score: {
-    fontFamily: fonts.displayBold,
-    fontSize: 140,
-    lineHeight: 120,
-    color: palette.ink,
-    letterSpacing: -5,
-  },
-  scoreLabel: { ...T.label, color: palette.ink, opacity: 0.6 },
-  body: { ...T.body, color: palette.ink, opacity: 0.72, marginTop: 14, maxWidth: 360 },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  rowKey: { fontFamily: fonts.displayBold, fontSize: 14, color: palette.ink, letterSpacing: -0.2 },
-  rowWeight: { ...T.micro, color: palette.ink, opacity: 0.55, marginTop: 2 },
-  track: { width: 80, height: 8, backgroundColor: palette.line, borderRadius: 4, overflow: 'hidden' },
-  fill: { height: '100%' },
-  rowVal: { fontFamily: fonts.displayBold, fontSize: 18, color: palette.ink, width: 36, textAlign: 'right' },
-});
+const makeStyles = (palette: typeof staticPalette) =>
+  StyleSheet.create({
+    title: {
+      fontFamily: fonts.displayBold,
+      fontSize: 44,
+      lineHeight: 42,
+      letterSpacing: -2,
+      color: palette.ink,
+      marginTop: 4,
+      marginBottom: 18,
+    },
+
+    scoreCard: {
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: palette.line,
+      backgroundColor: palette.paper,
+      padding: 18,
+      gap: 14,
+    },
+    scoreTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    scoreNumWrap: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
+    scoreNum: { fontFamily: fonts.displayBold, fontSize: 72, lineHeight: 66, letterSpacing: -4, color: palette.ink },
+    scoreOf: { fontFamily: fonts.body, fontSize: 16, color: palette.inkMuted, marginBottom: 8 },
+    tierPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingHorizontal: 12,
+      height: 30,
+      borderRadius: 15,
+    },
+    tierPillText: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 1.6, color: palette.ink },
+
+    scoreBarTrack: { height: 10, borderRadius: 5, backgroundColor: palette.boneSoft, overflow: 'hidden' },
+    scoreBarFill: { height: 10, borderRadius: 5 },
+    scoreFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    scoreFootText: { ...T.label, color: palette.inkMuted },
+
+    factorRow: { gap: 8 },
+    factorHead: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },
+    factorLabel: { fontFamily: fonts.bodyBold, fontSize: 13, letterSpacing: -0.1, color: palette.ink, flex: 1 },
+    factorWeight: { ...T.label, color: palette.inkMuted },
+    factorScore: { fontFamily: fonts.displayBold, fontSize: 16, color: palette.ink, width: 30, textAlign: 'right' },
+    barTrack: { height: 6, borderRadius: 3, backgroundColor: palette.boneSoft, overflow: 'hidden' },
+    barFill: { height: 6, borderRadius: 3 },
+
+    tierStrip: { flexDirection: 'row', gap: 5 },
+    tierStep: {
+      flex: 1,
+      paddingVertical: 9,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: palette.line,
+      backgroundColor: palette.boneSoft,
+      alignItems: 'center',
+      gap: 2,
+    },
+    tierStepActive: { backgroundColor: palette.ink, borderColor: palette.ink },
+    tierStepText: { fontFamily: fonts.bodyBold, fontSize: 9, letterSpacing: 0.6, color: palette.inkMuted },
+    tierStepMin: { fontFamily: fonts.body, fontSize: 9, color: palette.inkMuted },
+    tierStepTextActive: { color: palette.bone },
+
+    cta: {
+      marginTop: 20,
+      height: 60,
+      borderRadius: 18,
+      backgroundColor: palette.ink,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 10,
+    },
+    ctaLabel: { fontFamily: fonts.bodyBold, fontSize: 14, letterSpacing: 2.5, color: palette.bone },
+    ctaArrow: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: palette.bone,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    sheetCard: {
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: palette.line,
+      backgroundColor: palette.paper,
+      padding: 18,
+      gap: 14,
+    },
+    sparkRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 6, height: 76 },
+    spark: { flex: 1, borderRadius: 3 },
+    sheetFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    sheetFootText: { ...T.small, color: palette.inkMuted },
+    sheetDelta: { fontFamily: fonts.bodyBold, fontSize: 13, color: palette.ink },
+    sheetNote: { ...T.body, color: palette.inkMuted, marginTop: 14, lineHeight: 20 },
+    sheetDone: {
+      marginTop: 18,
+      height: 52,
+      borderRadius: 16,
+      backgroundColor: palette.ink,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sheetDoneText: { fontFamily: fonts.bodyBold, fontSize: 13, letterSpacing: 2, color: palette.bone },
+  });

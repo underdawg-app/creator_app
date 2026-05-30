@@ -21,7 +21,7 @@ export const welcomeSlides = [
     title: 'BUILT\nFOR THE\nDAWGS',
     editorial: 'the ones nobody signed.',
     description: 'For the next generation of creators.',
-    accent: '#D8FF3D',
+    accent: '#FCD34D',
     bg: '#0A0A0A',
     fg: '#F2EFE6',
   },
@@ -48,15 +48,15 @@ export const welcomeSlides = [
 ];
 
 export const creatorTypes = [
-  { key: 'visual', title: 'VISUAL ARTIST', subtitle: 'painters · illustrators · photographers', color: '#D8FF3D' },
+  { key: 'visual', title: 'VISUAL ARTIST', subtitle: 'painters · illustrators · photographers', color: '#FCD34D' },
   { key: 'musician', title: 'MUSICIAN', subtitle: 'singers · producers · djs', color: '#2E5BFF' },
   { key: 'video', title: 'VIDEO CREATOR', subtitle: 'youtubers · filmmakers · vloggers', color: '#FF6BB5' },
   { key: 'writer', title: 'WRITER', subtitle: 'authors · poets · journalists', color: '#FF5A1F' },
-  { key: 'performer', title: 'PERFORMER', subtitle: 'dancers · actors · comedians', color: '#D8FF3D' },
+  { key: 'performer', title: 'PERFORMER', subtitle: 'dancers · actors · comedians', color: '#FCD34D' },
   { key: 'educator', title: 'EDUCATOR', subtitle: 'teachers · coaches · experts', color: '#2E5BFF' },
   { key: 'podcaster', title: 'PODCASTER', subtitle: 'audio · interviews · shows', color: '#FF6BB5' },
   { key: 'streamer', title: 'STREAMER', subtitle: 'gamers · irl · live', color: '#FF5A1F' },
-  { key: 'fashion', title: 'FASHION / LIFE', subtitle: 'fashion · beauty · food', color: '#D8FF3D' },
+  { key: 'fashion', title: 'FASHION / LIFE', subtitle: 'fashion · beauty · food', color: '#FCD34D' },
   { key: 'multi', title: 'MULTI-HYPHENATE', subtitle: 'you do all the things', color: '#F2EFE6' },
 ];
 
@@ -130,7 +130,7 @@ export const feedPosts = [
     note: 'dropping friday. three tracks. one city.',
     image: 'https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=1200&q=80&auto=format&fit=crop',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80&auto=format&fit=crop&crop=faces',
-    color: '#D8FF3D',
+    color: '#FCD34D',
     bg: '#0A0A0A',
     fg: '#F2EFE6',
     tall: false,
@@ -175,7 +175,7 @@ export const feedPosts = [
     image: 'https://images.unsplash.com/photo-1555421689-d68471e189f2?w=1200&q=80&auto=format&fit=crop',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80&auto=format&fit=crop&crop=faces',
     color: '#0A0A0A',
-    bg: '#D8FF3D',
+    bg: '#FCD34D',
     fg: '#0A0A0A',
     tall: false,
     likes: 506,
@@ -262,7 +262,7 @@ export const feedPosts = [
     note: 'the light does the work. I just wait.',
     image: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=1200&q=80&auto=format&fit=crop',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80&auto=format&fit=crop&crop=faces',
-    color: '#D8FF3D',
+    color: '#FCD34D',
     bg: '#0A0A0A',
     fg: '#F2EFE6',
     tall: true,
@@ -350,7 +350,7 @@ export const feedPosts = [
     note: 'beat made live tonight. stems in comments.',
     image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=1200&q=80&auto=format&fit=crop',
     avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=400&q=80&auto=format&fit=crop&crop=faces',
-    color: '#D8FF3D',
+    color: '#FCD34D',
     bg: '#0A0A0A',
     fg: '#F2EFE6',
     tall: false,
@@ -373,7 +373,7 @@ export const feedPosts = [
     image: 'https://images.unsplash.com/photo-1561948955-570b270e7c36?w=1200&q=80&auto=format&fit=crop',
     avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&q=80&auto=format&fit=crop&crop=faces',
     color: '#0A0A0A',
-    bg: '#D8FF3D',
+    bg: '#FCD34D',
     fg: '#0A0A0A',
     tall: false,
     likes: 882,
@@ -512,7 +512,7 @@ export const challenges: Challenge[] = [
     prize: '₹25,000 + FEATURE',
     daysLeft: 4,
     entries: 218,
-    color: '#D8FF3D',
+    color: '#FCD34D',
     audio: {
       id: 'a1',
       title: 'BONETONES LOOP',
@@ -756,9 +756,9 @@ export const profileMock = {
   ],
   portfolio: [
     { id: 'p1', title: 'SALT / STUDY 04', color: '#2E5BFF', bg: '#F2EFE6' },
-    { id: 'p2', title: 'GLASS HOUSE', color: '#D8FF3D', bg: '#0A0A0A' },
+    { id: 'p2', title: 'GLASS HOUSE', color: '#FCD34D', bg: '#0A0A0A' },
     { id: 'p3', title: 'BONE PAINT', color: '#FF6BB5', bg: '#0A0A0A' },
-    { id: 'p4', title: 'LAST TRAIN', color: '#0A0A0A', bg: '#D8FF3D' },
+    { id: 'p4', title: 'LAST TRAIN', color: '#0A0A0A', bg: '#FCD34D' },
   ],
 };
 
@@ -808,7 +808,7 @@ export const userFeed: UserFeedItem[] = [
     likes: 902,
     comments: 24,
     reposts: 9,
-    accent: '#D8FF3D',
+    accent: '#FCD34D',
     category: 'PHOTO',
   },
   {
@@ -860,7 +860,7 @@ export const userFeed: UserFeedItem[] = [
     likes: 488,
     comments: 18,
     reposts: 7,
-    accent: '#D8FF3D',
+    accent: '#FCD34D',
     category: 'VISUAL ART',
   },
 
@@ -903,7 +903,7 @@ export const userFeed: UserFeedItem[] = [
     likes: 1840,
     comments: 71,
     reposts: 42,
-    accent: '#D8FF3D',
+    accent: '#FCD34D',
     category: 'PROCESS',
   },
   {
@@ -930,7 +930,7 @@ export const userFeed: UserFeedItem[] = [
     likes: 612,
     comments: 28,
     reposts: 19,
-    accent: '#D8FF3D',
+    accent: '#FCD34D',
   },
   {
     id: 't2',
@@ -981,17 +981,17 @@ export type ModuleDef = {
 };
 
 export const moduleGrid: ModuleDef[] = [
-  { key: 'portfolio', label: 'PORTFOLIO', eyebrow: 'MODULE · 02', route: '/(modules)/portfolio', accent: '#D8FF3D', bg: '#0A0A0A', fg: '#F2EFE6' },
+  { key: 'portfolio', label: 'PORTFOLIO', eyebrow: 'MODULE · 02', route: '/(modules)/portfolio', accent: '#FCD34D', bg: '#0A0A0A', fg: '#F2EFE6' },
   { key: 'studio', label: 'STUDIO', eyebrow: 'MODULE · 03', route: '/(modules)/studio', accent: '#2E5BFF', bg: '#F2EFE6', fg: '#0A0A0A' },
   { key: 'audience', label: 'AUDIENCE', eyebrow: 'MODULE · 05', route: '/(modules)/audience', accent: '#FF6BB5', bg: '#0A0A0A', fg: '#F2EFE6' },
-  { key: 'analytics', label: 'ANALYTICS', eyebrow: 'MODULE · 06', route: '/(modules)/analytics', accent: '#D8FF3D', bg: '#F2EFE6', fg: '#0A0A0A' },
+  { key: 'analytics', label: 'ANALYTICS', eyebrow: 'MODULE · 06', route: '/(modules)/analytics', accent: '#FCD34D', bg: '#F2EFE6', fg: '#0A0A0A' },
   { key: 'jobs', label: 'JOB BOARD', eyebrow: 'MODULE · 07', route: '/(modules)/jobs', accent: '#FF5A1F', bg: '#0A0A0A', fg: '#F2EFE6' },
-  { key: 'merch', label: 'MERCH', eyebrow: 'MODULE · 08', route: '/(modules)/merch', accent: '#D8FF3D', bg: '#0A0A0A', fg: '#F2EFE6' },
+  { key: 'merch', label: 'MERCH', eyebrow: 'MODULE · 08', route: '/(modules)/merch', accent: '#FCD34D', bg: '#0A0A0A', fg: '#F2EFE6' },
   { key: 'art', label: 'ART MARKET', eyebrow: 'MODULE · 09', route: '/(modules)/art', accent: '#2E5BFF', bg: '#F2EFE6', fg: '#0A0A0A' },
-  { key: 'finance', label: 'FINANCE', eyebrow: 'MODULE · 10', route: '/(modules)/finance', accent: '#D8FF3D', bg: '#0A0A0A', fg: '#F2EFE6' },
+  { key: 'finance', label: 'FINANCE', eyebrow: 'MODULE · 10', route: '/(modules)/finance', accent: '#FCD34D', bg: '#0A0A0A', fg: '#F2EFE6' },
   { key: 'reputation', label: 'REPUTATION', eyebrow: 'MODULE · 12', route: '/(modules)/reputation', accent: '#FF6BB5', bg: '#F2EFE6', fg: '#0A0A0A' },
   { key: 'community', label: 'COMMUNITY', eyebrow: 'MODULE · 13', route: '/(modules)/community', accent: '#2E5BFF', bg: '#0A0A0A', fg: '#F2EFE6' },
-  { key: 'learning', label: 'LEARNING', eyebrow: 'MODULE · 14', route: '/(modules)/learning', accent: '#D8FF3D', bg: '#F2EFE6', fg: '#0A0A0A' },
+  { key: 'learning', label: 'LEARNING', eyebrow: 'MODULE · 14', route: '/(modules)/learning', accent: '#FCD34D', bg: '#F2EFE6', fg: '#0A0A0A' },
   { key: 'settings', label: 'SETTINGS', eyebrow: 'MODULE · 15', route: '/(modules)/settings', accent: '#9C988A', bg: '#0A0A0A', fg: '#F2EFE6' },
 ];
 
@@ -1010,10 +1010,10 @@ export type Platform = {
 
 export const platformSeed: Platform[] = [
   { key: 'ig', name: 'INSTAGRAM', handle: '@solaroux', followers: 12_480, connected: true, growth: 4.2, accent: '#FF6BB5' },
-  { key: 'tt', name: 'TIKTOK', handle: '@solaroux', followers: 4_820, connected: true, growth: 12.8, accent: '#D8FF3D' },
+  { key: 'tt', name: 'TIKTOK', handle: '@solaroux', followers: 4_820, connected: true, growth: 12.8, accent: '#FCD34D' },
   { key: 'yt', name: 'YOUTUBE', handle: 'Sola Roux', followers: 2_106, connected: false, growth: 0, accent: '#FF5A1F' },
   { key: 'tw', name: 'TWITTER', handle: '@solaroux', followers: 3_240, connected: false, growth: 0, accent: '#2E5BFF' },
-  { key: 'sp', name: 'SPOTIFY', handle: 'Sola Roux', followers: 0, connected: false, growth: 0, accent: '#D8FF3D' },
+  { key: 'sp', name: 'SPOTIFY', handle: 'Sola Roux', followers: 0, connected: false, growth: 0, accent: '#FCD34D' },
   { key: 'tv', name: 'TWITCH', handle: 'solaroux', followers: 0, connected: false, growth: 0, accent: '#FF6BB5' },
 ];
 
@@ -1071,7 +1071,7 @@ export const analyticsSeed = {
     ],
   },
   ai: [
-    { id: 'a1', kind: 'TREND', title: '"resin pour" is up 214% in your niche', body: 'Post a making-of this week — engagement window closes Thursday.', accent: '#D8FF3D' },
+    { id: 'a1', kind: 'TREND', title: '"resin pour" is up 214% in your niche', body: 'Post a making-of this week — engagement window closes Thursday.', accent: '#FCD34D' },
     { id: 'a2', kind: 'TIMING', title: 'Post Tue / Thu at 6:40 PM for +42% reach', body: 'Your cohort responds late-evening. Short video preferred on Thursday.', accent: '#2E5BFF' },
     { id: 'a3', kind: 'CONTENT', title: 'Your 4-minute films get 3x engagement', body: 'Consider AFTER WATER as a recurring series. 4min is the sweet spot.', accent: '#FF6BB5' },
     { id: 'a4', kind: 'COLLAB', title: 'Pair with @kore.odu for 34% audience overlap', body: 'Sound + visual overlap is strong. A split EP cover-art collab would compound.', accent: '#FF5A1F' },
@@ -1111,7 +1111,7 @@ export const jobsSeed: Job[] = [
     deadline: '2026-05-12',
     applicants: 24,
     location: 'REMOTE · NYC PREFERRED',
-    accent: '#D8FF3D',
+    accent: '#FCD34D',
     verified: true,
     description:
       'Oddbird is launching ACID SUMMER — a limited drop of resin-dipped tees. We want three creators whose palette leans chemical and whose work feels like heatwave evenings. You decide the visual grammar; we supply the product and the money.',
@@ -1179,7 +1179,7 @@ export const jobsSeed: Job[] = [
     deadline: '2026-05-30',
     applicants: 8,
     location: 'LONDON / NYC',
-    accent: '#D8FF3D',
+    accent: '#FCD34D',
     verified: true,
     description:
       'Six-month creative partnership. We want creators whose personal style is already a point of view — not a mood board. Long-form relationship, retainer structure, quarterly in-person.',
@@ -1236,7 +1236,7 @@ export const dealsSeed: Deal[] = [
     progress: 0.25,
     amount: 0,
     nextAction: 'Counter-offer rate card',
-    accent: '#D8FF3D',
+    accent: '#FCD34D',
   },
   {
     id: 'd3',
@@ -1289,8 +1289,8 @@ export const productTypes = [
 
 export const productsSeed: Product[] = [
   { id: 'p1', name: 'SALT / STUDY TEE', type: 'T-SHIRT', baseCost: 480, margin: 520, color: '#2E5BFF', bg: '#F2EFE6', fg: '#0A0A0A', published: true, sold: 182 },
-  { id: 'p2', name: 'BONE PAINT HOODIE', type: 'HOODIE', baseCost: 1_100, margin: 900, color: '#D8FF3D', bg: '#0A0A0A', fg: '#F2EFE6', published: true, sold: 96 },
-  { id: 'p3', name: 'LAST TRAIN POSTER', type: 'POSTER', baseCost: 180, margin: 220, color: '#0A0A0A', bg: '#D8FF3D', fg: '#0A0A0A', published: true, sold: 341 },
+  { id: 'p2', name: 'BONE PAINT HOODIE', type: 'HOODIE', baseCost: 1_100, margin: 900, color: '#FCD34D', bg: '#0A0A0A', fg: '#F2EFE6', published: true, sold: 96 },
+  { id: 'p3', name: 'LAST TRAIN POSTER', type: 'POSTER', baseCost: 180, margin: 220, color: '#0A0A0A', bg: '#FCD34D', fg: '#0A0A0A', published: true, sold: 341 },
 ];
 
 export const merchOrdersSeed = [
@@ -1320,14 +1320,14 @@ export type Artwork = {
 
 export const artSeed: Artwork[] = [
   { id: 'a1', title: 'SALT / STUDY No. 04', kind: 'ORIGINAL', price: 42_000, year: 2026, medium: 'Acrylic, resin, dust on panel', dimensions: '60×48cm', color: '#2E5BFF', bg: '#F2EFE6', fg: '#0A0A0A', available: true },
-  { id: 'a2', title: 'GLASS HOUSE', kind: 'LIMITED PRINT', price: 6_800, year: 2025, edition: '12 / 30', medium: 'Giclée on cotton rag', dimensions: '50×70cm', color: '#D8FF3D', bg: '#0A0A0A', fg: '#F2EFE6', available: true },
+  { id: 'a2', title: 'GLASS HOUSE', kind: 'LIMITED PRINT', price: 6_800, year: 2025, edition: '12 / 30', medium: 'Giclée on cotton rag', dimensions: '50×70cm', color: '#FCD34D', bg: '#0A0A0A', fg: '#F2EFE6', available: true },
   { id: 'a3', title: 'BONE PAINT', kind: 'OPEN PRINT', price: 2_400, year: 2025, medium: 'Archival pigment', dimensions: '30×40cm', color: '#FF6BB5', bg: '#0A0A0A', fg: '#F2EFE6', available: true },
-  { id: 'a4', title: 'LAST TRAIN, 04:12', kind: 'DIGITAL', price: 1_200, year: 2026, medium: 'High-res PNG + TIFF bundle', color: '#0A0A0A', bg: '#D8FF3D', fg: '#0A0A0A', available: true },
+  { id: 'a4', title: 'LAST TRAIN, 04:12', kind: 'DIGITAL', price: 1_200, year: 2026, medium: 'High-res PNG + TIFF bundle', color: '#0A0A0A', bg: '#FCD34D', fg: '#0A0A0A', available: true },
 ];
 
 export const commissionsSeed = [
   { id: 'cm1', from: '@nyla.collect', brief: 'Portrait — resin-over-acrylic, 40cm sq.', budget: 18_000, status: 'QUOTED', accent: '#FF6BB5' },
-  { id: 'cm2', from: '@deepfield.mag', brief: 'Editorial cover — summer issue.', budget: 28_000, status: 'IN PROGRESS', accent: '#D8FF3D' },
+  { id: 'cm2', from: '@deepfield.mag', brief: 'Editorial cover — summer issue.', budget: 28_000, status: 'IN PROGRESS', accent: '#FCD34D' },
   { id: 'cm3', from: '@miguel.arte', brief: 'Resin study — gift, rush timeline.', budget: 9_000, status: 'NEW', accent: '#2E5BFF' },
 ];
 
@@ -1404,7 +1404,7 @@ export const threadsSeed: Thread[] = [
     preview: 'yo. split EP cover? your palette, my sound.',
     unread: 2,
     updatedAgo: '1h',
-    accent: '#D8FF3D',
+    accent: '#FCD34D',
     messages: [
       { from: 'them', body: 'yo. split EP cover? your palette, my sound.', ts: '1h' },
       { from: 'them', body: 'i have 4 tracks, you have infinite blue.', ts: '1h' },
@@ -1491,14 +1491,14 @@ export const verificationSteps = [
  * ----------------------------------------------------------------------- */
 export const groupsSeed = [
   { id: 'g1', name: 'BROOKLYN PAINTERS', members: 482, niche: 'Visual Art', joined: true, accent: '#2E5BFF' },
-  { id: 'g2', name: 'RESIN + POUR', members: 1_284, niche: 'Technique', joined: true, accent: '#D8FF3D' },
+  { id: 'g2', name: 'RESIN + POUR', members: 1_284, niche: 'Technique', joined: true, accent: '#FCD34D' },
   { id: 'g3', name: 'MONSOON CLUB (DOC)', members: 96, niche: 'Film', joined: false, accent: '#FF6BB5' },
   { id: 'g4', name: 'LAGOS → BERLIN', members: 642, niche: 'Music / Diaspora', joined: false, accent: '#FF5A1F' },
-  { id: 'g5', name: 'WOMEN WHO PAINT', members: 2_108, niche: 'Visual Art', joined: true, accent: '#D8FF3D' },
+  { id: 'g5', name: 'WOMEN WHO PAINT', members: 2_108, niche: 'Visual Art', joined: true, accent: '#FCD34D' },
 ];
 
 export const eventsSeed = [
-  { id: 'e1', title: 'OPEN STUDIO · BROOKLYN', date: 'MAY 18', host: 'UNDERDAWG NYC', rsvps: 124, accent: '#D8FF3D' },
+  { id: 'e1', title: 'OPEN STUDIO · BROOKLYN', date: 'MAY 18', host: 'UNDERDAWG NYC', rsvps: 124, accent: '#FCD34D' },
   { id: 'e2', title: 'AMA: PRICING YOUR ART', date: 'MAY 22', host: 'SOLA ROUX + KEIRA T.', rsvps: 312, accent: '#2E5BFF' },
   { id: 'e3', title: 'RESIN CLASS — LEVEL 01', date: 'JUN 02', host: 'RESIN + POUR', rsvps: 58, accent: '#FF6BB5' },
 ];
@@ -1544,7 +1544,7 @@ export const communityGroupsSeed: Array<{
   blurb: string;
   accent: string;
 }> = [
-  { id: 'cg1', name: 'WOMEN WHO PAINT',      kind: 'NICHE',    members: 4_820, blurb: 'painters · printmakers · resin obsessives',  accent: '#D8FF3D' },
+  { id: 'cg1', name: 'WOMEN WHO PAINT',      kind: 'NICHE',    members: 4_820, blurb: 'painters · printmakers · resin obsessives',  accent: '#FCD34D' },
   { id: 'cg2', name: 'BROOKLYN CREATORS',    kind: 'LOCATION', members: 2_140, blurb: 'studios · shows · meet-ups within the BK',     accent: '#2E5BFF' },
   { id: 'cg3', name: 'VERTICAL FILMMAKERS',  kind: 'INTEREST', members: 6_310, blurb: 'short-form film, ig + tiktok native',         accent: '#FF6BB5' },
   { id: 'cg4', name: 'THE BACK ROOM',        kind: 'PRIVATE',  members: 48,    blurb: 'invite-only — verified senior creators',      accent: '#FF5A1F' },
@@ -1560,7 +1560,7 @@ export const communityEventsSeed: Array<{
   rsvps: number;
   accent: string;
 }> = [
-  { id: 'ev1', title: 'PORTFOLIO TEARDOWN',         kind: 'WEBINAR',  host: 'Maya Patel',       when: 'Thu · 19:00', location: 'Online',           rsvps: 412, accent: '#D8FF3D' },
+  { id: 'ev1', title: 'PORTFOLIO TEARDOWN',         kind: 'WEBINAR',  host: 'Maya Patel',       when: 'Thu · 19:00', location: 'Online',           rsvps: 412, accent: '#FCD34D' },
   { id: 'ev2', title: 'BROOKLYN OPEN STUDIOS',      kind: 'MEETUP',   host: 'BK Creators',      when: 'Sat · 14:00', location: 'Williamsburg',     rsvps: 188, accent: '#2E5BFF' },
   { id: 'ev3', title: 'PRICING AMA — RAISE YOUR RATES', kind: 'AMA',  host: 'Underdawg Legal',  when: 'Sun · 11:00', location: 'Online',           rsvps: 264, accent: '#FF6BB5' },
 ];
@@ -1576,7 +1576,7 @@ export const mentorsSeed: Array<{
   reviews: number;
   accent: string;
 }> = [
-  { id: 'm1', handle: '@maya_films',   name: 'Maya Patel',      expertise: 'PRICING · CLIENT WORK', rate: '$120 / hr', avail: 'OPEN',     rating: 4.9, reviews: 64, accent: '#D8FF3D' },
+  { id: 'm1', handle: '@maya_films',   name: 'Maya Patel',      expertise: 'PRICING · CLIENT WORK', rate: '$120 / hr', avail: 'OPEN',     rating: 4.9, reviews: 64, accent: '#FCD34D' },
   { id: 'm2', handle: '@kore.odu',     name: 'Kore Odu',        expertise: 'MUSIC PRODUCTION',      rate: '$95 / hr',  avail: 'WAITLIST', rating: 4.8, reviews: 42, accent: '#2E5BFF' },
   { id: 'm3', handle: '@lin.w',        name: 'Lin Wei',         expertise: 'WRITING · ZINES',       rate: 'FREE',      avail: 'OPEN',     rating: 5.0, reviews: 22, accent: '#FF6BB5' },
 ];
@@ -1621,7 +1621,7 @@ export const coursesSeed = [
     duration: '38 min',
     lessons: 6,
     category: 'MONETIZATION',
-    accent: '#D8FF3D',
+    accent: '#FCD34D',
   },
   {
     id: 'c2',
@@ -1665,11 +1665,11 @@ export const lessonsSample = [
  * MODULE 3 — STUDIO (content types)
  * ----------------------------------------------------------------------- */
 export const contentTypes = [
-  { key: 'image', name: 'IMAGE', sub: 'capture or pick from gallery', accent: '#D8FF3D', route: '/(modules)/camera?mode=PHOTO' },
+  { key: 'image', name: 'IMAGE', sub: 'capture or pick from gallery', accent: '#FCD34D', route: '/(modules)/camera?mode=PHOTO' },
   { key: 'video', name: 'VIDEO', sub: 'record or pick from gallery', accent: '#2E5BFF', route: '/(modules)/camera?mode=VIDEO' },
   { key: 'audio', name: 'AUDIO', sub: 'track, clip, podcast', accent: '#FF6BB5', route: '/(modules)/studio/audio-composer' },
   { key: 'text', name: 'TEXT', sub: 'essay, poem, note', accent: '#FF5A1F', route: '/(modules)/studio/text-composer' },
-  { key: 'story', name: 'STORY', sub: '24h ephemeral', accent: '#D8FF3D', route: '/(modules)/camera?mode=STORY' },
+  { key: 'story', name: 'STORY', sub: '24h ephemeral', accent: '#FCD34D', route: '/(modules)/camera?mode=STORY' },
   { key: 'live', name: 'LIVE', sub: 'go live, in real time', accent: '#FF5A1F', route: '/(modules)/studio/live-composer' },
 ];
 
@@ -1682,11 +1682,11 @@ export const trendingTags = [
 ];
 
 export const categoriesGrid = [
-  { key: 'art', label: 'VISUAL ART', accent: '#D8FF3D' },
+  { key: 'art', label: 'VISUAL ART', accent: '#FCD34D' },
   { key: 'music', label: 'MUSIC', accent: '#2E5BFF' },
   { key: 'film', label: 'FILM', accent: '#FF6BB5' },
   { key: 'dance', label: 'DANCE', accent: '#FF5A1F' },
-  { key: 'poetry', label: 'POETRY', accent: '#D8FF3D' },
+  { key: 'poetry', label: 'POETRY', accent: '#FCD34D' },
   { key: 'design', label: 'DESIGN', accent: '#2E5BFF' },
   { key: 'fashion', label: 'FASHION', accent: '#FF6BB5' },
   { key: 'podcast', label: 'PODCAST', accent: '#FF5A1F' },

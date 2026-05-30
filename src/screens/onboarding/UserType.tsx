@@ -5,7 +5,10 @@ import {
   Pressable,
   ScrollView,
   Text as RNText,
+  Dimensions,
 } from 'react-native';
+
+const { width } = Dimensions.get('window');
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
 import { Ionicons } from '@/icons';
@@ -42,15 +45,8 @@ export default function UserTypeScreen() {
 
       <View style={styles.content}>
         <RNText style={styles.kicker}>I AM A</RNText>
-        <RNText
-          allowFontScaling={false}
-          style={styles.bigLabel}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.55}
-        >
-          {selected.label}
-          <RNText style={{ color: '#D8FF3D' }}>.</RNText>
+        <RNText style={[T.display2, { color: palette.ink, includeFontPadding: false }]} allowFontScaling={false}>
+          {`${selected.label}.`}
         </RNText>
 
         <View style={styles.tagRow}>
@@ -177,7 +173,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   tagBullet: {
     width: 8,
     height: 8,
-    backgroundColor: '#D8FF3D',
+    backgroundColor: palette.acid,
   },
   tagText: {
     fontFamily: fonts.bodyBold,
@@ -234,7 +230,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     textTransform: 'uppercase',
   },
   chipTextActive: {
-    color: palette.bone,
+    color: palette.ink,
   },
 
   cta: {

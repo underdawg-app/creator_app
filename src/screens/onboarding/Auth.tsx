@@ -154,18 +154,11 @@ export default function Auth() {
         keyboardVerticalOffset={0}
       >
         <View style={styles.heading}>
-          <View style={styles.headingRule} />
-          <RNText
-            allowFontScaling={false}
-            style={[styles.title, { color: palette.ink }]}
-          >
+          <RNText style={[T.display2, { color: palette.ink, includeFontPadding: false }]} allowFontScaling={false}>
             SIGN
           </RNText>
-          <RNText
-            allowFontScaling={false}
-            style={[styles.title, { color: palette.ink }]}
-          >
-            IN<RNText style={{ color: '#D8FF3D' }}>.</RNText>
+          <RNText style={[T.display2, { color: palette.ink, includeFontPadding: false }]} allowFontScaling={false}>
+            IN.
           </RNText>
           <RNText style={styles.subheading}>
             Continue with your phone or Google. Your profile stays private until
@@ -185,7 +178,7 @@ export default function Auth() {
               value={phone}
               onChangeText={setPhone}
               placeholder="98765 43210"
-              placeholderTextColor={'rgba(10,10,10,0.32)'}
+              placeholderTextColor={palette.mute}
               keyboardType="phone-pad"
               autoComplete="tel"
               textContentType="telephoneNumber"
@@ -318,21 +311,15 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   headingRule: {
     width: 36,
     height: 3,
-    backgroundColor: '#D8FF3D',
+    backgroundColor: palette.acid,
     marginBottom: 16,
   },
   title: {
-    fontFamily: fonts.displayBold,
-    fontSize: 72,
-    lineHeight: 70,
-    letterSpacing: -2.4,
+    ...T.display1,
     includeFontPadding: false,
   },
   subheading: {
-    fontFamily: fonts.body,
-    fontSize: 16,
-    lineHeight: 24,
-    letterSpacing: -0.1,
+    ...T.lead,
     color: palette.ink,
     opacity: 0.78,
     marginTop: 18,
@@ -366,10 +353,8 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingRight: 8,
   },
   dialText: {
-    fontFamily: fonts.displayBold,
-    fontSize: 20,
+    ...T.title3,
     color: palette.ink,
-    letterSpacing: -0.4,
   },
   dialDivider: {
     width: 1.5,
@@ -381,9 +366,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   phoneInput: {
     flex: 1,
     height: 60,
-    fontFamily: fonts.displayBold,
-    fontSize: 22,
-    letterSpacing: 0.6,
+    ...T.title2,
     color: palette.ink,
     paddingVertical: 0,
   },
@@ -402,11 +385,8 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     opacity: 0.4,
   },
   primaryBtnText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 14,
-    letterSpacing: 2.4,
+    ...T.body,
     color: palette.bone,
-    textTransform: 'uppercase',
   },
   primaryBtnArrowWrap: {
     width: 36,
@@ -449,17 +429,12 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     backgroundColor: 'transparent',
   },
   googleBtnText: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 14,
-    letterSpacing: 2.2,
+    ...T.body,
     color: palette.ink,
-    textTransform: 'uppercase',
   },
 
   legalText: {
-    fontFamily: fonts.body,
-    fontSize: 12,
-    lineHeight: 18,
+    ...T.labelLarge,
     color: palette.ink,
     opacity: 0.45,
     textAlign: 'center',
@@ -481,10 +456,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     borderColor: palette.ink,
   },
   kbDismissLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    letterSpacing: 2,
+    ...T.label,
     color: palette.ink,
-    textTransform: 'uppercase',
   },
 });

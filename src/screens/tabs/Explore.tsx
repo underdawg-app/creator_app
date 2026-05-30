@@ -295,7 +295,7 @@ function HeaderBar() {
       <View style={styles.headerCenter}>
         <RNImage
           source={HEADER_LOGO}
-          style={styles.headerLogo}
+          style={[styles.headerLogo, { tintColor: palette.ink }]}
           resizeMode="contain"
         />
       </View>
@@ -893,8 +893,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    fontFamily: fonts.body,
-    fontSize: 14,
+    ...T.body,
     color: palette.ink,
     paddingVertical: 0,
   },
@@ -921,12 +920,9 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     backgroundColor: palette.ink,
   },
   tabLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    letterSpacing: 1.6,
+    ...T.label,
     color: palette.ink,
     opacity: 0.5,
-    textTransform: 'uppercase',
   },
   tabLabelActive: {
     color: palette.bone,
@@ -960,7 +956,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  storyInitial: { fontFamily: fonts.displayBold, fontSize: 22, color: staticPalette.ink },
+  storyInitial: { ...T.title2, color: staticPalette.ink },
   storyAdd: {
     position: 'absolute',
     right: -2,
@@ -1008,9 +1004,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     justifyContent: 'center',
   },
   craftPillLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 14,
-    letterSpacing: -0.2,
+    ...T.body,
   },
 
   /* ─── Post ── */
@@ -1025,12 +1019,10 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     justifyContent: 'center',
     overflow: 'hidden',
   },
-  avatarText: { fontFamily: fonts.displayBold, fontSize: 18, color: staticPalette.ink },
+  avatarText: { ...T.title3, color: staticPalette.ink },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   postName: {
-    fontFamily: fonts.displayBold,
-    fontSize: 16,
-    letterSpacing: -0.3,
+    ...T.body,
     color: palette.ink,
     flexShrink: 1,
   },
@@ -1052,17 +1044,13 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     borderColor: palette.ink,
   },
   followLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.4,
+    ...T.label,
     color: palette.ink,
   },
 
   captionBlock: { paddingTop: 2 },
   captionLine: {
-    fontFamily: fonts.body,
-    fontSize: 14,
-    lineHeight: 19,
+    ...T.body,
     color: palette.ink,
   },
   captionHandle: {
@@ -1118,9 +1106,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   engageBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingVertical: 4 },
   engageIconBtn: { padding: 4 },
   engageCount: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 12,
-    letterSpacing: 0.4,
+    ...T.labelLarge,
     color: staticPalette.ink,
   },
 
@@ -1150,11 +1136,9 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  widgetAvatarText: { fontFamily: fonts.displayBold, fontSize: 16, color: staticPalette.ink },
+  widgetAvatarText: { ...T.small, color: staticPalette.ink },
   widgetName: {
-    fontFamily: fonts.displayBold,
-    fontSize: 14,
-    letterSpacing: -0.2,
+    ...T.body,
     color: palette.ink,
   },
   widgetMeta: { ...T.micro, color: palette.ink, opacity: 0.55, marginTop: 2 },
@@ -1167,9 +1151,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     borderColor: palette.ink,
   },
   widgetFollowLabel: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 10,
-    letterSpacing: 1.4,
+    ...T.label,
     color: palette.ink,
   },
 
@@ -1212,24 +1194,18 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     opacity: 0.7,
     letterSpacing: 1.6,
   },
-  challengeDot: { color: palette.ink, opacity: 0.45, fontSize: 12 },
+  challengeDot: { ...T.labelLarge, color: palette.ink, opacity: 0.45 },
   challengeDays: {
-    fontFamily: fonts.bodyBold,
-    fontSize: 11,
-    letterSpacing: 1.4,
+    ...T.label,
     color: palette.ink,
     opacity: 0.7,
   },
   challengeTag: {
-    fontFamily: fonts.displayBold,
-    fontSize: 17,
-    letterSpacing: -0.4,
+    ...T.lead,
     color: palette.ink,
   },
   challengePrompt: {
-    fontFamily: fonts.editorial,
-    fontSize: 13,
-    lineHeight: 18,
+    ...T.button,
     color: palette.ink,
     opacity: 0.78,
   },

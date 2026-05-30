@@ -123,6 +123,11 @@ export default function JobsHome() {
             onPress={() => router.push('/(modules)/jobs/active-deals')}
           />
           <QuickRow
+            label="Applications"
+            count={apps.length}
+            onPress={() => router.push('/(modules)/jobs/applications')}
+          />
+          <QuickRow
             label="Rate Card"
             onPress={() => router.push('/(modules)/jobs/rate-card')}
             last
