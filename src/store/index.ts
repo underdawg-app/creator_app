@@ -75,6 +75,13 @@ type Toast = {
   tone: 'default' | 'success' | 'warn';
 };
 
+export type Comment = {
+  id: string;
+  handle: string;
+  body: string;
+  mine?: boolean;
+};
+
 type UIState = {
   toasts: Toast[];
   confettiAt: number;
@@ -387,6 +394,10 @@ type StoreState = {
   toggleSave: (id: string) => void;
   toggleFollow: (handle: string) => void;
 
+  // comments — keyed by post id. Seeded lazily from sampleComments on first read.
+  comments: Record<string, Comment[]>;
+  addComment: (postId: string, body: string) => void;
+
   // jobs
   applications: Application[];
   applyToJob: (a: Omit<Application, 'id' | 'status' | 'submittedAt'>) => void;
@@ -601,6 +612,25 @@ export const useStore = create<StoreState>()(
       toggleSave: (id) => set((s) => ({ saves: { ...s.saves, [id]: !s.saves[id] } })),
       toggleFollow: (handle) =>
         set((s) => ({ following: { ...s.following, [handle]: !s.following[handle] } })),
+
+      comments: {},
+      addComment: (postId, body) =>
+        set((s) => {
+          const text = body.trim();
+          if (!text) return s;
+          const mine: Comment = {
+            id: `c${++tid}`,
+            handle: profileMock.handle,
+            body: text,
+            mine: true,
+          };
+          return {
+            comments: {
+              ...s.comments,
+              [postId]: [...(s.comments[postId] ?? []), mine],
+            },
+          };
+        }),
 
       applications: [],
       applyToJob: (a) =>

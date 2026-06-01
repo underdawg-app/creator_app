@@ -1,31 +1,10 @@
 node_modules/
-.expo/
-dist/
-web-build/
-*.log
-.DS_Store
-expo-env.d.ts
-.env
-.env.local
 ios/Pods/
 ios/build/
 android/build/
-android/.gradle/
 android/app/build/
-
-# Watchman writes hundreds of these per session — never track them
-.watchman-cookie-*
-
-# Editor / OS junk
-*.swp
-.idea/
-.vscode/
-*.iml
-
-# Native build / IDE state
-android/app/release/
-android/captures/
-ios/Underdawgs.xcworkspace/xcuserdata/
-ios/Underdawgs.xcodeproj/xcuserdata/
-ios/Underdawgs.xcodeproj/project.xcworkspace/xcuserdata/
-*.hprof
+android/.gradle/
+android/.cxx/
+*.log
+.DS_Store
+.ud_sentinel.txt
