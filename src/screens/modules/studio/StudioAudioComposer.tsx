@@ -16,8 +16,13 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { router } from '@/navigation';
-import { palette as staticPalette } from '@/theme/colors';
-import { useTheme } from '@/theme/ThemeContext';
+import { palette as staticPalette, type Palette } from '@/theme/colors';
+import {
+  useTheme,
+  useThemedPalette,
+  useThemedPaletteStyles,
+} from '@/theme/ThemeContext';
+import { withOpacity } from '@/theme/colorUtils';
 import { fonts, type as T } from '@/theme/typography';
 import { ModuleHeader } from '@/components/ui/ModuleHeader';
 import { MagneticButton } from '@/components/ui/MagneticButton';
@@ -25,14 +30,13 @@ import { Chip } from '@/components/ui/Chip';
 import { Ionicons } from '@/icons';
 import { useStore } from '@/store';
 
-const SURFACE = staticPalette.ink;
-const FG = staticPalette.bone;
-const FG_DIM = 'rgba(242,239,230,0.65)';
-const FG_MUTED = 'rgba(242,239,230,0.45)';
-const CARD_BG = 'rgba(242,239,230,0.06)';
-const CARD_BORDER = 'rgba(242,239,230,0.16)';
+// Theme-invariant accents; mic icon / waveform draw on these fixed fills.
 const ACCENT = staticPalette.acid;
 const REC = staticPalette.ember;
+// Published-post DATA carries fixed dark surface/fg — a post renders on its
+// own fixed dark card elsewhere, so these stay pinned regardless of app theme.
+const POST_BG = staticPalette.ink;
+const POST_FG = staticPalette.bone;
 
 const KINDS = ['TRACK', 'CLIP', 'PODCAST'] as const;
 type AudioKind = (typeof KINDS)[number];
@@ -40,6 +44,8 @@ type AudioKind = (typeof KINDS)[number];
 export default function AudioComposer() {
   const { scheme } = useTheme();
   const inverse = scheme === 'light';
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
 
   const [kind, setKind] = useState<AudioKind>('TRACK');
   const [title, setTitle] = useState('');
@@ -88,8 +94,8 @@ export default function AudioComposer() {
       caption: title ? `${title}${notes ? `\n\n${notes}` : ''}` : notes,
       tags: [kind.toLowerCase()],
       color: ACCENT,
-      bg: SURFACE,
-      fg: FG,
+      bg: POST_BG,
+      fg: POST_FG,
     });
     toast('Audio published.', 'success');
     router.replace('/(tabs)');
@@ -101,8 +107,8 @@ export default function AudioComposer() {
       caption: title ? `${title}${notes ? `\n\n${notes}` : ''}` : notes,
       tags: [kind.toLowerCase()],
       color: ACCENT,
-      bg: SURFACE,
-      fg: FG,
+      bg: POST_BG,
+      fg: POST_FG,
     });
     toast('Draft saved.', 'success');
     router.replace('/(modules)/studio/drafts');
@@ -162,7 +168,7 @@ export default function AudioComposer() {
                   ? 'thirty second snippet'
                   : 'untitled track'
               }
-              placeholderTextColor={FG_MUTED}
+              placeholderTextColor={withOpacity(palette.ink, 0.45)}
               maxFontSizeMultiplier={1.2}
             />
           </View>
@@ -181,7 +187,7 @@ export default function AudioComposer() {
                   ? 'what this episode is about. links go here.'
                   : 'a line about the sound.'
               }
-              placeholderTextColor={FG_MUTED}
+              placeholderTextColor={withOpacity(palette.ink, 0.45)}
               maxFontSizeMultiplier={1.2}
             />
           </View>
@@ -212,16 +218,19 @@ export default function AudioComposer() {
 /* -------------------------------------------------------------------------- */
 
 function Waveform({ active }: { active: boolean }) {
+  const styles = useThemedPaletteStyles(makeStyles);
+  const palette = useThemedPalette();
   return (
     <View style={styles.wave}>
       {Array.from({ length: 28 }).map((_, i) => (
-        <WaveBar key={i} index={i} active={active} />
+        <WaveBar key={i} index={i} active={active} idleColor={withOpacity(palette.ink, 0.65)} />
       ))}
     </View>
   );
 }
 
-function WaveBar({ index, active }: { index: number; active: boolean }) {
+function WaveBar({ index, active, idleColor }: { index: number; active: boolean; idleColor: string }) {
+  const styles = useThemedPaletteStyles(makeStyles);
   const idle = 6 + ((index * 13) % 14);
   const peak = 8 + ((index * 17) % 38);
   const h = useSharedValue(idle);
@@ -251,7 +260,7 @@ function WaveBar({ index, active }: { index: number; active: boolean }) {
     <Animated.View
       style={[
         styles.waveBar,
-        { backgroundColor: active ? ACCENT : FG_DIM },
+        { backgroundColor: active ? ACCENT : idleColor },
         animStyle,
       ]}
     />
@@ -264,8 +273,8 @@ function formatMmss(total: number) {
   return `${m}:${s}`;
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: SURFACE },
+const makeStyles = (palette: Palette) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: palette.bone },
   headerPad: { paddingHorizontal: 12 },
   scroll: { paddingHorizontal: 12, paddingBottom: 140 },
 
@@ -275,9 +284,9 @@ const styles = StyleSheet.create({
     marginTop: 22,
     padding: 22,
     borderRadius: 22,
-    backgroundColor: CARD_BG,
+    backgroundColor: withOpacity(palette.ink, 0.06),
     borderWidth: 1,
-    borderColor: CARD_BORDER,
+    borderColor: withOpacity(palette.ink, 0.16),
     alignItems: 'center',
     gap: 14,
   },
@@ -295,12 +304,12 @@ const styles = StyleSheet.create({
     fontFamily: fonts.displayBold,
     fontSize: 36,
     letterSpacing: -1.2,
-    color: FG,
+    color: palette.ink,
     fontVariant: ['tabular-nums'],
   },
   elapsedSub: {
     ...T.label,
-    color: FG_MUTED,
+    color: withOpacity(palette.ink, 0.45),
     fontSize: 14,
     fontFamily: fonts.body,
   },
@@ -313,22 +322,22 @@ const styles = StyleSheet.create({
   },
   recordHint: {
     ...T.label,
-    color: FG_DIM,
+    color: withOpacity(palette.ink, 0.65),
     letterSpacing: 1.4,
   },
 
   field: { marginTop: 22, gap: 10 },
-  label: { ...T.label, color: FG, opacity: 0.65, letterSpacing: 1.6 },
+  label: { ...T.label, color: palette.ink, opacity: 0.65, letterSpacing: 1.6 },
   input: {
     borderWidth: 1,
-    borderColor: CARD_BORDER,
+    borderColor: withOpacity(palette.ink, 0.16),
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontFamily: fonts.body,
     fontSize: 16,
-    color: FG,
-    backgroundColor: CARD_BG,
+    color: palette.ink,
+    backgroundColor: withOpacity(palette.ink, 0.06),
   },
   notes: { minHeight: 140, textAlignVertical: 'top' },
 
