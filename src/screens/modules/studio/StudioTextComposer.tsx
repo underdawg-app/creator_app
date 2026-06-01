@@ -8,25 +8,30 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
-import { palette as staticPalette } from '@/theme/colors';
-import { useTheme } from '@/theme/ThemeContext';
+import { palette as staticPalette, type Palette } from '@/theme/colors';
+import {
+  useTheme,
+  useThemedPalette,
+  useThemedPaletteStyles,
+} from '@/theme/ThemeContext';
+import { withOpacity } from '@/theme/colorUtils';
 import { fonts, type as T } from '@/theme/typography';
 import { ModuleHeader } from '@/components/ui/ModuleHeader';
 import { MagneticButton } from '@/components/ui/MagneticButton';
 import { Chip } from '@/components/ui/Chip';
 import { useStore } from '@/store';
 
-const SURFACE = staticPalette.ink;
-const FG = staticPalette.bone;
-const FG_DIM = 'rgba(242,239,230,0.65)';
-const FG_MUTED = 'rgba(242,239,230,0.45)';
-const CARD_BG = 'rgba(242,239,230,0.06)';
-const CARD_BORDER = 'rgba(242,239,230,0.16)';
 const ACCENT = staticPalette.acid;
+// Published-post DATA carries fixed dark surface/fg (posts render on their own
+// fixed dark cards elsewhere), so these stay pinned regardless of app theme.
+const POST_BG = staticPalette.ink;
+const POST_FG = staticPalette.bone;
 
 export default function TextComposer() {
   const { scheme } = useTheme();
   const inverse = scheme === 'light';
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
 
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
@@ -45,8 +50,8 @@ export default function TextComposer() {
       caption: title ? `${title}\n\n${body}` : body,
       tags: [form.toLowerCase()],
       color: ACCENT,
-      bg: SURFACE,
-      fg: FG,
+      bg: POST_BG,
+      fg: POST_FG,
     });
     toast('Published.', 'success');
     router.replace('/(tabs)');
@@ -58,8 +63,8 @@ export default function TextComposer() {
       caption: title ? `${title}\n\n${body}` : body,
       tags: [form.toLowerCase()],
       color: ACCENT,
-      bg: SURFACE,
-      fg: FG,
+      bg: POST_BG,
+      fg: POST_FG,
     });
     toast('Draft saved.', 'success');
     router.replace('/(modules)/studio/drafts');
@@ -100,7 +105,7 @@ export default function TextComposer() {
                   ? 'one note, untitled'
                   : 'on the way home from the studio'
               }
-              placeholderTextColor={FG_MUTED}
+              placeholderTextColor={withOpacity(palette.ink, 0.45)}
               maxFontSizeMultiplier={1.2}
             />
           </View>
@@ -120,7 +125,7 @@ export default function TextComposer() {
                   ? 'one line at a time.\nbreak where it breathes.'
                   : 'write without waiting.'
               }
-              placeholderTextColor={FG_MUTED}
+              placeholderTextColor={withOpacity(palette.ink, 0.45)}
               maxFontSizeMultiplier={1.2}
             />
           </View>
@@ -146,8 +151,8 @@ export default function TextComposer() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: SURFACE },
+const makeStyles = (palette: Palette) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: palette.bone },
   headerPad: { paddingHorizontal: 12 },
   scroll: { paddingHorizontal: 12, paddingBottom: 140 },
 
@@ -158,19 +163,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  label: { ...T.label, color: FG, opacity: 0.65, letterSpacing: 1.6 },
-  wordCount: { ...T.micro, color: FG_MUTED },
+  label: { ...T.label, color: palette.ink, opacity: 0.65, letterSpacing: 1.6 },
+  wordCount: { ...T.micro, color: withOpacity(palette.ink, 0.45) },
 
   input: {
     borderWidth: 1,
-    borderColor: CARD_BORDER,
+    borderColor: withOpacity(palette.ink, 0.16),
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontFamily: fonts.body,
     fontSize: 16,
-    color: FG,
-    backgroundColor: CARD_BG,
+    color: palette.ink,
+    backgroundColor: withOpacity(palette.ink, 0.06),
   },
   bodyInput: {
     minHeight: 280,
