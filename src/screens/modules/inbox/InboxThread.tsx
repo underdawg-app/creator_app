@@ -12,7 +12,13 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from '@/navigation';
 import { Ionicons } from '@/icons';
-import { palette as staticPalette } from '@/theme/colors';
+import { palette as staticPalette, type Palette } from '@/theme/colors';
+import {
+  useTheme,
+  useThemedPalette,
+  useThemedPaletteStyles,
+} from '@/theme/ThemeContext';
+import { withOpacity } from '@/theme/colorUtils';
 import { fonts, type as T } from '@/theme/typography';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Tap } from '@/components/ui/Tap';
@@ -26,12 +32,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-const BG = staticPalette.ink;
-const SURFACE = staticPalette.inkSoft;
-const SURFACE_HI = staticPalette.inkMuted;
-const FG = staticPalette.bone;
-const MUTE = 'rgba(242,239,230,0.55)';
-const HAIRLINE = 'rgba(242,239,230,0.08)';
+// Theme-invariant accent — the "my message" bubble + send button stay this
+// fixed mid-tone in both schemes, so text drawn on them is pinned (see below).
 const ACID = staticPalette.acid;
 
 const REPLY_POOL: Record<
@@ -80,6 +82,10 @@ function readableOn(hex: string) {
 }
 
 export default function ThreadDetail() {
+  const palette = useThemedPalette();
+  const styles = useThemedPaletteStyles(makeStyles);
+  const { scheme } = useTheme();
+  const statusBar = scheme === 'dark' ? 'light-content' : 'dark-content';
   const { id } = useLocalSearchParams<{ id: string }>();
   const thread = useStore((s) => s.threads.find((t) => t.id === id));
   const sendMessage = useStore((s) => s.sendMessage);
@@ -127,8 +133,8 @@ export default function ThreadDetail() {
 
   if (!thread) {
     return (
-      <View style={{ flex: 1, backgroundColor: BG }}>
-        <StatusBar barStyle="light-content" />
+      <View style={{ flex: 1, backgroundColor: palette.bone }}>
+        <StatusBar barStyle={statusBar} />
         <SafeAreaView style={styles.notFoundWrap}>
           <RNText style={styles.notFoundTitle}>Thread not found</RNText>
           <RNText style={styles.notFoundBody}>
@@ -161,15 +167,15 @@ export default function ThreadDetail() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: BG }}
+      style={{ flex: 1, backgroundColor: palette.bone }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle={statusBar} />
 
       <SafeAreaView edges={['top']}>
         <View style={styles.header}>
-          <Tap onPress={() => router.back()} style={styles.iconBtn} burstColor={FG}>
-            <Ionicons name="chevron-back" size={24} color={FG} />
+          <Tap onPress={() => router.back()} style={styles.iconBtn} burstColor={palette.ink}>
+            <Ionicons name="chevron-back" size={24} color={palette.ink} />
           </Tap>
 
           <View style={[styles.avatar, { backgroundColor: thread.accent }]}>
@@ -178,7 +184,7 @@ export default function ThreadDetail() {
             </RNText>
             {thread.verified ? (
               <View style={styles.verifiedBadge}>
-                <Ionicons name="checkmark" size={9} color={BG} />
+                <Ionicons name="checkmark" size={9} color={palette.bone} />
               </View>
             ) : null}
           </View>
@@ -195,8 +201,8 @@ export default function ThreadDetail() {
             </View>
           </View>
 
-          <Tap onPress={() => {}} style={styles.iconBtn} burstColor={FG}>
-            <Ionicons name="ellipsis-horizontal" size={20} color={FG} />
+          <Tap onPress={() => {}} style={styles.iconBtn} burstColor={palette.ink}>
+            <Ionicons name="ellipsis-horizontal" size={20} color={palette.ink} />
           </Tap>
         </View>
       </SafeAreaView>
@@ -260,7 +266,7 @@ export default function ThreadDetail() {
                     styles.bubble,
                     isMe
                       ? [styles.bubbleMe, { backgroundColor: ACID }]
-                      : [styles.bubbleThem, { backgroundColor: SURFACE }],
+                      : [styles.bubbleThem, { backgroundColor: palette.boneSoft }],
                     isMe
                       ? {
                           borderBottomRightRadius: endsGroup ? 6 : 18,
@@ -275,7 +281,8 @@ export default function ThreadDetail() {
                   <RNText
                     style={[
                       styles.bubbleText,
-                      { color: isMe ? BG : FG },
+                      // "me" sits on fixed ACID -> pin dark; "them" on themed surface -> themed ink
+                      { color: isMe ? staticPalette.ink : palette.ink },
                     ]}
                     maxFontSizeMultiplier={1.2}
                   >
@@ -291,7 +298,7 @@ export default function ThreadDetail() {
         })}
 
         {thread.typing ? (
-          <TypingBubble accent={thread.accent} initial={initial} avatarFg={avatarFg} />
+          <TypingBubble accent={thread.accent} initial={initial} avatarFg={avatarFg} palette={palette} />
         ) : null}
       </ScrollView>
 
@@ -307,14 +314,14 @@ export default function ThreadDetail() {
             style={styles.composerIconBtn}
             burstColor={ACID}
           >
-            <Ionicons name="camera-outline" size={22} color={FG} />
+            <Ionicons name="camera-outline" size={22} color={palette.ink} />
           </Tap>
           <TextInput
             style={styles.input}
             value={text}
             onChangeText={setText}
             placeholder="message…"
-            placeholderTextColor={MUTE}
+            placeholderTextColor={withOpacity(palette.ink, 0.55)}
             multiline
             maxFontSizeMultiplier={1.2}
             selectionColor={ACID}
@@ -323,7 +330,7 @@ export default function ThreadDetail() {
             onPress={send}
             style={[
               styles.sendBtn,
-              { backgroundColor: text.trim() ? ACID : SURFACE_HI },
+              { backgroundColor: text.trim() ? ACID : palette.boneMuted },
             ]}
             burstColor={ACID}
             disabled={!text.trim()}
@@ -331,7 +338,8 @@ export default function ThreadDetail() {
             <Ionicons
               name="arrow-up"
               size={20}
-              color={text.trim() ? BG : MUTE}
+              // active send sits on fixed ACID -> pin dark; idle on themed surface -> themed muted ink
+              color={text.trim() ? staticPalette.ink : withOpacity(palette.ink, 0.55)}
             />
           </Tap>
         </View>
@@ -344,11 +352,14 @@ function TypingBubble({
   accent,
   initial,
   avatarFg,
+  palette,
 }: {
   accent: string;
   initial: string;
   avatarFg: string;
+  palette: Palette;
 }) {
+  const styles = useThemedPaletteStyles(makeStyles);
   return (
     <View style={[styles.bubbleRow, styles.bubbleRowThem, { marginTop: 14 }]}>
       <View style={styles.themAvatarSlot}>
@@ -364,7 +375,7 @@ function TypingBubble({
             styles.bubble,
             styles.bubbleThem,
             {
-              backgroundColor: SURFACE,
+              backgroundColor: palette.boneSoft,
               flexDirection: 'row',
               gap: 5,
               paddingVertical: 12,
@@ -374,16 +385,16 @@ function TypingBubble({
             },
           ]}
         >
-          <Dot delay={0} />
-          <Dot delay={180} />
-          <Dot delay={360} />
+          <Dot delay={0} color={palette.ink} />
+          <Dot delay={180} color={palette.ink} />
+          <Dot delay={360} color={palette.ink} />
         </View>
       </View>
     </View>
   );
 }
 
-function Dot({ delay }: { delay: number }) {
+function Dot({ delay, color }: { delay: number; color: string }) {
   const t = useSharedValue(0);
   useEffect(() => {
     const id = setTimeout(() => {
@@ -408,14 +419,14 @@ function Dot({ delay }: { delay: number }) {
   return (
     <Animated.View
       style={[
-        { width: 6, height: 6, borderRadius: 3, backgroundColor: FG },
+        { width: 6, height: 6, borderRadius: 3, backgroundColor: color },
         style,
       ]}
     />
   );
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (palette: Palette) => StyleSheet.create({
   header: {
     paddingHorizontal: 8,
     paddingVertical: 8,
@@ -423,7 +434,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
     borderBottomWidth: 1,
-    borderBottomColor: HAIRLINE,
+    borderBottomColor: withOpacity(palette.ink, 0.08),
   },
   iconBtn: {
     width: 38,
@@ -453,14 +464,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: FG,
+    backgroundColor: palette.ink,
     borderWidth: 2,
-    borderColor: BG,
+    borderColor: palette.bone,
   },
   name: {
     fontFamily: fonts.displayBold,
     fontSize: 16,
-    color: FG,
+    color: palette.ink,
     letterSpacing: -0.3,
   },
   statusRow: {
@@ -494,11 +505,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 999,
-    backgroundColor: SURFACE,
+    backgroundColor: palette.boneSoft,
   },
   dateChipText: {
     ...T.small,
-    color: MUTE,
+    color: withOpacity(palette.ink, 0.55),
     fontSize: 11,
     letterSpacing: 0.6,
   },
@@ -541,7 +552,7 @@ const styles = StyleSheet.create({
   },
   ts: {
     ...T.small,
-    color: MUTE,
+    color: withOpacity(palette.ink, 0.55),
     fontSize: 11,
     marginTop: 4,
     paddingHorizontal: 4,
@@ -552,8 +563,8 @@ const styles = StyleSheet.create({
     paddingTop: 6,
     paddingBottom: 0,
     borderTopWidth: 1,
-    borderTopColor: HAIRLINE,
-    backgroundColor: BG,
+    borderTopColor: withOpacity(palette.ink, 0.08),
+    backgroundColor: palette.bone,
   },
   composer: {
     flexDirection: 'row',
@@ -564,7 +575,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: SURFACE,
+    backgroundColor: palette.boneSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -576,8 +587,8 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     fontFamily: fonts.body,
     fontSize: 15,
-    color: FG,
-    backgroundColor: SURFACE,
+    color: palette.ink,
+    backgroundColor: palette.boneSoft,
     borderRadius: 22,
   },
   sendBtn: {
@@ -596,11 +607,11 @@ const styles = StyleSheet.create({
   notFoundTitle: {
     fontFamily: fonts.displayBold,
     fontSize: 22,
-    color: FG,
+    color: palette.ink,
     letterSpacing: -0.6,
   },
   notFoundBody: {
     ...T.body,
-    color: MUTE,
+    color: withOpacity(palette.ink, 0.55),
   },
 });
