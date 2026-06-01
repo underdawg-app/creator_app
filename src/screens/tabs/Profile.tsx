@@ -124,13 +124,22 @@ export default function Profile() {
                 </RNText>
                 <Ionicons name="chevron-forward" size={12} color={palette.ink} />
               </Tap>
-              <Tap
-                onPress={() => router.push('/(modules)/settings')}
-                style={styles.iconBtn}
-                burstColor={palette.ink}
-              >
-                <Ionicons name="settings-outline" size={16} color={palette.ink} />
-              </Tap>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Tap
+                  onPress={() => router.push('/(modules)/saved')}
+                  style={styles.iconBtn}
+                  burstColor={palette.ink}
+                >
+                  <Ionicons name="bookmark-outline" size={16} color={palette.ink} />
+                </Tap>
+                <Tap
+                  onPress={() => router.push('/(modules)/settings')}
+                  style={styles.iconBtn}
+                  burstColor={palette.ink}
+                >
+                  <Ionicons name="settings-outline" size={16} color={palette.ink} />
+                </Tap>
+              </View>
             </View>
 
             {/* Avatar (centered top) + Name block (centered below) */}

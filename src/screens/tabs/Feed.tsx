@@ -31,6 +31,7 @@ import { Tap } from '@/components/ui/Tap';
 import { useStore } from '@/store';
 import { BadgePill } from '@/components/ui/BadgePill';
 import { Chip } from '@/components/ui/Chip';
+import { profileHref } from '@/data/people';
 
 const { width } = Dimensions.get('window');
 
@@ -331,6 +332,24 @@ function PostCardImpl({ post }: { post: Post }) {
 
   const likes = post.likes + (liked ? 1 : 0);
 
+  const openPost = useCallback(() => router.push(`/(modules)/profile/post/${post.id}` as any), [post.id]);
+  const openProfile = useCallback(() => router.push(profileHref(post.handle) as any), [post.handle]);
+
+  // Double-tap the thumbnail to like; single tap opens the post.
+  const lastTap = useRef(0);
+  const singleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onThumbTap = useCallback(() => {
+    const now = Date.now();
+    if (now - lastTap.current < 240) {
+      if (singleTapTimer.current) { clearTimeout(singleTapTimer.current); singleTapTimer.current = null; }
+      lastTap.current = 0;
+      if (!liked) toggleLike(post.id);
+    } else {
+      lastTap.current = now;
+      singleTapTimer.current = setTimeout(() => { singleTapTimer.current = null; openPost(); }, 240);
+    }
+  }, [liked, post.id, toggleLike, openPost]);
+
   return (
     <View style={styles.ticketWrap}>
       {post.rising ? (
@@ -350,6 +369,7 @@ function PostCardImpl({ post }: { post: Post }) {
               numberOfLines={2}
               adjustsFontSizeToFit
               minimumFontScale={0.7}
+              onPress={openProfile}
             >
               {post.creator}
             </RNText>
@@ -377,7 +397,7 @@ function PostCardImpl({ post }: { post: Post }) {
             </View>
           </View>
 
-          <View style={styles.thumbWrap}>
+          <Tap style={styles.thumbWrap} onPress={onThumbTap} burstColor={post.color}>
             {post.image ? (
               <Image
                 source={{ uri: post.image }}
@@ -393,14 +413,14 @@ function PostCardImpl({ post }: { post: Post }) {
                 <Ionicons name="play" size={16} color={palette.ink} />
               </View>
             ) : null}
-          </View>
+          </Tap>
         </View>
 
         <View style={styles.perforation} />
 
         <View style={styles.ticketFooter}>
           <Tap
-            onPress={() => toast('Post detail opening…', 'default')}
+            onPress={openPost}
             style={styles.detailsBtn}
             burstColor={post.color}
           >
@@ -422,7 +442,7 @@ function PostCardImpl({ post }: { post: Post }) {
               <RNText style={styles.engagePillText}>{compact(likes)}</RNText>
             </Tap>
             <Tap
-              onPress={() => toast('Comments opening…', 'default')}
+              onPress={openPost}
               style={styles.engagePill}
               burstColor={post.color}
             >
