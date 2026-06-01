@@ -43,6 +43,7 @@ import { Tap } from '@/components/ui/Tap';
 import { useStore } from '@/store';
 import { BadgePill } from '@/components/ui/BadgePill';
 import { JobRow } from '@/components/jobs/JobRow';
+import { profileHref } from '@/data/people';
 
 const { width } = Dimensions.get('window');
 
@@ -541,10 +542,35 @@ function PostCardImpl({ post }: { post: Post }) {
 
   const likes = post.likes + (liked ? 1 : 0);
 
+  const openPost = useCallback(() => router.push(`/(modules)/profile/post/${post.id}` as any), [post.id]);
+  const openProfile = useCallback(() => router.push(profileHref(post.handle) as any), [post.handle]);
+
+  // Single tap opens the post; double tap likes it. We debounce the single tap
+  // by ~240ms so a second tap can cancel it and register as a like instead.
+  const lastTap = useRef(0);
+  const singleTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onMediaTap = useCallback(() => {
+    const now = Date.now();
+    if (now - lastTap.current < 240) {
+      if (singleTapTimer.current) {
+        clearTimeout(singleTapTimer.current);
+        singleTapTimer.current = null;
+      }
+      lastTap.current = 0;
+      if (!liked) toggleLike(post.id); // double-tap only ever likes, never unlikes
+    } else {
+      lastTap.current = now;
+      singleTapTimer.current = setTimeout(() => {
+        singleTapTimer.current = null;
+        openPost();
+      }, 240);
+    }
+  }, [liked, post.id, toggleLike, openPost]);
+
   return (
     <View style={styles.post}>
       <View style={styles.postHead}>
-        <View style={[styles.avatar, { backgroundColor: post.color }]}>
+        <Pressable style={[styles.avatar, { backgroundColor: post.color }]} onPress={openProfile}>
           {post.avatar ? (
             <Image
               source={{ uri: post.avatar }}
@@ -558,7 +584,7 @@ function PostCardImpl({ post }: { post: Post }) {
               {post.creator.slice(0, 1)}
             </RNText>
           )}
-        </View>
+        </Pressable>
         <View style={{ flex: 1, gap: 2 }}>
           <View style={styles.nameRow}>
             <RNText
@@ -567,6 +593,7 @@ function PostCardImpl({ post }: { post: Post }) {
               adjustsFontSizeToFit
               minimumFontScale={0.85}
               maxFontSizeMultiplier={1.15}
+              onPress={openProfile}
             >
               {post.creator}
             </RNText>
@@ -599,7 +626,7 @@ function PostCardImpl({ post }: { post: Post }) {
         </Tap>
       </View>
 
-      <Tap onPress={() => toast('Post detail opening…', 'default')} burstColor={post.color}>
+      <Tap onPress={onMediaTap} burstColor={post.color}>
         <View style={[styles.media, { backgroundColor: post.bg }]}>
           {post.image ? (
             <Image
@@ -645,7 +672,7 @@ function PostCardImpl({ post }: { post: Post }) {
           </RNText>
         </Tap>
         <Tap
-          onPress={() => toast('Comments opening…', 'default')}
+          onPress={openPost}
           burstColor={post.color}
           style={styles.engageBtn}
         >

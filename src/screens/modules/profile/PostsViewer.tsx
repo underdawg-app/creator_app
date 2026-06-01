@@ -1,8 +1,9 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   View,
   StyleSheet,
   Text as RNText,
+  TextInput,
   Dimensions,
   Platform,
   FlatList,
@@ -135,6 +136,27 @@ function PostCard({ item }: { item: UserFeedItem }) {
   const toast = useStore((s) => s.toast);
   const stats = useMemo(() => deriveStats(item), [item]);
 
+  const liked = useStore((s) => !!s.likes[item.id]);
+  const saved = useStore((s) => !!s.saves[item.id]);
+  const toggleLike = useStore((s) => s.toggleLike);
+  const toggleSave = useStore((s) => s.toggleSave);
+  const userComments = useStore((s) => s.comments[item.id]);
+  const addComment = useStore((s) => s.addComment);
+  const [draft, setDraft] = useState('');
+
+  // Seed comments (static) + any the user has added this session.
+  const allComments = [...sampleComments, ...(userComments ?? [])];
+  const likeCount = item.likes + (liked ? 1 : 0);
+  const commentCount = item.comments + (userComments?.length ?? 0);
+
+  const submitComment = () => {
+    const body = draft.trim();
+    if (!body) return;
+    addComment(item.id, body);
+    setDraft('');
+    toast('Comment posted.', 'success');
+  };
+
   return (
     <View style={styles.card}>
       {/* Author row */}
@@ -192,12 +214,13 @@ function PostCard({ item }: { item: UserFeedItem }) {
       <View style={styles.actionRow}>
         <View style={styles.actionLeft}>
           <ActionBtn
-            icon="heart-outline"
-            onPress={() => toast('Liked.', 'success')}
+            icon={liked ? 'heart' : 'heart-outline'}
+            color={liked ? palette.ember : palette.ink}
+            onPress={() => toggleLike(item.id)}
           />
           <ActionBtn
             icon="chatbubble-outline"
-            onPress={() => toast('Comments opened.', 'default')}
+            onPress={() => toast('Add a comment below.', 'default')}
           />
           <ActionBtn
             icon="paper-plane-outline"
@@ -205,15 +228,16 @@ function PostCard({ item }: { item: UserFeedItem }) {
           />
         </View>
         <ActionBtn
-          icon="bookmark-outline"
-          onPress={() => toast('Saved.', 'success')}
+          icon={saved ? 'bookmark' : 'bookmark-outline'}
+          color={saved ? palette.acid : palette.ink}
+          onPress={() => toggleSave(item.id)}
         />
       </View>
 
       {/* Likes */}
       <View style={styles.likeBlock}>
         <RNText style={styles.likeCount} maxFontSizeMultiplier={1.1}>
-          {compact(item.likes)} likes
+          {compact(likeCount)} likes
         </RNText>
       </View>
 
@@ -225,28 +249,46 @@ function PostCard({ item }: { item: UserFeedItem }) {
         </RNText>
       </View>
 
-      {/* Comments preview */}
+      {/* Comments */}
       <View style={styles.commentBlock}>
-        <Tap
-          onPress={() => {}}
-          style={styles.commentMore}
-          burstColor={palette.acid}
-        >
+        <View style={styles.commentMore}>
           <RNText style={styles.commentMoreText} maxFontSizeMultiplier={1.1}>
-            View all {item.comments} comments
+            {commentCount} comments
           </RNText>
-        </Tap>
-        {sampleComments.map((c) => (
+        </View>
+        {allComments.map((c) => (
           <RNText
             key={c.id}
             style={styles.commentLine}
-            numberOfLines={1}
+            numberOfLines={2}
             maxFontSizeMultiplier={1.15}
           >
             <RNText style={styles.commentHandle}>{c.handle} </RNText>
             {c.body}
           </RNText>
         ))}
+
+        {/* Composer */}
+        <View style={styles.composer}>
+          <TextInput
+            style={styles.composerInput}
+            value={draft}
+            onChangeText={setDraft}
+            placeholder="Add a comment…"
+            placeholderTextColor={palette.mute}
+            maxFontSizeMultiplier={1.2}
+            onSubmitEditing={submitComment}
+            returnKeyType="send"
+          />
+          <Tap
+            onPress={submitComment}
+            disabled={!draft.trim()}
+            style={[styles.composerSend, { opacity: draft.trim() ? 1 : 0.4 }]}
+            burstColor={palette.acid}
+          >
+            <RNText style={styles.composerSendText}>POST</RNText>
+          </Tap>
+        </View>
       </View>
 
       {/* Analytics row */}
@@ -303,15 +345,17 @@ function PostCard({ item }: { item: UserFeedItem }) {
 function ActionBtn({
   icon,
   onPress,
+  color,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
+  color?: string;
 }) {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
   return (
     <Tap onPress={onPress} style={styles.actionBtn} burstColor={palette.acid}>
-      <Ionicons name={icon} size={22} color={palette.ink} />
+      <Ionicons name={icon} size={22} color={color ?? palette.ink} />
     </Tap>
   );
 }
@@ -511,6 +555,39 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     opacity: 0.85,
   },
   commentHandle: { fontFamily: fonts.bodyBold, opacity: 1 },
+
+  composer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 10,
+  },
+  composerInput: {
+    flex: 1,
+    height: 42,
+    borderRadius: 21,
+    paddingHorizontal: 16,
+    fontFamily: fonts.body,
+    fontSize: 14,
+    color: palette.ink,
+    backgroundColor: palette.boneSoft,
+    borderWidth: 1,
+    borderColor: palette.line,
+  },
+  composerSend: {
+    height: 42,
+    paddingHorizontal: 16,
+    borderRadius: 21,
+    backgroundColor: palette.ink,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  composerSendText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 12,
+    letterSpacing: 1.6,
+    color: palette.bone,
+  },
 
   /* ---------- Analytics ---------- */
   analyticsCard: {
