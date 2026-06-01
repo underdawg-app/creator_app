@@ -80,6 +80,14 @@ export default function PortfolioIndex() {
   const avatar = profile.avatar || profileMock.avatar;
   const handle = profile.handle || profileMock.handle;
   const name = profile.name || profileMock.name;
+  const availability = profile.availability ?? 'AVAILABLE';
+  const showRates = profile.showRates ?? true;
+  const avail =
+    availability === 'BOOKED'
+      ? { text: 'BOOKED OUT', color: palette.ember }
+      : availability === 'SELECTIVE'
+        ? { text: 'SELECTIVELY OPEN', color: palette.blush }
+        : { text: 'AVAILABLE FOR WORK', color: palette.electric };
 
   return (
     <ScreenFrame
@@ -106,8 +114,8 @@ export default function PortfolioIndex() {
           </View>
           <View style={styles.heroRight}>
             <View style={styles.availPill}>
-              <View style={[styles.availDot, { backgroundColor: palette.electric }]} />
-              <RNText style={styles.availText}>AVAILABLE FOR WORK</RNText>
+              <View style={[styles.availDot, { backgroundColor: avail.color }]} />
+              <RNText style={styles.availText}>{avail.text}</RNText>
             </View>
             <RNText style={styles.heroName} numberOfLines={2} adjustsFontSizeToFit minimumFontScale={0.6}>
               {name}
@@ -118,6 +126,11 @@ export default function PortfolioIndex() {
           </View>
         </View>
 
+        {profile.tagline ? (
+          <RNText style={styles.tagline} numberOfLines={1} maxFontSizeMultiplier={1.2}>
+            “{profile.tagline}”
+          </RNText>
+        ) : null}
         <RNText style={styles.bio} numberOfLines={3} maxFontSizeMultiplier={1.2}>
           {profile.bio || 'For the ones still climbing. Visual work, on bone and blue.'}
         </RNText>
@@ -281,6 +294,7 @@ export default function PortfolioIndex() {
       </Section>
 
       {/* ===== Rates ===== */}
+      {showRates ? (
       <Section
         eyebrow="RATES · FROM"
         title="the price tag."
@@ -301,6 +315,7 @@ export default function PortfolioIndex() {
           ))}
         </View>
       </Section>
+      ) : null}
 
       {/* ===== Past clients ===== */}
       <Section eyebrow="WORKED WITH" title="past clients.">
@@ -404,6 +419,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   heroHandle: { ...T.small, color: palette.mute },
 
+  tagline: { fontFamily: fonts.editorialItalic, fontSize: 17, lineHeight: 22, color: palette.ink },
   bio: { ...T.body, color: palette.ink, opacity: 0.85, lineHeight: 21 },
 
   statStrip: {

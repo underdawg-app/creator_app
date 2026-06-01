@@ -41,6 +41,10 @@ type Profile = {
   reputation: number;
   uid: string | null;
   phone: string | null;
+  // Portfolio-page presentation (edited on PortfolioEdit, not ProfileEdit):
+  availability: 'AVAILABLE' | 'SELECTIVE' | 'BOOKED';
+  tagline: string;
+  showRates: boolean;
 };
 
 type ContentPost = {
@@ -507,6 +511,9 @@ const initialProfile: Profile = {
   reputation: profileMock.stats.reputation,
   uid: null,
   phone: null,
+  availability: 'AVAILABLE',
+  tagline: 'For the ones still climbing.',
+  showRates: true,
 };
 
 const initialLikes: Record<string, boolean> = {};
