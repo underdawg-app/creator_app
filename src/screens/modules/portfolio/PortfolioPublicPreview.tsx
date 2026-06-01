@@ -446,7 +446,7 @@ export default function PublicPreview() {
                   <Ionicons
                     name={platformIcon[p.name] ?? 'globe-outline'}
                     size={16}
-                    color={staticPalette.ink}
+                    color={p.connected ? staticPalette.ink : palette.ink}
                   />
                 </View>
                 <View style={{ flex: 1 }}>

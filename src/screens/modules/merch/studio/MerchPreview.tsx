@@ -29,13 +29,10 @@ export default function MerchPreview() {
   const url = storeUrlOf(b.handle);
 
   return (
-    <View style={styles.root}>
-      {/* The real storefront fills everything and scrolls internally. */}
-      <StorefrontPreview mode="full" />
-
-      {/* Thin translucent top bar floating over the storefront. */}
-      <SafeAreaView edges={['top']} style={styles.barSafe} pointerEvents="box-none">
-        <View style={[styles.bar, { backgroundColor: theme.bg + 'EE', borderColor: theme.border }]}>
+    <View style={[styles.root, { backgroundColor: theme.bg }]}>
+      {/* Top bar in normal flow — the storefront renders BELOW it (not behind). */}
+      <SafeAreaView edges={['top']} style={[styles.barSafe, { backgroundColor: theme.bg }]}>
+        <View style={[styles.bar, { borderColor: theme.border }]}>
           <Pressable onPress={() => router.back()} hitSlop={10} style={styles.iconBtn}>
             <Ionicons name="close" size={20} color={theme.text} />
           </Pressable>
@@ -53,6 +50,11 @@ export default function MerchPreview() {
           </Pressable>
         </View>
       </SafeAreaView>
+
+      {/* The real storefront fills the rest and scrolls internally. */}
+      <View style={{ flex: 1 }}>
+        <StorefrontPreview mode="full" />
+      </View>
     </View>
   );
 }
@@ -60,12 +62,7 @@ export default function MerchPreview() {
 const makeStyles = (palette: typeof staticPalette) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: palette.ink },
-    barSafe: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-    },
+    barSafe: {},
     bar: {
       flexDirection: 'row',
       alignItems: 'center',

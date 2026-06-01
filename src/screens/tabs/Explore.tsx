@@ -18,7 +18,7 @@ import {
 // Height (in px) of the SearchBar + TabBar block that auto-hides on
 // scroll-down and re-shows on scroll-up. Plain RN Animated with
 // useNativeDriver:false — Android-safe.
-const SCROLLAWAY_HEIGHT = 96;
+const SCROLLAWAY_HEIGHT = 104;
 const HIDE_THRESHOLD = 12;
 
 const HEADER_LOGO = require('@/objects/brand-wordmark.png');
@@ -880,7 +880,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   searchWrap: {
     marginHorizontal: 16,
     marginTop: 8,
-    marginBottom: 4,
+    marginBottom: 0,
     paddingHorizontal: 14,
     height: 44,
     borderRadius: 22,
@@ -903,7 +903,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     paddingHorizontal: 16,
-    paddingTop: 4,
+    paddingTop: 10,
     paddingBottom: 10,
     gap: 6,
     alignItems: 'center',
@@ -1107,7 +1107,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   engageIconBtn: { padding: 4 },
   engageCount: {
     ...T.labelLarge,
-    color: staticPalette.ink,
+    color: palette.ink,
   },
 
   /* ─── Widgets ── */

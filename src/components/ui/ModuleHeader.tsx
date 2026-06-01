@@ -71,7 +71,7 @@ export function ModuleHeader({
         ) : null}
       </View>
 
-      <View style={styles.rightSlot}>{right ?? <View style={styles.back} />}</View>
+      <View style={styles.rightSlot}>{right ?? <View style={styles.spacer} />}</View>
     </View>
   );
 }
@@ -101,4 +101,5 @@ const styles = StyleSheet.create({
     maxWidth: 240,
   },
   rightSlot: { minWidth: 38, height: 38, alignItems: 'flex-end', justifyContent: 'center' },
+  spacer: { width: 38, height: 38 },
 });

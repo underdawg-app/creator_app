@@ -51,10 +51,10 @@ const LOGO_OPTIONS = [
   'https://images.unsplash.com/photo-1614851099175-e5b30eb6f696?w=200&q=80&auto=format&fit=crop',
 ];
 
-const COLOR_BG_OPTIONS = ['#0A0A0A', '#F2EFE6', '#FCD34D', '#2E5BFF', '#FF6BB5', '#FF5A1F'];
+const COLOR_BG_OPTIONS = ['#0A0A0A', '#F2EFE6', '#9CA3AF', '#2E5BFF', '#FF6BB5', '#FF5A1F'];
 
 const ACCENTS: { key: StoreAccentKey; label: string; hex: string }[] = [
-  { key: 'acid', label: 'ACID', hex: '#FCD34D' },
+  { key: 'acid', label: 'GREY', hex: '#9CA3AF' },
   { key: 'electric', label: 'ELECTRIC', hex: '#2E5BFF' },
   { key: 'blush', label: 'BLUSH', hex: '#FF6BB5' },
   { key: 'ember', label: 'EMBER', hex: '#FF5A1F' },
@@ -342,7 +342,7 @@ export default function MerchStudio() {
                 style={[
                   styles.modeChip,
                   active
-                    ? { backgroundColor: staticPalette.ink, borderColor: staticPalette.ink }
+                    ? { backgroundColor: palette.ink, borderColor: palette.ink }
                     : { borderColor: palette.line },
                 ]}
               >
@@ -351,12 +351,12 @@ export default function MerchStudio() {
                     m === 'image' ? 'image-outline' : m === 'video' ? 'videocam-outline' : 'color-fill-outline'
                   }
                   size={13}
-                  color={active ? staticPalette.bone : palette.ink}
+                  color={active ? palette.bone : palette.ink}
                 />
                 <RNText
                   style={[
                     styles.modeLabel,
-                    { color: active ? staticPalette.bone : palette.ink },
+                    { color: active ? palette.bone : palette.ink },
                   ]}
                 >
                   {m.toUpperCase()}
@@ -459,7 +459,7 @@ export default function MerchStudio() {
                   styles.fontTile,
                   {
                     borderColor: active ? accent : palette.line,
-                    backgroundColor: active ? staticPalette.ink : palette.paper,
+                    backgroundColor: active ? palette.ink : palette.paper,
                   },
                 ]}
               >
@@ -468,7 +468,7 @@ export default function MerchStudio() {
                     styles.fontSample,
                     {
                       fontFamily: h.family,
-                      color: active ? staticPalette.bone : palette.ink,
+                      color: active ? palette.bone : palette.ink,
                     },
                   ]}
                 >
@@ -503,7 +503,7 @@ export default function MerchStudio() {
                   styles.fontTile,
                   {
                     borderColor: active ? accent : palette.line,
-                    backgroundColor: active ? staticPalette.ink : palette.paper,
+                    backgroundColor: active ? palette.ink : palette.paper,
                   },
                 ]}
               >
@@ -513,7 +513,7 @@ export default function MerchStudio() {
                     {
                       fontFamily: b.family,
                       fontSize: 30,
-                      color: active ? staticPalette.bone : palette.ink,
+                      color: active ? palette.bone : palette.ink,
                     },
                   ]}
                 >
@@ -579,11 +579,11 @@ export default function MerchStudio() {
               styles.layoutCard,
               {
                 borderColor: active ? accent : palette.line,
-                backgroundColor: active ? staticPalette.ink : palette.paper,
+                backgroundColor: active ? palette.ink : palette.paper,
               },
             ]}
           >
-            <View style={[styles.layoutDiagram, { backgroundColor: active ? '#1a1a1a' : palette.bg }]}>
+            <View style={[styles.layoutDiagram, { backgroundColor: active ? '#1a1a1a' : palette.bone }]}>
               {l.key === 'grid' ? (
                 <View style={styles.diagramGrid}>
                   <View style={[styles.diagramTile, { backgroundColor: accent }]} />
@@ -614,7 +614,7 @@ export default function MerchStudio() {
               <RNText
                 style={[
                   styles.layoutLabel,
-                  { color: active ? staticPalette.bone : palette.ink },
+                  { color: active ? palette.bone : palette.ink },
                 ]}
               >
                 {l.label}
@@ -622,7 +622,7 @@ export default function MerchStudio() {
               <RNText
                 style={[
                   styles.layoutDesc,
-                  { color: active ? staticPalette.bone : palette.ink, opacity: 0.7 },
+                  { color: active ? palette.bone : palette.ink, opacity: 0.7 },
                 ]}
                 numberOfLines={2}
               >
@@ -851,9 +851,9 @@ export default function MerchStudio() {
               scale={1}
               onPress={addNewCategory}
               burstColor={accent}
-              style={[styles.catAddBtn, { backgroundColor: staticPalette.ink }]}
+              style={[styles.catAddBtn, { backgroundColor: palette.ink }]}
             >
-              <Ionicons name="add" size={20} color={accent} />
+              <Ionicons name="add" size={20} color={palette.bone} />
             </Tap>
           </View>
         </Field>
@@ -1318,11 +1318,11 @@ export default function MerchStudio() {
                       burstColor={accent}
                       style={[
                         styles.faqAdd,
-                        { backgroundColor: staticPalette.ink, borderColor: staticPalette.ink },
+                        { backgroundColor: palette.ink, borderColor: palette.ink },
                       ]}
                     >
-                      <Ionicons name="add" size={14} color={accent} />
-                      <RNText style={[styles.faqAddLabel, { color: accent }]}>ADD Q & A</RNText>
+                      <Ionicons name="add" size={14} color={palette.bone} />
+                      <RNText style={[styles.faqAddLabel, { color: palette.bone }]}>ADD Q & A</RNText>
                     </Tap>
                   </View>
                 </View>
@@ -1732,14 +1732,14 @@ export default function MerchStudio() {
                 style={[
                   styles.tabPill,
                   active
-                    ? { backgroundColor: staticPalette.ink, borderColor: staticPalette.ink }
+                    ? { backgroundColor: palette.ink, borderColor: palette.ink }
                     : { borderColor: palette.line },
                 ]}
               >
                 <RNText
                   style={[
                     styles.tabLabel,
-                    { color: active ? staticPalette.bone : palette.ink },
+                    { color: active ? palette.bone : palette.ink },
                   ]}
                   numberOfLines={1}
                 >
@@ -1796,7 +1796,7 @@ export default function MerchStudio() {
       <View
         style={[
           styles.publishBar,
-          { backgroundColor: palette.bg, borderTopColor: palette.line },
+          { backgroundColor: palette.bone, borderTopColor: palette.line },
         ]}
       >
         <View style={{ flex: 1 }}>
@@ -1827,6 +1827,7 @@ export default function MerchStudio() {
  * ======================================================================= */
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  const palette = useThemedPalette();
   return (
     <View>
       <RNText
@@ -1835,7 +1836,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
           fontSize: 10,
           letterSpacing: 1.8,
           textTransform: 'uppercase',
-          color: staticPalette.ink,
+          color: palette.ink,
           opacity: 0.55,
           marginBottom: 10,
         }}

@@ -280,7 +280,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingHorizontal: 8,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#FCD34D',
+    backgroundColor: '#9CA3AF',
     alignItems: 'center',
     justifyContent: 'center',
   },

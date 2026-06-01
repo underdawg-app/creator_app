@@ -18,7 +18,7 @@ type CatOption = { key: string; name: string; baseCost: number; custom?: boolean
 
 const STEPS = ['TYPES', 'DESIGN', 'PRICING', 'PUBLISH'];
 const COLOR_PICKS = [
-  { c: '#FCD34D', bg: '#0A0A0A', fg: '#F2EFE6' },
+  { c: '#9CA3AF', bg: '#0A0A0A', fg: '#F2EFE6' },
   { c: '#2E5BFF', bg: '#F2EFE6', fg: '#0A0A0A' },
   { c: '#FF6BB5', bg: '#0A0A0A', fg: '#F2EFE6' },
   { c: '#FF5A1F', bg: '#F2EFE6', fg: '#0A0A0A' },

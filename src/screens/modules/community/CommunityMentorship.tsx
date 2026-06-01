@@ -84,7 +84,7 @@ export default function CommunityMentorship() {
           <Ionicons
             name={isMentor ? 'checkmark-circle' : 'sparkles-outline'}
             size={18}
-            color={isMentor ? palette.ink : palette.ink}
+            color={isMentor ? staticPalette.ink : palette.ink}
           />
         </View>
         <View style={{ flex: 1 }}>
@@ -142,7 +142,7 @@ export default function CommunityMentorship() {
                   <RNText
                     style={[
                       styles.availLabel,
-                      { color: m.avail === 'OPEN' ? palette.ink : palette.bone },
+                      { color: m.avail === 'OPEN' ? staticPalette.ink : staticPalette.bone },
                     ]}
                     maxFontSizeMultiplier={1.1}
                   >

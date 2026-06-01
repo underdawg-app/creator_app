@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
-import { fonts } from '@/theme/typography';
+import { fonts, type as T } from '@/theme/typography';
 import { Ionicons } from '@/icons';
 import { router } from '@/navigation';
 import { useStore } from '@/store';
@@ -25,6 +25,7 @@ import {
   StudioHeader,
   StudioFooter,
   DeviceFrame,
+  useAutoHideFooter,
 } from '@/screens/modules/merch/studio/_chrome';
 import {
   getTheme,
@@ -55,6 +56,8 @@ export default function MerchStudioReview() {
   const publishBuilder = useStore((s) => s.publishBuilder);
   const resetBuilder = useStore((s) => s.resetBuilder);
   const confetti = useStore((s) => s.confetti);
+
+  const { onScroll, footerStyle } = useAutoHideFooter();
 
   const [confirmReset, setConfirmReset] = useState(false);
 
@@ -147,7 +150,9 @@ export default function MerchStudioReview() {
   const onStartOver = () => {
     setConfirmReset(false);
     resetBuilder();
-    router.back();
+    // Jump back to the merch welcome (first) screen and drop the wizard from
+    // the stack, instead of stepping back one screen into the builder.
+    router.navigate('/(modules)/merch');
   };
 
   return (
@@ -155,10 +160,15 @@ export default function MerchStudioReview() {
       <StudioHeader title="YOUR STORE" />
 
       <ScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.scroll, { paddingBottom: 130 }]}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       >
-        <RNText style={styles.kicker}>YOUR STORE</RNText>
+        <View style={styles.kickerRow}>
+          <View style={styles.dot} />
+          <RNText style={styles.kicker}>YOUR STORE</RNText>
+        </View>
         <RNText style={styles.title}>ready to ship.</RNText>
 
         {/* Large tappable live preview → full storefront */}
@@ -178,7 +188,10 @@ export default function MerchStudioReview() {
         </Pressable>
 
         {/* Quick-edit cards */}
-        <RNText style={[styles.kicker, styles.sectionGap]}>QUICK EDIT</RNText>
+        <View style={[styles.kickerRow, styles.sectionGap]}>
+          <View style={styles.dot} />
+          <RNText style={styles.kicker}>QUICK EDIT</RNText>
+        </View>
         <View style={styles.editGrid}>
           {editCards.map((c) => (
             <Pressable
@@ -201,7 +214,10 @@ export default function MerchStudioReview() {
         </View>
 
         {/* Manage existing screens */}
-        <RNText style={[styles.kicker, styles.sectionGap]}>MANAGE</RNText>
+        <View style={[styles.kickerRow, styles.sectionGap]}>
+          <View style={styles.dot} />
+          <RNText style={styles.kicker}>MANAGE</RNText>
+        </View>
         <View style={styles.manageGroup}>
           {manageRows.map((r, i) => (
             <Pressable
@@ -234,6 +250,7 @@ export default function MerchStudioReview() {
       <StudioFooter
         label={b.published ? 'Re-publish' : 'Publish store'}
         onPress={onPublish}
+        animStyle={footerStyle}
       />
 
       <Sheet
@@ -263,21 +280,16 @@ export default function MerchStudioReview() {
 const makeStyles = (palette: typeof staticPalette) =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: palette.bone },
-    scroll: { paddingHorizontal: 20, paddingBottom: 28 },
+    scroll: { paddingHorizontal: 16, paddingBottom: 28 },
 
-    kicker: {
-      fontFamily: fonts.bodyBold,
-      fontSize: 11,
-      lineHeight: 14,
-      letterSpacing: 2.2,
-      textTransform: 'uppercase',
-      color: palette.mute,
-    },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: palette.acid },
+    kickerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    kicker: { ...T.labelLarge, color: palette.ink, opacity: 0.7 },
     sectionGap: { marginTop: 30 },
     title: {
       fontFamily: fonts.displayBold,
-      fontSize: 40,
-      lineHeight: 40,
+      fontSize: 44,
+      lineHeight: 44,
       letterSpacing: -1.8,
       color: palette.ink,
       marginTop: 4,
@@ -306,7 +318,7 @@ const makeStyles = (palette: typeof staticPalette) =>
     editCard: {
       width: '48%',
       minHeight: 96,
-      borderRadius: 16,
+      borderRadius: 18,
       borderWidth: 1,
       borderColor: palette.line,
       backgroundColor: palette.paper,
@@ -342,7 +354,7 @@ const makeStyles = (palette: typeof staticPalette) =>
 
     manageGroup: {
       marginTop: 14,
-      borderRadius: 16,
+      borderRadius: 18,
       borderWidth: 1,
       borderColor: palette.line,
       backgroundColor: palette.paper,

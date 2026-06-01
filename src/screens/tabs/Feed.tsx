@@ -888,7 +888,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  widgetKicker: { ...T.label, color: staticPalette.ink, opacity: 0.65 },
+  widgetKicker: { ...T.label, color: palette.ink, opacity: 0.65 },
   widgetAction: { ...T.label, color: palette.electric },
   widgetRow: {
     flexDirection: 'row',
@@ -908,9 +908,9 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   },
   widgetName: {
     ...T.body,
-    color: staticPalette.ink,
+    color: palette.ink,
   },
-  widgetMeta: { ...T.micro, color: staticPalette.ink, opacity: 0.55, marginTop: 2 },
+  widgetMeta: { ...T.micro, color: palette.ink, opacity: 0.55, marginTop: 2 },
   widgetFollow: {
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -985,14 +985,14 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     zIndex: 5,
     paddingHorizontal: 12,
     paddingVertical: 5,
-    backgroundColor: '#FCD34D',
+    backgroundColor: '#9CA3AF',
     borderWidth: 1.5,
     borderColor: palette.ink,
     transform: [{ rotate: '4deg' }],
   },
   tapeText: {
     ...T.label,
-    color: palette.ink,
+    color: staticPalette.bone,
   },
   ticketCard: {
     backgroundColor: palette.paper,

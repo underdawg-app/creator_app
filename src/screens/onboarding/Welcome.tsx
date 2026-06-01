@@ -43,6 +43,8 @@ const { width, height } = Dimensions.get('window');
 
 const HERO_HEIGHT = Math.min(height * 0.52, 480);
 const OBJ_SIZE = Math.min(width * 0.74, 320);
+// Slide 1 (obj-1) renders noticeably larger than the rest.
+const OBJ_SIZE_LG = Math.min(width * 1.2, 520);
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList<any>);
 
@@ -170,8 +172,8 @@ export default function Welcome() {
           <MagneticButton
             label={index === welcomeSlides.length - 1 ? 'GET STARTED' : 'CONTINUE'}
             onPress={goNext}
-            background={slide.accent}
-            foreground={palette.ink}
+            background={index === 0 ? '#8B5CF6' : slide.accent}
+            foreground={index === 0 ? '#F2EFE6' : palette.ink}
             size="lg"
           />
         </View>
@@ -281,7 +283,10 @@ function Slide({
         <Animated.View style={[styles.objWrap, objStyle]} pointerEvents="none">
           <Image
             source={slideObjects[i % slideObjects.length]}
-            style={{ width: OBJ_SIZE, height: OBJ_SIZE }}
+            style={{
+              width: i === 0 ? OBJ_SIZE_LG : OBJ_SIZE,
+              height: i === 0 ? OBJ_SIZE_LG : OBJ_SIZE,
+            }}
             contentFit="contain"
           />
         </Animated.View>

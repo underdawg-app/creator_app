@@ -1,11 +1,10 @@
-// MerchPublished — the celebratory success screen the creator lands on after
-// publishing their storefront. It fires confetti once on mount, surfaces the
-// live store URL with copy/share actions, shows a medium live preview that
-// reflects the shared storeBuilder slice, and offers two ways forward: view
-// the full store or jump back into the editor. All reads come from the single
-// source of truth (storeBuilder), so the preview stays in sync.
+// MerchPublished — the success screen after publishing the storefront. Re-skinned
+// to the homepage (Explore) layout system: a top HeaderBar with a bottom hairline,
+// a 16px gutter, dot + labelLarge section kickers, radius-18 line cards and the
+// shared `T` type tokens. Surfaces the live store URL (copy/share), a live preview
+// of the storeBuilder, and the two ways forward. No confetti.
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   StyleSheet,
@@ -16,7 +15,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
-import { fonts } from '@/theme/typography';
+import { fonts, type as T } from '@/theme/typography';
 import { Ionicons } from '@/icons';
 import { router } from '@/navigation';
 import { useStore } from '@/store';
@@ -29,71 +28,91 @@ export default function MerchPublished() {
   const styles = useThemedPaletteStyles(makeStyles);
 
   const b = useStore((s) => s.storeBuilder);
-  const confetti = useStore((s) => s.confetti);
   const toast = useStore((s) => s.toast);
 
-  // Celebrate exactly once when the creator arrives.
-  useEffect(() => {
-    confetti();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const url = storeUrlOf(b.handle);
-
   const onCopy = () => toast('Link copied.', 'success');
   const onShare = () => toast('Share sheet opened.');
 
   return (
     <View style={styles.screen}>
+      {/* Homepage-style header bar */}
+      <SafeAreaView edges={['top']} style={styles.headerSafe}>
+        <View style={styles.header}>
+          <Pressable onPress={() => router.back()} style={styles.iconBtn} hitSlop={8}>
+            <Ionicons name="close" size={18} color={palette.ink} />
+          </Pressable>
+          <View style={styles.headerCenter}>
+            <RNText style={styles.headerTitle} allowFontScaling={false}>
+              PUBLISHED
+            </RNText>
+          </View>
+          <Pressable onPress={onShare} style={styles.iconBtn} hitSlop={8}>
+            <Ionicons name="share-outline" size={18} color={palette.ink} />
+          </Pressable>
+        </View>
+      </SafeAreaView>
+
       <ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
       >
-        <SafeAreaView edges={['top']}>
-          {/* Celebratory mark */}
-          <View style={styles.mark}>
-            <Ionicons name="checkmark" size={40} color={palette.ink} />
-          </View>
+        {/* Success mark */}
+        <View style={styles.mark}>
+          <Ionicons name="checkmark" size={34} color={staticPalette.ink} />
+        </View>
 
-          <RNText style={styles.kicker}>STORE PUBLISHED</RNText>
-          <RNText style={styles.title}>you&rsquo;re live.</RNText>
-          <RNText style={styles.sub}>
-            Your store is published and ready to share.
+        {/* Kicker — dot + labelLarge */}
+        <View style={styles.kickerRow}>
+          <View style={styles.dot} />
+          <RNText style={styles.kicker} maxFontSizeMultiplier={1.1}>
+            STORE PUBLISHED
           </RNText>
+        </View>
+        <RNText style={styles.title} allowFontScaling={false}>
+          you&rsquo;re live.
+        </RNText>
+        <RNText style={styles.sub} maxFontSizeMultiplier={1.2}>
+          Your store is published and ready to share.
+        </RNText>
 
-          {/* Live store URL card */}
-          <View style={styles.urlCard}>
-            <View style={styles.urlTop}>
-              <Ionicons name="globe-outline" size={15} color={palette.mute} />
-              <RNText style={styles.urlLabel}>YOUR STORE URL</RNText>
-            </View>
-            <RNText numberOfLines={1} style={styles.url}>
-              {url}
+        {/* Live store URL card */}
+        <View style={styles.urlCard}>
+          <View style={styles.urlTop}>
+            <Ionicons name="globe-outline" size={15} color={palette.mute} />
+            <RNText style={styles.urlLabel} maxFontSizeMultiplier={1.1}>
+              YOUR STORE URL
             </RNText>
-            <View style={styles.urlActions}>
-              <Pressable onPress={onCopy} style={styles.urlBtn} hitSlop={6}>
-                <Ionicons name="copy-outline" size={16} color={palette.ink} />
-                <RNText style={styles.urlBtnText}>COPY</RNText>
-              </Pressable>
-              <Pressable onPress={onShare} style={styles.urlBtn} hitSlop={6}>
-                <Ionicons
-                  name="share-outline"
-                  size={16}
-                  color={palette.ink}
-                />
-                <RNText style={styles.urlBtnText}>SHARE</RNText>
-              </Pressable>
-            </View>
           </View>
+          <RNText numberOfLines={1} style={styles.url} allowFontScaling={false}>
+            {url}
+          </RNText>
+          <View style={styles.urlActions}>
+            <Pressable onPress={onCopy} style={styles.urlBtn} hitSlop={6}>
+              <Ionicons name="copy-outline" size={16} color={palette.ink} />
+              <RNText style={styles.urlBtnText} maxFontSizeMultiplier={1.1}>
+                COPY
+              </RNText>
+            </Pressable>
+            <Pressable onPress={onShare} style={styles.urlBtn} hitSlop={6}>
+              <Ionicons name="share-outline" size={16} color={palette.ink} />
+              <RNText style={styles.urlBtnText} maxFontSizeMultiplier={1.1}>
+                SHARE
+              </RNText>
+            </Pressable>
+          </View>
+        </View>
 
-          {/* Medium live preview */}
-          <RNText style={[styles.kicker, styles.previewKicker]}>
+        {/* Live preview section */}
+        <View style={styles.sectionHead}>
+          <View style={styles.dot} />
+          <RNText style={styles.sectionKicker} maxFontSizeMultiplier={1.1}>
             LIVE PREVIEW
           </RNText>
-          <DeviceFrame style={{ height: 320 }}>
-            <StorefrontPreview mode="mini" />
-          </DeviceFrame>
-        </SafeAreaView>
+        </View>
+        <DeviceFrame style={{ height: 320 }}>
+          <StorefrontPreview mode="mini" />
+        </DeviceFrame>
       </ScrollView>
 
       {/* Primary + secondary CTAs */}
@@ -102,7 +121,9 @@ export default function MerchPublished() {
           onPress={() => router.push('/(modules)/merch/preview')}
           style={styles.primaryCta}
         >
-          <RNText style={styles.primaryCtaText}>VIEW MY STORE</RNText>
+          <RNText style={styles.primaryCtaText} maxFontSizeMultiplier={1.1}>
+            VIEW MY STORE
+          </RNText>
           <View style={styles.primaryCtaArrow}>
             <Ionicons name="arrow-forward" size={16} color={palette.ink} />
           </View>
@@ -112,7 +133,9 @@ export default function MerchPublished() {
           onPress={() => router.push('/(modules)/merch/build/review')}
           style={styles.secondaryCta}
         >
-          <RNText style={styles.secondaryCtaText}>BACK TO EDITOR</RNText>
+          <RNText style={styles.secondaryCtaText} maxFontSizeMultiplier={1.1}>
+            BACK TO EDITOR
+          </RNText>
         </Pressable>
       </SafeAreaView>
     </View>
@@ -122,42 +145,58 @@ export default function MerchPublished() {
 const makeStyles = (palette: typeof staticPalette) =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: palette.bone },
-    scroll: { paddingHorizontal: 20, paddingBottom: 28 },
+
+    // Header — mirrors the homepage bar
+    headerSafe: {
+      backgroundColor: palette.bone,
+      borderBottomWidth: 1,
+      borderBottomColor: palette.line,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      paddingTop: 8,
+      paddingBottom: 12,
+    },
+    headerCenter: { flex: 1, alignItems: 'center' },
+    headerTitle: { ...T.title3, color: palette.ink, letterSpacing: 0.4 },
+    iconBtn: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: palette.line,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+
+    scroll: { paddingHorizontal: 16, paddingTop: 18, paddingBottom: 28 },
 
     mark: {
-      width: 76,
-      height: 76,
+      width: 72,
+      height: 72,
       borderRadius: 24,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: palette.acid,
-      marginTop: 24,
+      marginBottom: 20,
     },
 
-    kicker: {
-      fontFamily: fonts.bodyBold,
-      fontSize: 11,
-      lineHeight: 14,
-      letterSpacing: 2.2,
-      textTransform: 'uppercase',
-      color: palette.mute,
-    },
-    previewKicker: { marginTop: 30, marginBottom: 14 },
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: palette.acid },
+    kickerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    kicker: { ...T.labelLarge, color: palette.ink, opacity: 0.7 },
+
     title: {
       fontFamily: fonts.displayBold,
-      fontSize: 40,
-      lineHeight: 40,
+      fontSize: 44,
+      lineHeight: 44,
       letterSpacing: -1.8,
       color: palette.ink,
-      marginTop: 16,
+      marginTop: 8,
     },
-    sub: {
-      fontFamily: fonts.body,
-      fontSize: 16,
-      lineHeight: 23,
-      color: palette.mute,
-      marginTop: 10,
-    },
+    sub: { ...T.lead, color: palette.mute, marginTop: 10 },
 
     urlCard: {
       marginTop: 26,
@@ -167,18 +206,8 @@ const makeStyles = (palette: typeof staticPalette) =>
       backgroundColor: palette.paper,
       padding: 18,
     },
-    urlTop: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 7,
-    },
-    urlLabel: {
-      fontFamily: fonts.bodyBold,
-      fontSize: 11,
-      letterSpacing: 2,
-      textTransform: 'uppercase',
-      color: palette.mute,
-    },
+    urlTop: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+    urlLabel: { ...T.label, color: palette.mute },
     url: {
       fontFamily: fonts.displayBold,
       fontSize: 19,
@@ -186,11 +215,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       color: palette.ink,
       marginTop: 10,
     },
-    urlActions: {
-      flexDirection: 'row',
-      gap: 10,
-      marginTop: 16,
-    },
+    urlActions: { flexDirection: 'row', gap: 10, marginTop: 16 },
     urlBtn: {
       flex: 1,
       flexDirection: 'row',
@@ -202,18 +227,18 @@ const makeStyles = (palette: typeof staticPalette) =>
       borderWidth: 1.5,
       borderColor: palette.ink,
     },
-    urlBtnText: {
-      fontFamily: fonts.bodyBold,
-      fontSize: 13,
-      letterSpacing: 1.8,
-      color: palette.ink,
-    },
+    urlBtnText: { ...T.label, color: palette.ink },
 
-    footer: {
-      paddingHorizontal: 20,
-      paddingTop: 10,
-      paddingBottom: 6,
+    sectionHead: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      marginTop: 30,
+      marginBottom: 14,
     },
+    sectionKicker: { ...T.labelLarge, color: palette.ink },
+
+    footer: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 6 },
     primaryCta: {
       height: 60,
       borderRadius: 18,

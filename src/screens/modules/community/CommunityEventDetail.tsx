@@ -314,7 +314,7 @@ const makeStyles = (palette: typeof staticPalette) =>
     },
     ctaGoing: { backgroundColor: palette.acid },
     ctaLabel: { fontFamily: fonts.bodyBold, fontSize: 14, letterSpacing: 2.5, color: palette.bone },
-    ctaLabelGoing: { color: palette.ink },
+    ctaLabelGoing: { color: staticPalette.ink },
     ctaArrow: {
       width: 26,
       height: 26,

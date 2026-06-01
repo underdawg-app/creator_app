@@ -162,7 +162,7 @@ export default function CommunityDirectory() {
                   </RNText>
                 </View>
                 <View style={styles.repPill}>
-                  <Ionicons name="ribbon-outline" size={11} color={palette.ink} />
+                  <Ionicons name="ribbon-outline" size={11} color={staticPalette.ink} />
                   <RNText style={styles.repText} maxFontSizeMultiplier={1.1}>
                     {c.rep}
                   </RNText>

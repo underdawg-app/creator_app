@@ -87,7 +87,7 @@ export default function AnalyticsCrossPlatform() {
       {/* Best performing callout */}
       <Tap onPress={() => setOpen(best)} style={styles.bestCard} burstColor={best.accent}>
         <View style={[styles.bestDot, { backgroundColor: best.accent }]}>
-          <Ionicons name="trending-up-outline" size={18} color={palette.ink} />
+          <Ionicons name="trending-up-outline" size={18} color={staticPalette.ink} />
         </View>
         <View style={{ flex: 1 }}>
           <RNText style={styles.bestEyebrow}>BEST PERFORMING</RNText>

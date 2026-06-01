@@ -14,7 +14,7 @@ import { productTypes } from '@/data/mock';
 import { useStore } from '@/store';
 
 const PLACEMENTS = ['CENTER', 'POCKET', 'FULL PRINT', 'BACK'];
-const SWATCHES = ['#0A0A0A', '#2E5BFF', '#FCD34D', '#FF6BB5', '#FF5A1F', '#F2EFE6'];
+const SWATCHES = ['#0A0A0A', '#2E5BFF', '#9CA3AF', '#FF6BB5', '#FF5A1F', '#F2EFE6'];
 
 type Mockup = { id: number; placement: string; color: string; bg: string };
 

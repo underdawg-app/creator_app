@@ -15,10 +15,7 @@ import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import { SkiaGrain } from '@/components/skia/SkiaGrain';
 import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
-// Split the splash lockup into its two layers so the red mark can stay red
-// while the wordmark text recolors with the theme (black in light mode).
-const BRAND_MARK = require('@/objects/brand-logo.png');
-const BRAND_TEXT = require('@/objects/brand-wordmark.png');
+const BRAND_WORDMARK = require('@/objects/brand-splash.png');
 // Every bundled image the app uses, rendered invisibly below at 1×1 so the
 // PNG decoder warms the bitmap cache during splash. By the time the user
 // reaches the first real screen, none of these have to decode-on-render —
@@ -187,17 +184,12 @@ export default function Splash() {
         </View>
       )}
 
-      {/* Center wordmark — red mark stays red, text recolors with theme. */}
+      {/* Center wordmark */}
       <View style={styles.center}>
         <Animated.View style={[styles.wordmark, markStyle]}>
           <RNImage
-            source={BRAND_MARK}
-            style={styles.brandMark}
-            resizeMode="contain"
-          />
-          <RNImage
-            source={BRAND_TEXT}
-            style={[styles.brandText, { tintColor: palette.ink }]}
+            source={BRAND_WORDMARK}
+            style={styles.brandWordmark}
             resizeMode="contain"
           />
         </Animated.View>
@@ -286,15 +278,10 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   wordmark: {
     alignSelf: 'stretch',
     alignItems: 'center',
-    gap: 4,
   },
-  brandMark: {
-    width: Math.min(width * 0.34, 150),
-    height: Math.min(width * 0.34, 150),
-  },
-  brandText: {
-    width: Math.min(width * 0.72, 320),
-    height: Math.min(width * 0.32, 140),
+  brandWordmark: {
+    width: Math.min(width * 0.85, 380),
+    height: Math.min(width * 0.85, 380),
   },
 
   tagline: {

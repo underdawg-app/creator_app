@@ -258,16 +258,42 @@ const initialStoreCustomization: StoreCustomization = {
 // guided flow stays simple and never collides with the advanced editor.
 // --------------------------------------------------------------------------
 
+export type ProductPlacement = 'FRONT' | 'BACK' | 'LEFT' | 'RIGHT';
+
 export type BuilderProduct = {
   id: string;
   type: string; // PRODUCT_TYPES key — 'TEE' | 'HOODIE' | 'MUG' | 'TOTE' | 'POSTER' | 'CAP'
   color: string; // garment hex
-  design: string; // design label / preset name
+  design: string; // tile label — print method, or AI mockup design name
   name: string;
   price: number;
+  method?: string; // print/decoration method label (DTG, DTF, EMBROIDERY …)
+  artworkUri?: string | null; // uploaded design image (cropped)
+  placement?: ProductPlacement; // which side the artwork sits on
+  // Free transform of the artwork within the print area (print-on-demand placer):
+  artX?: number; // normalized x offset from print-area centre (-… to …)
+  artY?: number; // normalized y offset
+  artScale?: number; // scale multiplier (1 = fit print-area width)
+  mockupUrl?: string; // photoreal mockup image (Printful via backend) — shown as the product image when present
 };
 
 export type StoreBannerStyle = 'GRADIENT' | 'SOLID' | 'PATTERN' | 'MINIMAL';
+
+// One slide of the auto-rotating hero carousel.
+export type BannerItem = {
+  id: string;
+  imageUri: string | null; // cropped hero image; falls back to bannerStyle fill
+  headline: string;
+  subtext: string;
+  buttonLabel: string;
+};
+
+// A storefront nav link (e.g. "ALL PRODUCTS", "NEW IN").
+export type StoreMenuLink = {
+  id: string;
+  label: string;
+  target: 'all' | 'selected';
+};
 
 export type StoreBuilder = {
   built: boolean; // has the user finished building at least once
@@ -278,14 +304,14 @@ export type StoreBuilder = {
   name: string;
   handle: string;
   tagline: string;
+  logoUri: string | null; // uploaded logo (gallery), overrides the monogram
+  headerImageUri: string | null; // header background image (gallery)
   // theme
   themeKey: string;
   fontKey: string;
-  // banner / hero
-  bannerStyle: StoreBannerStyle;
-  headline: string;
-  subtext: string;
-  buttonLabel: string;
+  // banner / hero carousel
+  bannerStyle: StoreBannerStyle; // fill style for banners without an image
+  banners: BannerItem[]; // auto-rotating hero carousel (2–3 slides)
   // layout toggles
   showSearch: boolean;
   showGrid: boolean;
@@ -293,6 +319,10 @@ export type StoreBuilder = {
   showFooter: boolean;
   storyTitle: string;
   storyBody: string;
+  // navigation + footer
+  menuLinks: StoreMenuLink[];
+  footerNote: string;
+  footerLinks: string[];
   // catalog
   products: BuilderProduct[];
 };
@@ -305,12 +335,15 @@ const defaultBuilder: StoreBuilder = {
   name: '',
   handle: '',
   tagline: '',
+  logoUri: null,
+  headerImageUri: null,
   themeKey: 'midnight',
   fontKey: 'grotesk',
   bannerStyle: 'GRADIENT',
-  headline: 'THE NEW DROP',
-  subtext: 'Limited run. Ships worldwide.',
-  buttonLabel: 'SHOP NOW',
+  banners: [
+    { id: 'b1', imageUri: null, headline: 'THE NEW DROP', subtext: 'Limited run. Ships worldwide.', buttonLabel: 'SHOP NOW' },
+    { id: 'b2', imageUri: null, headline: 'SEASON 01', subtext: 'Made in small batches.', buttonLabel: 'EXPLORE' },
+  ],
   showSearch: true,
   showGrid: true,
   showStory: true,
@@ -318,6 +351,12 @@ const defaultBuilder: StoreBuilder = {
   storyTitle: 'THE STORY',
   storyBody:
     'Made by a creator, for the people who get it. Every piece ships from a real studio — not a warehouse.',
+  menuLinks: [
+    { id: 'm1', label: 'ALL PRODUCTS', target: 'all' },
+    { id: 'm2', label: 'NEW IN', target: 'selected' },
+  ],
+  footerNote: 'Thanks for supporting an independent creator.',
+  footerLinks: ['SHIPPING', 'RETURNS', 'CONTACT'],
   products: [],
 };
 
@@ -848,7 +887,9 @@ export const useStore = create<StoreState>()(
         set((s) => ({
           ui: {
             ...s.ui,
-            toasts: [...s.ui.toasts, { id: ++tid, message, tone }],
+            // Only ever one toast at a time: a new one replaces the current
+            // one in the same spot instead of stacking up the screen.
+            toasts: [{ id: ++tid, message, tone }],
           },
         })),
       dismissToast: (id) =>
@@ -857,7 +898,7 @@ export const useStore = create<StoreState>()(
         })),
       confetti: () =>
         set((s) => ({ ui: { ...s.ui, confettiAt: Date.now() } })),
-      splash: (x, y, color = '#FCD34D') =>
+      splash: (x, y, color = '#9CA3AF') =>
         set((s) => ({ ui: { ...s.ui, splashAt: { ts: Date.now(), x, y, color } } })),
 
       themePreference: 'system',
@@ -906,6 +947,16 @@ export const useStore = create<StoreState>()(
     {
       name: 'underdawg-store-v1',
       storage: createJSONStorage(() => AsyncStorage),
+      // Bumped to clear a sticky `storeBuilder.built/published` flag that was
+      // persisted in older installs and trapped users on the one-page review
+      // instead of the welcome → wizard flow. Resets ONLY the store builder;
+      // all other saved data is preserved. v2: new builder shape (header image,
+      // banner carousel, menu links, customizable footer).
+      version: 2,
+      migrate: (persisted: any) =>
+        persisted
+          ? { ...persisted, storeBuilder: { ...defaultBuilder, products: [] } }
+          : persisted,
       partialize: (s) => ({
         profile: s.profile,
         platforms: s.platforms,

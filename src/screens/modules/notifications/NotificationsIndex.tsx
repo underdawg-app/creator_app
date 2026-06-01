@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { View, StyleSheet, Text as RNText, Pressable } from 'react-native';
 import { router } from '@/navigation';
 import { Ionicons } from '@/icons';
@@ -173,35 +173,13 @@ const KIND_TINT: Record<Kind, string> = {
   challenge: '#FF6BB5',
 };
 
-type TabKey = 'foryou' | 'following' | 'rising';
-
-const TABS: { key: TabKey; label: string }[] = [
-  { key: 'foryou', label: 'FOR YOU' },
-  { key: 'following', label: 'FOLLOWING' },
-  { key: 'rising', label: 'RISING' },
-];
-
-// Loose mapping: Following = social interactions; Rising = career/growth events.
-const SOCIAL_KINDS: Kind[] = ['like', 'comment', 'follow', 'mention'];
-const RISING_KINDS: Kind[] = ['gig_invite', 'gig_approved', 'payout', 'challenge'];
-
 export default function NotificationsIndex() {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
-  const [tab, setTab] = useState<TabKey>('foryou');
 
-  const filter = (items: Notification[]) =>
-    items.filter((n) =>
-      tab === 'foryou'
-        ? true
-        : tab === 'following'
-        ? SOCIAL_KINDS.includes(n.kind)
-        : RISING_KINDS.includes(n.kind),
-    );
-
-  const today = useMemo(() => filter(TODAY), [tab]);
-  const week = useMemo(() => filter(WEEK), [tab]);
-  const earlier = useMemo(() => filter(EARLIER), [tab]);
+  const today = TODAY;
+  const week = WEEK;
+  const earlier = EARLIER;
   const empty = today.length + week.length + earlier.length === 0;
 
   return (
@@ -213,35 +191,6 @@ export default function NotificationsIndex() {
         />
       }
     >
-      <View style={styles.tabsRow}>
-        {TABS.map((t) => {
-          const isActive = t.key === tab;
-          return (
-            <Pressable
-              key={t.key}
-              onPress={() => setTab(t.key)}
-              style={[
-                styles.tabPill,
-                isActive && {
-                  backgroundColor: palette.ink,
-                  borderColor: palette.ink,
-                },
-              ]}
-            >
-              <RNText
-                style={[
-                  styles.tabPillText,
-                  { color: isActive ? palette.bone : palette.ink },
-                ]}
-                maxFontSizeMultiplier={1.1}
-              >
-                {t.label}
-              </RNText>
-            </Pressable>
-          );
-        })}
-      </View>
-
       {today.length > 0 ? <Group title="TODAY" items={today} /> : null}
       {week.length > 0 ? <Group title="THIS WEEK" items={week} /> : null}
       {earlier.length > 0 ? <Group title="EARLIER" items={earlier} /> : null}
@@ -334,28 +283,6 @@ function Row({ n }: { n: Notification }) {
 
 const makeStyles = (palette: typeof staticPalette) =>
   StyleSheet.create({
-    tabsRow: {
-      flexDirection: 'row',
-      gap: 8,
-      paddingHorizontal: 16,
-      paddingTop: 14,
-      paddingBottom: 4,
-    },
-    tabPill: {
-      height: 32,
-      paddingHorizontal: 16,
-      borderRadius: 999,
-      borderWidth: 1.5,
-      borderColor: palette.ink,
-      backgroundColor: palette.paper,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    tabPillText: {
-      fontFamily: fonts.bodyBold,
-      fontSize: 11,
-      letterSpacing: 1.6,
-    },
     empty: {
       alignItems: 'center',
       paddingHorizontal: 32,

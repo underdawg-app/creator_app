@@ -17,7 +17,10 @@ import Create from '@/screens/tabs/Create';
 import Inbox from '@/screens/tabs/Inbox';
 import Profile from '@/screens/tabs/Profile';
 import JobsIndex from '@/screens/modules/jobs/JobsIndex';
-import MerchIndex from '@/screens/modules/merch/MerchIndex';
+// Bottom MERCH tab now opens the new store-builder studio (welcome → wizard),
+// not the old MerchIndex page. The old advanced editor is still reachable at
+// /(modules)/merch/advanced.
+import MerchStudio from '@/screens/modules/merch/studio/MerchStudio';
 
 const Tab = createBottomTabNavigator();
 
@@ -50,7 +53,7 @@ export default function TabsNavigator() {
     >
       <Tab.Screen name="Explore" component={Explore} />
       <Tab.Screen name="Jobs" component={JobsIndex} />
-      <Tab.Screen name="Merch" component={MerchIndex} />
+      <Tab.Screen name="Merch" component={MerchStudio} />
       <Tab.Screen name="Profile" component={Profile} />
       {/* Hidden tabs — reachable via router.push but not shown in the bar. */}
       <Tab.Screen name="Feed" component={Feed} options={{ tabBarButton: () => null }} />

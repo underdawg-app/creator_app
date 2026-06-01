@@ -67,7 +67,7 @@ export default function CourseDetail() {
               style={styles.lesson}
             >
               <View style={[styles.lessonDot, { backgroundColor: isDone ? palette.acid : palette.line }]}>
-                {isDone ? <Ionicons name="checkmark" size={14} color={palette.ink} /> : null}
+                {isDone ? <Ionicons name="checkmark" size={14} color={staticPalette.ink} /> : null}
               </View>
               <View style={{ flex: 1 }}>
                 <RNText

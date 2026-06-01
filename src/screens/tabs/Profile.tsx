@@ -36,14 +36,15 @@ import { BadgePill } from '@/components/ui/BadgePill';
 const { width } = Dimensions.get('window');
 
 const SCREEN_PADDING = 12;
-const GRID_GAP = 4;
+const GRID_GAP = 3;
 const VIDEO_GAP = 10;
 // Reserved exclusively for the "completed" state in the profile-setup
 // strip — progress bar fill, percent badge, count accent, and each step's
 // checkmark badge. Never used for any other UI state so the user can
 // always read "neon green = done".
 const NEON_GREEN = '#9C988A';
-const POST_TILE_SIZE = (width - SCREEN_PADDING * 2 - GRID_GAP * 2) / 3;
+const POST_TILE_SIZE = (width - GRID_GAP * 2) / 3;
+const POST_TILE_H = Math.round((POST_TILE_SIZE * 4) / 3);
 const VIDEO_TILE_W = Math.floor((width - SCREEN_PADDING * 2 - VIDEO_GAP) / 2);
 const VIDEO_TILE_H = VIDEO_TILE_W * 1.45;
 
@@ -102,7 +103,7 @@ export default function Profile() {
             <SkiaWaveField
               width={width}
               height={620}
-              color="rgba(242,239,230,0.06)"
+              color={palette.line}
               lines={18}
               amplitude={12}
               frequency={0.02}
@@ -115,20 +116,20 @@ export default function Profile() {
               <Tap
                 onPress={() => router.push('/(modules)/community')}
                 style={styles.profileMenuBtn}
-                burstColor={staticPalette.bone}
+                burstColor={palette.ink}
               >
-                <Ionicons name="people-circle-outline" size={18} color={staticPalette.bone} />
+                <Ionicons name="people-circle-outline" size={18} color={palette.ink} />
                 <RNText style={styles.profileMenuLabel} maxFontSizeMultiplier={1.1}>
                   COMMUNITY
                 </RNText>
-                <Ionicons name="chevron-forward" size={12} color={staticPalette.bone} />
+                <Ionicons name="chevron-forward" size={12} color={palette.ink} />
               </Tap>
               <Tap
                 onPress={() => router.push('/(modules)/settings')}
                 style={styles.iconBtn}
-                burstColor={staticPalette.bone}
+                burstColor={palette.ink}
               >
-                <Ionicons name="settings-outline" size={16} color={staticPalette.bone} />
+                <Ionicons name="settings-outline" size={16} color={palette.ink} />
               </Tap>
             </View>
 
@@ -156,7 +157,7 @@ export default function Profile() {
                   />
                 </View>
                 <View style={styles.avatarEditPip}>
-                  <Ionicons name="pencil" size={12} color={staticPalette.ink} />
+                  <Ionicons name="pencil" size={12} color={palette.bone} />
                 </View>
               </Pressable>
 
@@ -190,8 +191,8 @@ export default function Profile() {
             </View>
 
             <View style={styles.pillRow}>
-              <BadgePill tier="RISING" accent={palette.mute} inverse />
-              <BadgePill label="VERIFIED" accent={palette.mute} inverse />
+              <BadgePill tier="RISING" accent={palette.mute} />
+              <BadgePill label="VERIFIED" accent={palette.mute} />
             </View>
 
             <RNText
@@ -232,7 +233,7 @@ export default function Profile() {
             >
               <View style={styles.analyticsLeft}>
                 <View style={styles.analyticsIcon}>
-                  <Ionicons name="trending-up" size={16} color={staticPalette.ink} />
+                  <Ionicons name="trending-up" size={16} color={palette.ink} />
                 </View>
                 <View>
                   <RNText style={styles.analyticsLabel} maxFontSizeMultiplier={1.1}>
@@ -261,19 +262,19 @@ export default function Profile() {
                   <RNText style={styles.ctaPrimaryLabel} maxFontSizeMultiplier={1.1}>
                     PORTFOLIO
                   </RNText>
-                  <Ionicons name="arrow-forward" size={13} color={staticPalette.ink} />
+                  <Ionicons name="arrow-forward" size={13} color={palette.ink} />
                 </Tap>
               </View>
               <View style={styles.ctaSlot}>
                 <Tap
                   style={styles.ctaGhost}
-                  burstColor={staticPalette.bone}
+                  burstColor={palette.ink}
                   onPress={() => router.push('/(modules)/merch')}
                 >
                   <Ionicons
                     name="storefront-outline"
                     size={14}
-                    color={staticPalette.bone}
+                    color={palette.ink}
                   />
                   <RNText style={styles.ctaGhostLabel} maxFontSizeMultiplier={1.1}>
                     MY STORE
@@ -303,8 +304,8 @@ export default function Profile() {
             speed={52}
             direction="left"
             separator="   ·   "
-            textStyle={loopTextStyle}
-            style={{ height: LOOP_HEIGHT, width: width, backgroundColor: staticPalette.ink }}
+            textStyle={[loopTextStyle, { color: palette.ink }]}
+            style={{ height: LOOP_HEIGHT, width: width, backgroundColor: palette.bone }}
           />
         </View>
 
@@ -728,7 +729,7 @@ function StatCol({
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
   return (
-    <Tap style={styles.statCol} onPress={onPress} burstColor={staticPalette.bone}>
+    <Tap style={styles.statCol} onPress={onPress} burstColor={palette.ink}>
       <RNText
         style={[styles.statValue, accent && { color: palette.mute }]}
         numberOfLines={1}
@@ -808,7 +809,7 @@ function ProfileSetupStrip() {
       sub: 'what you make',
       subDone: 'craft picked',
       icon: 'sparkles-outline',
-      accent: '#A78BFA',
+      accent: '#9CA3AF',
       route: '/(onboarding)/creator-type',
       done: !!profile.type && profile.type.trim().length > 0,
     },
@@ -911,7 +912,6 @@ function SetupCard({ step, index }: { step: SetupStep; index: number }) {
       burstColor={step.accent}
       style={[styles.setupCard, { backgroundColor: step.accent }]}
     >
-      <View style={styles.setupCardBlob} pointerEvents="none" />
 
       <View style={styles.setupCardTopRow}>
         <RNText style={styles.setupCardIndex} maxFontSizeMultiplier={1.1}>
@@ -986,7 +986,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   root: { flex: 1, backgroundColor: palette.bone },
 
   hero: {
-    backgroundColor: staticPalette.ink,
+    backgroundColor: palette.bone,
     overflow: 'hidden',
     borderBottomLeftRadius: 36,
     borderBottomRightRadius: 36,
@@ -1007,7 +1007,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  kicker: { ...T.label, color: staticPalette.bone, opacity: 0.7 },
+  kicker: { ...T.label, color: palette.ink, opacity: 0.7 },
   profileMenuBtn: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1016,11 +1016,11 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 17,
     borderWidth: 1,
-    borderColor: 'rgba(242,239,230,0.18)',
+    borderColor: palette.line,
   },
   profileMenuLabel: {
     ...T.label,
-    color: staticPalette.bone,
+    color: palette.ink,
     letterSpacing: 1.8,
   },
   iconBtn: {
@@ -1028,7 +1028,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     height: 34,
     borderRadius: 17,
     borderWidth: 1,
-    borderColor: 'rgba(242,239,230,0.18)',
+    borderColor: palette.line,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1048,7 +1048,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     borderWidth: 2,
     borderColor: staticPalette.mute,
     padding: 3,
-    backgroundColor: staticPalette.ink,
+    backgroundColor: palette.bone,
     overflow: 'hidden',
   },
   avatar: {
@@ -1066,7 +1066,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     borderRadius: 7,
     backgroundColor: staticPalette.mute,
     borderWidth: 2,
-    borderColor: staticPalette.ink,
+    borderColor: palette.bone,
   },
   // Pencil sticker for "tap the photo to edit profile". Sits at the top-right
   // corner, opposite the status dot, outside the ring's clipping so it reads
@@ -1078,9 +1078,9 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: staticPalette.bone,
+    backgroundColor: palette.ink,
     borderWidth: 2,
-    borderColor: staticPalette.ink,
+    borderColor: palette.bone,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1107,14 +1107,14 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     fontFamily: fonts.editorialItalic,
     fontSize: 26,
     lineHeight: 26,
-    color: staticPalette.bone,
+    color: palette.ink,
     letterSpacing: -0.3,
   },
   bigName: {
     fontFamily: fonts.displayBold,
     fontSize: 32,
     lineHeight: 34,
-    color: staticPalette.bone,
+    color: palette.ink,
     letterSpacing: -1.2,
     textAlign: 'center',
   },
@@ -1132,7 +1132,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     fontSize: 16,
     lineHeight: 20,
     letterSpacing: 0.6,
-    color: staticPalette.bone,
+    color: palette.ink,
     opacity: 0.92,
     textAlign: 'center',
   },
@@ -1149,7 +1149,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     fontFamily: fonts.editorial,
     fontSize: 15,
     lineHeight: 21,
-    color: staticPalette.bone,
+    color: palette.ink,
     opacity: 0.86,
     marginTop: 14,
     maxWidth: 360,
@@ -1166,7 +1166,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingVertical: 18,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: 'rgba(242,239,230,0.18)',
+    borderColor: palette.line,
   },
   statCol: {
     flex: 1,
@@ -1180,7 +1180,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     fontSize: 22,
     lineHeight: 24,
     letterSpacing: -0.6,
-    color: staticPalette.bone,
+    color: palette.ink,
     textAlign: 'center',
     width: '100%',
   },
@@ -1193,7 +1193,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   statDivider: {
     width: 1,
     height: 36,
-    backgroundColor: 'rgba(242,239,230,0.18)',
+    backgroundColor: palette.line,
   },
 
   /* ---------- Analytics wide card ---------- */
@@ -1206,8 +1206,8 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(242,239,230,0.22)',
-    backgroundColor: 'rgba(242,239,230,0.04)',
+    borderColor: palette.line,
+    backgroundColor: palette.boneSoft,
   },
   analyticsLeft: {
     flexDirection: 'row',
@@ -1225,7 +1225,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   analyticsLabel: {
     ...T.button,
     fontSize: 11,
-    color: staticPalette.bone,
+    color: palette.ink,
   },
   analyticsSub: {
     fontFamily: fonts.body,
@@ -1251,7 +1251,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     height: 48,
     borderRadius: 24,
   },
-  ctaPrimaryLabel: { ...T.button, fontSize: 12, color: staticPalette.ink },
+  ctaPrimaryLabel: { ...T.button, fontSize: 12, color: palette.ink },
   ctaGhost: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1260,9 +1260,9 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     height: 48,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: 'rgba(242,239,230,0.32)',
+    borderColor: palette.line,
   },
-  ctaGhostLabel: { ...T.button, fontSize: 12, color: staticPalette.bone },
+  ctaGhostLabel: { ...T.button, fontSize: 12, color: palette.ink },
 
   /* ---------- Profile setup strip ---------- */
   setupWrap: {
@@ -1334,15 +1334,6 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     overflow: 'hidden',
     justifyContent: 'space-between',
   },
-  setupCardBlob: {
-    position: 'absolute',
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    top: -50,
-    right: -50,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-  },
   setupCardTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1405,7 +1396,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
   loopStrip: {
     height: LOOP_HEIGHT,
     overflow: 'hidden',
-    backgroundColor: staticPalette.ink,
+    backgroundColor: palette.bone,
   },
 
   /* ---------- Personal feed section ---------- */
@@ -1457,12 +1448,13 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: GRID_GAP,
+    marginHorizontal: -SCREEN_PADDING,
   },
   postTile: {
     width: POST_TILE_SIZE,
-    height: POST_TILE_SIZE,
+    height: POST_TILE_H,
     overflow: 'hidden',
-    borderRadius: 4,
+    borderRadius: 0,
   },
 
   /* ---------- VIDEOS — 2-col reel grid ---------- */

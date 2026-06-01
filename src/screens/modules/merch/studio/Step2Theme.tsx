@@ -8,13 +8,14 @@ import { View, StyleSheet, Text as RNText, Pressable, ScrollView } from 'react-n
 import { useStore } from '@/store';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
-import { fonts } from '@/theme/typography';
+import { fonts, type as T } from '@/theme/typography';
 import { Ionicons } from '@/icons';
 import { router } from '@/navigation';
 import {
   StudioHeader,
   StudioFooter,
   DeviceFrame,
+  useAutoHideFooter,
 } from '@/screens/modules/merch/studio/_chrome';
 import { StorefrontPreview } from '@/components/merch/StorefrontPreview';
 import { STORE_THEMES, FONT_PAIRS } from '@/screens/modules/merch/studio/themePresets';
@@ -26,22 +27,32 @@ export default function Step2Theme() {
   const b = useStore((s) => s.storeBuilder);
   const set = useStore((s) => s.setBuilder);
 
+  const { onScroll, footerStyle } = useAutoHideFooter();
+
   return (
     <View style={styles.root}>
       <StudioHeader step={2} />
 
       <ScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.scroll, { paddingBottom: 130 }]}
         showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
       >
-        <RNText style={styles.kicker}>STEP 2 · THEME</RNText>
+        <View style={styles.kickerRow}>
+          <View style={styles.dot} />
+          <RNText style={styles.kicker}>STEP 2 · THEME</RNText>
+        </View>
         <RNText style={styles.title}>pick a look.</RNText>
         <RNText style={styles.lede}>
           A palette and a typeface — the whole storefront restyles as you tap.
         </RNText>
 
         {/* ---- PALETTE ---- */}
-        <RNText style={[styles.kicker, styles.sectionKicker]}>PALETTE</RNText>
+        <View style={[styles.kickerRow, styles.sectionKickerRow]}>
+          <View style={styles.dot} />
+          <RNText style={styles.kicker}>PALETTE</RNText>
+        </View>
         <View style={styles.themeGrid}>
           {STORE_THEMES.map((t) => {
             const active = b.themeKey === t.key;
@@ -76,7 +87,10 @@ export default function Step2Theme() {
         </View>
 
         {/* ---- FONT PAIRING ---- */}
-        <RNText style={[styles.kicker, styles.sectionKicker]}>FONT PAIRING</RNText>
+        <View style={[styles.kickerRow, styles.sectionKickerRow]}>
+          <View style={styles.dot} />
+          <RNText style={styles.kicker}>FONT PAIRING</RNText>
+        </View>
         <View style={styles.fontList}>
           {FONT_PAIRS.map((f) => {
             const active = b.fontKey === f.key;
@@ -117,7 +131,10 @@ export default function Step2Theme() {
         </View>
 
         {/* ---- LIVE PREVIEW ---- */}
-        <RNText style={[styles.kicker, styles.sectionKicker]}>LIVE PREVIEW</RNText>
+        <View style={[styles.kickerRow, styles.sectionKickerRow]}>
+          <View style={styles.dot} />
+          <RNText style={styles.kicker}>LIVE PREVIEW</RNText>
+        </View>
         <DeviceFrame style={{ height: 400 }}>
           <StorefrontPreview mode="mini" />
         </DeviceFrame>
@@ -126,6 +143,7 @@ export default function Step2Theme() {
       <StudioFooter
         label="Continue"
         onPress={() => router.push('/(modules)/merch/build/banner')}
+        animStyle={footerStyle}
       />
     </View>
   );
@@ -134,29 +152,23 @@ export default function Step2Theme() {
 const makeStyles = (palette: typeof staticPalette) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: palette.bone },
-    scroll: { paddingHorizontal: 20, paddingBottom: 24 },
+    scroll: { paddingHorizontal: 16, paddingBottom: 24 },
 
-    kicker: {
-      fontFamily: fonts.bodyBold,
-      fontSize: 11,
-      letterSpacing: 2.2,
-      color: palette.ink,
-      opacity: 0.7,
-      textTransform: 'uppercase',
-    },
-    sectionKicker: { marginTop: 32, marginBottom: 14, opacity: 0.55 },
+    // Dot + kicker (homepage section rhythm)
+    dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: palette.acid },
+    kickerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    kicker: { ...T.labelLarge, color: palette.ink, opacity: 0.7 },
+    sectionKickerRow: { marginTop: 28, marginBottom: 14 },
     title: {
       fontFamily: fonts.displayBold,
-      fontSize: 40,
-      lineHeight: 40,
+      fontSize: 44,
+      lineHeight: 44,
       letterSpacing: -1.8,
       color: palette.ink,
       marginTop: 4,
     },
     lede: {
-      fontFamily: fonts.body,
-      fontSize: 15,
-      lineHeight: 22,
+      ...T.lead,
       color: palette.mute,
       marginTop: 10,
     },
@@ -170,7 +182,7 @@ const makeStyles = (palette: typeof staticPalette) =>
     themeCard: {
       width: '48%',
       borderWidth: 1.5,
-      borderRadius: 16,
+      borderRadius: 18,
       padding: 10,
       marginBottom: 12,
       backgroundColor: palette.paper,
@@ -214,7 +226,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       alignItems: 'center',
       minHeight: 72,
       borderWidth: 1.5,
-      borderRadius: 16,
+      borderRadius: 18,
       paddingHorizontal: 18,
       paddingVertical: 14,
       backgroundColor: palette.paper,

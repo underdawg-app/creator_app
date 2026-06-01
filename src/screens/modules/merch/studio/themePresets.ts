@@ -28,7 +28,7 @@ export const STORE_THEMES: StoreTheme[] = [
     text: '#F2EFE6',
     sub: '#9C988A',
     border: 'rgba(242,239,230,0.14)',
-    accent: '#FCD34D',
+    accent: '#9CA3AF',
     accentText: '#0A0A0A',
   },
   {
@@ -136,7 +136,7 @@ export const GARMENT_COLORS: { key: string; label: string; hex: string }[] = [
   { key: 'black', label: 'BLACK', hex: '#0A0A0A' },
   { key: 'bone', label: 'BONE', hex: '#EDE7D8' },
   { key: 'white', label: 'WHITE', hex: '#FFFFFF' },
-  { key: 'acid', label: 'ACID', hex: '#FCD34D' },
+  { key: 'acid', label: 'GREY', hex: '#9CA3AF' },
   { key: 'cobalt', label: 'COBALT', hex: '#2E5BFF' },
   { key: 'rust', label: 'RUST', hex: '#C2502B' },
 ];
@@ -144,10 +144,22 @@ export const GARMENT_COLORS: { key: string; label: string; hex: string }[] = [
 // Design presets for the AI mockup step (when not prompting / uploading).
 export const DESIGN_PRESETS: { key: string; label: string; swatch: string }[] = [
   { key: 'salt', label: 'SALT STUDY', swatch: '#2E5BFF' },
-  { key: 'bone', label: 'BONE PAINT', swatch: '#FCD34D' },
+  { key: 'bone', label: 'BONE PAINT', swatch: '#9CA3AF' },
   { key: 'lasttrain', label: 'LAST TRAIN', swatch: '#FF6BB5' },
   { key: 'afterwater', label: 'AFTER WATER', swatch: '#46D8C8' },
   { key: 'monogram', label: 'MONOGRAM', swatch: '#C2502B' },
+];
+
+// Print / decoration methods for the "Add to store" sheet — how the artwork is
+// applied to the garment (replaces the old design-preset picker).
+export const PRINT_METHODS: { key: string; label: string; sub: string; icon: string }[] = [
+  { key: 'dtg', label: 'DTG', sub: 'Direct-to-garment · soft, full-colour', icon: 'print-outline' },
+  { key: 'dtf', label: 'DTF', sub: 'Film transfer · vivid on any fabric', icon: 'copy-outline' },
+  { key: 'screen', label: 'SCREEN PRINT', sub: 'Bold & durable · best in bulk', icon: 'layers-outline' },
+  { key: 'embroidery', label: 'EMBROIDERY', sub: 'Stitched thread · premium texture', icon: 'flower-outline' },
+  { key: 'sublimation', label: 'SUBLIMATION', sub: 'All-over print · polyester', icon: 'color-fill-outline' },
+  { key: 'vinyl', label: 'VINYL / HTV', sub: 'Heat-transfer vinyl · crisp edges', icon: 'cut-outline' },
+  { key: 'puff', label: 'PUFF PRINT', sub: 'Raised 3D ink · statement pieces', icon: 'ellipse-outline' },
 ];
 
 // Banner style options for Step 3.

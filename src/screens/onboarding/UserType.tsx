@@ -230,7 +230,7 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     textTransform: 'uppercase',
   },
   chipTextActive: {
-    color: palette.ink,
+    color: palette.bone,
   },
 
   cta: {

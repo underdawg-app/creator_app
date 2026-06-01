@@ -11,22 +11,49 @@ import { Section } from '@/components/ui/Section';
 import { ListCell } from '@/components/ui/ListCell';
 import { Tap } from '@/components/ui/Tap';
 import { Sheet } from '@/components/ui/Sheet';
+import { ProgressRing } from '@/components/ui/ProgressRing';
+import { Ticker } from '@/components/ui/Ticker';
 import { repBreakdown, analyticsSeed } from '@/data/mock';
 import { useStore } from '@/store';
 
-const TIERS = [
-  { key: 'emerging', label: 'EMERGING', min: 0 },
-  { key: 'bronze', label: 'BRONZE', min: 31 },
-  { key: 'silver', label: 'SILVER', min: 51 },
-  { key: 'gold', label: 'GOLD', min: 71 },
-  { key: 'platinum', label: 'PLATINUM', min: 86 },
+// Realistic ranked ladder: each metal tier splits into three divisions
+// (III → II → I, low to high), capped by a single Diamond apex. A score sits
+// in the highest rank whose `min` it meets.
+type Rank = { key: string; tier: string; div: string; min: number };
+
+const RANKS: Rank[] = [
+  { key: 'bronze-3', tier: 'BRONZE', div: 'III', min: 0 },
+  { key: 'bronze-2', tier: 'BRONZE', div: 'II', min: 8 },
+  { key: 'bronze-1', tier: 'BRONZE', div: 'I', min: 16 },
+  { key: 'silver-3', tier: 'SILVER', div: 'III', min: 24 },
+  { key: 'silver-2', tier: 'SILVER', div: 'II', min: 32 },
+  { key: 'silver-1', tier: 'SILVER', div: 'I', min: 40 },
+  { key: 'gold-3', tier: 'GOLD', div: 'III', min: 48 },
+  { key: 'gold-2', tier: 'GOLD', div: 'II', min: 56 },
+  { key: 'gold-1', tier: 'GOLD', div: 'I', min: 64 },
+  { key: 'plat-3', tier: 'PLATINUM', div: 'III', min: 72 },
+  { key: 'plat-2', tier: 'PLATINUM', div: 'II', min: 78 },
+  { key: 'plat-1', tier: 'PLATINUM', div: 'I', min: 84 },
+  { key: 'diamond', tier: 'DIAMOND', div: '', min: 90 },
 ];
 
-function tierIndex(score: number) {
+// The five base tiers, for the compact ladder strip.
+const BASE_TIERS = ['BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'DIAMOND'];
+
+function rankIndex(score: number) {
   let idx = 0;
-  for (let i = 0; i < TIERS.length; i++) if (score >= TIERS[i].min) idx = i;
+  for (let i = 0; i < RANKS.length; i++) if (score >= RANKS[i].min) idx = i;
   return idx;
 }
+
+// "PLATINUM II" — caps, for pills and labels.
+const rankLabel = (r: Rank) => (r.div ? `${r.tier} ${r.div}` : r.tier);
+
+// "Platinum II" — title-cased tier, for inline sentence copy.
+const pretty = (r: Rank) => {
+  const tier = r.tier.charAt(0) + r.tier.slice(1).toLowerCase();
+  return r.div ? `${tier} ${r.div}` : tier;
+};
 
 export default function ReputationIndex() {
   const palette = useThemedPalette();
@@ -37,10 +64,14 @@ export default function ReputationIndex() {
   const [historyOpen, setHistoryOpen] = useState(false);
 
   const score = 82;
-  const curIdx = tierIndex(score);
-  const cur = TIERS[curIdx];
-  const next = TIERS[curIdx + 1];
+  const curIdx = rankIndex(score);
+  const cur = RANKS[curIdx];
+  const next = RANKS[curIdx + 1];
   const toNext = next ? next.min - score : 0;
+
+  // Active base tier + each base tier's entry threshold (its division III).
+  const activeBaseIdx = BASE_TIERS.indexOf(cur.tier);
+  const baseMin = (t: string) => RANKS.find((r) => r.tier === t)?.min ?? 0;
 
   // Progress within the current tier toward the next threshold.
   const lo = cur.min;
@@ -52,6 +83,12 @@ export default function ReputationIndex() {
   const trend = analyticsSeed.trend;
   const maxTrend = Math.max(...trend);
   const minTrend = Math.min(...trend);
+  const growth = analyticsSeed.totals.growth30d;
+
+  // Strongest factor to celebrate, weakest to nudge — derived, not hardcoded.
+  const ranked = [...repBreakdown].sort((a, b) => b.score - a.score);
+  const strongest = ranked[0];
+  const focus = ranked[ranked.length - 1];
 
   return (
     <ScreenFrame header={<ModuleHeader eyebrow="STANDING" title="REPUTATION" />} waves={false}>
@@ -61,29 +98,76 @@ export default function ReputationIndex() {
 
       {/* Score hero */}
       <View style={styles.scoreCard}>
-        <View style={styles.scoreTop}>
-          <View style={styles.scoreNumWrap}>
-            <RNText style={styles.scoreNum}>{score}</RNText>
-            <RNText style={styles.scoreOf}>/ 100</RNText>
-          </View>
-          <View style={[styles.tierPill, { backgroundColor: palette.acid }]}>
-            <Ionicons name="ribbon-outline" size={13} color={palette.ink} />
-            <RNText style={styles.tierPillText}>{cur.label}</RNText>
+        <View style={styles.scoreHero}>
+          <ProgressRing size={128} stroke={12} progress={score / 100} color={palette.acid}>
+            <View style={styles.ringCenter}>
+              <Ticker value={score} style={styles.scoreNum} />
+              <RNText style={styles.scoreOf}>/ 100</RNText>
+            </View>
+          </ProgressRing>
+
+          <View style={styles.scoreInfo}>
+            <View style={[styles.tierPill, { backgroundColor: palette.acid }]}>
+              <Ionicons name="ribbon-outline" size={13} color={palette.ink} />
+              <RNText style={styles.tierPillText}>{rankLabel(cur)}</RNText>
+            </View>
+            {next ? (
+              <RNText style={styles.nextLine}>
+                <RNText style={styles.nextStrong}>+{toNext}</RNText> to {pretty(next)}
+              </RNText>
+            ) : (
+              <RNText style={styles.nextLine}>Top rank reached.</RNText>
+            )}
+
+            <Pressable onPress={() => setHistoryOpen(true)} style={styles.trendPeek} hitSlop={6}>
+              <View style={styles.heroSpark}>
+                {trend.map((v, i) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.heroSparkBar,
+                      {
+                        height: 4 + ((v - minTrend) / (maxTrend - minTrend || 1)) * 18,
+                        backgroundColor: i === trend.length - 1 ? palette.electric : palette.ink,
+                        opacity: i === trend.length - 1 ? 1 : 0.35,
+                      },
+                    ]}
+                  />
+                ))}
+              </View>
+              <View style={styles.trendMeta}>
+                <Ionicons name="trending-up" size={13} color={palette.electric} />
+                <RNText style={styles.trendPct}>+{growth.toFixed(1)}%</RNText>
+              </View>
+            </Pressable>
           </View>
         </View>
 
+        {/* Within-tier progress toward the next threshold */}
         <View style={styles.scoreBarTrack}>
           <View style={[styles.scoreBarFill, { width: `${Math.max(tierPct, 4)}%`, backgroundColor: palette.acid }]} />
         </View>
         <View style={styles.scoreFoot}>
-          <RNText style={styles.scoreFootText}>{cur.label}</RNText>
-          {next ? (
-            <RNText style={styles.scoreFootText}>
-              +{toNext} to {next.label.charAt(0) + next.label.slice(1).toLowerCase()}
-            </RNText>
-          ) : (
-            <RNText style={styles.scoreFootText}>top tier</RNText>
-          )}
+          <RNText style={styles.scoreFootText}>{rankLabel(cur)}</RNText>
+          <RNText style={styles.scoreFootText}>{next ? rankLabel(next) : 'MAX'}</RNText>
+        </View>
+      </View>
+
+      {/* Quick read: strongest + focus factor */}
+      <View style={styles.statRow}>
+        <View style={[styles.statCard, { borderColor: palette.acid }]}>
+          <RNText style={styles.statKicker}>STRONGEST</RNText>
+          <RNText style={styles.statValue}>{strongest.score}</RNText>
+          <RNText style={styles.statLabel} numberOfLines={1}>
+            {strongest.label}
+          </RNText>
+        </View>
+        <View style={styles.statCard}>
+          <RNText style={styles.statKicker}>FOCUS HERE</RNText>
+          <RNText style={styles.statValue}>{focus.score}</RNText>
+          <RNText style={styles.statLabel} numberOfLines={1}>
+            {focus.label}
+          </RNText>
         </View>
       </View>
 
@@ -116,12 +200,12 @@ export default function ReputationIndex() {
       {/* Tiers strip */}
       <Section eyebrow="TIERS">
         <View style={styles.tierStrip}>
-          {TIERS.map((t, i) => {
-            const active = i === curIdx;
+          {BASE_TIERS.map((t, i) => {
+            const active = i === activeBaseIdx;
             return (
-              <View key={t.key} style={[styles.tierStep, active && styles.tierStepActive]}>
-                <RNText style={[styles.tierStepText, active && styles.tierStepTextActive]}>{t.label}</RNText>
-                <RNText style={[styles.tierStepMin, active && styles.tierStepTextActive]}>{t.min}+</RNText>
+              <View key={t} style={[styles.tierStep, active && styles.tierStepActive]}>
+                <RNText style={[styles.tierStepText, active && styles.tierStepTextActive]}>{t}</RNText>
+                <RNText style={[styles.tierStepMin, active && styles.tierStepTextActive]}>{baseMin(t)}+</RNText>
               </View>
             );
           })}
@@ -225,12 +309,14 @@ const makeStyles = (palette: typeof staticPalette) =>
       borderColor: palette.line,
       backgroundColor: palette.paper,
       padding: 18,
-      gap: 14,
+      gap: 16,
     },
-    scoreTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-    scoreNumWrap: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
-    scoreNum: { fontFamily: fonts.displayBold, fontSize: 72, lineHeight: 66, letterSpacing: -4, color: palette.ink },
-    scoreOf: { fontFamily: fonts.body, fontSize: 16, color: palette.inkMuted, marginBottom: 8 },
+    scoreHero: { flexDirection: 'row', alignItems: 'center', gap: 20 },
+    ringCenter: { alignItems: 'center' },
+    scoreNum: { fontFamily: fonts.displayBold, fontSize: 44, lineHeight: 46, letterSpacing: -2, color: palette.ink },
+    scoreOf: { fontFamily: fonts.body, fontSize: 12, color: palette.inkMuted, marginTop: -2 },
+
+    scoreInfo: { flex: 1, gap: 10, alignItems: 'flex-start' },
     tierPill: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -240,11 +326,32 @@ const makeStyles = (palette: typeof staticPalette) =>
       borderRadius: 15,
     },
     tierPillText: { fontFamily: fonts.bodyBold, fontSize: 11, letterSpacing: 1.6, color: palette.ink },
+    nextLine: { fontFamily: fonts.body, fontSize: 14, color: palette.inkMuted },
+    nextStrong: { fontFamily: fonts.displayBold, fontSize: 15, color: palette.ink },
+    trendPeek: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    heroSpark: { flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 22 },
+    heroSparkBar: { width: 3, borderRadius: 1.5 },
+    trendMeta: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+    trendPct: { fontFamily: fonts.bodyBold, fontSize: 13, color: palette.electric },
 
     scoreBarTrack: { height: 10, borderRadius: 5, backgroundColor: palette.boneSoft, overflow: 'hidden' },
     scoreBarFill: { height: 10, borderRadius: 5 },
     scoreFoot: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
     scoreFootText: { ...T.label, color: palette.inkMuted },
+
+    statRow: { flexDirection: 'row', gap: 10, marginTop: 12 },
+    statCard: {
+      flex: 1,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: palette.line,
+      backgroundColor: palette.paper,
+      padding: 16,
+      gap: 4,
+    },
+    statKicker: { ...T.label, color: palette.inkMuted },
+    statValue: { fontFamily: fonts.displayBold, fontSize: 32, letterSpacing: -1, color: palette.ink, marginTop: 2 },
+    statLabel: { ...T.small, color: palette.inkMuted },
 
     factorRow: { gap: 8 },
     factorHead: { flexDirection: 'row', alignItems: 'baseline', gap: 10 },

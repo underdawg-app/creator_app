@@ -27,11 +27,11 @@ import {
 const POST_TYPES: Array<{ key: CommunityPostKind; label: string; icon: string; accent: string }> = [
   { key: 'DISCUSSION', label: 'DISCUSSION', icon: 'chatbubbles-outline',   accent: '#2E5BFF' },
   { key: 'QUESTION',   label: 'QUESTION',   icon: 'help-circle-outline',   accent: '#FF6BB5' },
-  { key: 'WIN',        label: 'WIN',        icon: 'trophy-outline',        accent: '#FCD34D' },
+  { key: 'WIN',        label: 'WIN',        icon: 'trophy-outline',        accent: '#9CA3AF' },
   { key: 'STRUGGLE',   label: 'STRUGGLE',   icon: 'pulse-outline',         accent: '#FF5A1F' },
   { key: 'TIP',        label: 'TIP',        icon: 'bulb-outline',          accent: '#2E5BFF' },
   { key: 'RESOURCE',   label: 'RESOURCE',   icon: 'link-outline',          accent: '#FF6BB5' },
-  { key: 'COLLAB',     label: 'COLLAB',     icon: 'people-outline',        accent: '#FCD34D' },
+  { key: 'COLLAB',     label: 'COLLAB',     icon: 'people-outline',        accent: '#9CA3AF' },
   { key: 'FEEDBACK',   label: 'FEEDBACK',   icon: 'eye-outline',           accent: '#FF5A1F' },
 ];
 

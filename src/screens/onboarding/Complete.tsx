@@ -301,10 +301,10 @@ const COUNT = IS_ANDROID ? 36 : 90;
 const NEON: string[] = [
   staticPalette.blush,    // pink   #FF6BB5
   staticPalette.electric, // blue   #2E5BFF
-  staticPalette.acid,     // green  #FCD34D
+  staticPalette.acid,     // violet #9CA3AF
   staticPalette.ember,    // orange #FF5A1F
   '#F70E0A',              // red
-  '#FFE600',              // yellow
+  '#22D3EE',              // cyan
 ];
 
 type ParticleBank = {

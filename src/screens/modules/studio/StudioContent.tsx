@@ -37,7 +37,7 @@ const SEED: ContentItem[] = [
   { id: 'c2', kind: 'VIDEO', caption: 'studio b-roll, 12s loop.', bg: '#FF5A1F', fg: BONE, likes: 940, comments: 31, reposts: 48 },
   { id: 'c3', kind: 'AUDIO', caption: 'voice memo → track.', bg: '#FF6BB5', fg: INK, likes: 612, comments: 19, reposts: 9 },
   { id: 'c4', kind: 'TEXT', caption: 'the underdawg manifesto.', bg: '#14B8A6', fg: BONE, likes: 2030, comments: 188, reposts: 140 },
-  { id: 'c5', kind: 'IMAGE', caption: 'merch flatlay, gold pin.', bg: '#FCD34D', fg: INK, likes: 1574, comments: 73, reposts: 36 },
+  { id: 'c5', kind: 'IMAGE', caption: 'merch flatlay, gold pin.', bg: '#9CA3AF', fg: INK, likes: 1574, comments: 73, reposts: 36 },
 ];
 
 export default function StudioContent() {

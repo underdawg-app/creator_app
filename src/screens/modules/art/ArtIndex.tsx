@@ -67,8 +67,8 @@ export default function ArtHome() {
           <MagneticButton
             label="LIST NEW ART"
             size="lg"
-            background={staticPalette.ink}
-            foreground={staticPalette.acid}
+            background={palette.ink}
+            foreground={palette.bone}
             onPress={() => router.push('/(modules)/art/list')}
           />
         </View>

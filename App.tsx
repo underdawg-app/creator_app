@@ -100,7 +100,6 @@ function RootShell() {
               <RootNavigator />
             </NavigationContainer>
             <AcidSplashHost />
-            <ConfettiHost />
             <ToastHost />
           </View>
         </TransitionProvider>

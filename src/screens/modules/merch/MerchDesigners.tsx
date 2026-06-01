@@ -5,6 +5,7 @@ import {
   Text as RNText,
   Pressable,
   TextInput,
+  ScrollView,
 } from 'react-native';
 import { router } from '@/navigation';
 import { Ionicons } from '@/icons';
@@ -124,12 +125,17 @@ export default function MerchDesigners() {
         </Pressable>
       </View>
 
-      {/* Filters */}
-      <View style={styles.filterRow}>
+      {/* Filters — single swipable row that runs off both screen edges */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.filterScroll}
+        contentContainerStyle={styles.filterRow}
+      >
         {FILTERS.map((f) => (
           <Chip key={f} label={f} active={filter === f} onPress={() => setFilter(f)} />
         ))}
-      </View>
+      </ScrollView>
 
       {/* Designer cards */}
       <Section eyebrow={`${list.length} AVAILABLE`} title="the bench.">
@@ -264,7 +270,10 @@ const makeStyles = (palette: typeof staticPalette) =>
       color: palette.electric,
     },
 
-    filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 18 },
+    // Break out of ScreenFrame's 12px padding so the row bleeds to both edges,
+    // then pad the content back so the first chip still lines up with the page.
+    filterScroll: { marginTop: 18, marginHorizontal: -12 },
+    filterRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 12 },
 
     card: {
       borderRadius: 20,

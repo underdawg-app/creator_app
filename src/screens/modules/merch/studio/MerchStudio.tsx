@@ -9,6 +9,9 @@ import MerchStudioWelcome from './MerchStudioWelcome';
 import MerchStudioReview from './MerchStudioReview';
 
 export default function MerchStudio() {
-  const built = useStore((s) => s.storeBuilder.built);
-  return built ? <MerchStudioReview /> : <MerchStudioWelcome />;
+  // Gate on `published` (a deliberate action), NOT the sticky `built` flag.
+  // `built` was auto-set on Review mount and persisted in AsyncStorage, which
+  // trapped users on the one-page review and hid the welcome → wizard flow.
+  const published = useStore((s) => s.storeBuilder.published);
+  return published ? <MerchStudioReview /> : <MerchStudioWelcome />;
 }
