@@ -88,6 +88,7 @@ const STATIC: Record<string, ParseResult> = {
   '/(modules)/portfolio/piece-editor': { stack: 'Modules', screen: 'PortfolioPieceEditor' },
   '/(modules)/portfolio/public-preview': { stack: 'Modules', screen: 'PortfolioPublicPreview' },
   '/(modules)/profile/edit': { stack: 'Modules', screen: 'ProfileEdit' },
+  '/(modules)/saved': { stack: 'Modules', screen: 'SavedIndex' },
 
   '/(modules)/reputation': { stack: 'Modules', screen: 'ReputationIndex' },
   '/(modules)/reputation/badges': { stack: 'Modules', screen: 'ReputationBadges' },
@@ -152,6 +153,7 @@ const DYNAMIC: DynamicEntry[] = [
   { test: /^\/\(modules\)\/learning\/([^/?]+)$/, paramKeys: ['course'], stack: 'Modules', screen: 'LearningCourse' },
   { test: /^\/\(modules\)\/profile\/post\/([^/?]+)$/, paramKeys: ['id'], stack: 'Modules', screen: 'ProfilePostsViewer' },
   { test: /^\/\(modules\)\/profile\/reel\/([^/?]+)$/, paramKeys: ['id'], stack: 'Modules', screen: 'ProfileReelViewer' },
+  { test: /^\/\(modules\)\/profile\/u\/([^/?]+)$/, paramKeys: ['handle'], stack: 'Modules', screen: 'UserProfile' },
   // /reel must precede the catch-all /:id so 'reel' isn't parsed as an id.
   { test: /^\/\(modules\)\/community\/challenges\/([^/?]+)\/reel$/, paramKeys: ['id'], stack: 'Modules', screen: 'ChallengeReel' },
   { test: /^\/\(modules\)\/community\/challenges\/([^/?]+)$/, paramKeys: ['id'], stack: 'Modules', screen: 'ChallengeDetail' },

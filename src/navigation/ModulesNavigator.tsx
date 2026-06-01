@@ -65,6 +65,8 @@ import PortfolioPublicPreview from '@/screens/modules/portfolio/PortfolioPublicP
 import ProfilePostsViewer from '@/screens/modules/profile/PostsViewer';
 import ProfileReelViewer from '@/screens/modules/profile/ReelViewer';
 import ProfileEdit from '@/screens/modules/profile/ProfileEdit';
+import UserProfile from '@/screens/modules/profile/UserProfile';
+import SavedIndex from '@/screens/modules/profile/SavedIndex';
 
 import ReputationIndex from '@/screens/modules/reputation/ReputationIndex';
 import ReputationBadges from '@/screens/modules/reputation/ReputationBadges';
@@ -222,6 +224,8 @@ export default function ModulesNavigator() {
         }}
       />
       <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
+      <Stack.Screen name="UserProfile" component={UserProfile} />
+      <Stack.Screen name="SavedIndex" component={SavedIndex} />
 
       <Stack.Screen name="ReputationIndex" component={ReputationIndex} />
       <Stack.Screen name="ReputationBadges" component={ReputationBadges} />
