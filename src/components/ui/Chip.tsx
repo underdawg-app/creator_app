@@ -9,6 +9,20 @@ import {
 import { fonts } from '@/theme/typography';
 import { Tap } from './Tap';
 
+// When a chip is active it fills with `accent`; pick a label color that
+// actually contrasts that fill (luminance-based) so a dark accent like
+// palette.ink gets light text instead of dark-on-dark (the analytics
+// 7D/30D/90D tabs were black text on a black box in light mode).
+function readableOnAccent(hex: string): string {
+  const h = (hex || '').replace('#', '');
+  if (h.length < 6) return staticPalette.ink;
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.6 ? staticPalette.ink : staticPalette.bone;
+}
+
 type Props = {
   label: string;
   active?: boolean;
@@ -35,7 +49,7 @@ export function Chip({ label, active, onPress, accent = staticPalette.acid, inve
   };
 
   const labelColor = active
-    ? staticPalette.ink
+    ? readableOnAccent(accent)
     : inverse
       ? palette.bone
       : palette.ink;

@@ -182,11 +182,16 @@ function Row({
             style={[
               styles.numCircle,
               expanded
-                ? { backgroundColor: palette.inkMuted }
+                ? { backgroundColor: staticPalette.ink }
                 : { borderWidth: 1, borderColor: fg },
             ]}
           >
-            <RNText style={[styles.numText, { color: fg }]}>
+            <RNText
+              style={[
+                styles.numText,
+                { color: expanded ? staticPalette.bone : fg },
+              ]}
+            >
               {String(index + 1).padStart(2, '0')}
             </RNText>
           </View>
