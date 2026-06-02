@@ -19,6 +19,15 @@ def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 // Drop the jar variant; keep the aar so FastImage's SVG module works.
 configurations.all {
     exclude group: 'com.caverock', module: 'androidsvg'
+    // react-native-video targets androidx.media3 1.8.0, but transitive
+    // constraints upgrade it to 1.9.0, mixing ExoPlayer internals and crashing
+    // with NoSuchMethodError (DefaultLoadControl/DefaultAllocator). Pin every
+    // media3 module to one consistent version.
+    resolutionStrategy.eachDependency { details ->
+        if (details.requested.group == 'androidx.media3') {
+            details.useVersion '1.8.0'
+        }
+    }
 }
 
 android {

@@ -2,9 +2,14 @@
 // Preserves the `Haptics.impactAsync(Haptics.ImpactFeedbackStyle.X)` call shape
 // the existing components use, including the `.catch(() => {})` chain (Android
 // is sync, so we wrap in Promise.resolve to keep .catch working uniformly).
+import { Platform } from 'react-native';
 import RNHaptic from 'react-native-haptic-feedback';
 
 const options = { enableVibrateFallback: true, ignoreAndroidSystemSettings: false };
+
+// Android: no haptics at all. The platform ripple is the press feedback; an
+// extra vibration on every button tap reads as the app "feeling heavy".
+const HAPTICS_ENABLED = Platform.OS !== 'android';
 
 export enum ImpactFeedbackStyle {
   Light = 'Light',
@@ -35,6 +40,7 @@ const notificationToTrigger: Record<NotificationFeedbackType, string> = {
 };
 
 function safeTrigger(name: string): Promise<void> {
+  if (!HAPTICS_ENABLED) return Promise.resolve();
   try {
     RNHaptic.trigger(name as Parameters<typeof RNHaptic.trigger>[0], options);
   } catch {

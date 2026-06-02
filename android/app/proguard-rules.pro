@@ -68,6 +68,15 @@
 # ───────── Haptic Feedback ─────────
 -keep class com.mkuczera.** { *; }
 
+# ───────── react-native-video / ExoPlayer (androidx.media3) ─────────
+# Without this, R8 strips/renames media3 internals (DefaultLoadControl ↔
+# DefaultAllocator), crashing with NoSuchMethodError the moment a <Video> mounts.
+-keep class androidx.media3.** { *; }
+-keep interface androidx.media3.** { *; }
+-dontwarn androidx.media3.**
+-keep class com.brentvatne.** { *; }
+-dontwarn com.brentvatne.**
+
 # ───────── Keep enum values referenced via reflection by JS ─────────
 -keepclassmembers enum * { *; }
 -keepattributes *Annotation*, EnclosingMethod, InnerClasses, Signature, Exceptions
