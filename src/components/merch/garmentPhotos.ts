@@ -17,14 +17,18 @@ export type GarmentPhoto = {
   ratio: number;
 };
 
-// Print rects measured against each photo. Front/back of apparel share the same
-// rect so the print sits identically on both sides.
-const TEE = { x: 0.34, y: 0.30, w: 0.32, h: 0.30 };
-const HOODIE = { x: 0.37, y: 0.34, w: 0.26, h: 0.20 };
-const CAP = { x: 0.37, y: 0.25, w: 0.26, h: 0.15 };
-const MUG = { x: 0.25, y: 0.37, w: 0.24, h: 0.24 }; // left mug's front face
+// Print rects measured against each photo (image-space fractions).
+// APPAREL: one shared chest frame used by BOTH tee and hoodie, FRONT and BACK,
+// so placement is identical across all four.
+const APPAREL = { x: 0.32, y: 0.30, w: 0.36, h: 0.34 };
+// Pixel-detected front panel ~x0.25–0.72; print centered on it.
+const CAP = { x: 0.35, y: 0.22, w: 0.30, h: 0.17 };
+// Pixel-detected: left mug body spans x≈0.20–0.47 at mid-height; print sits on
+// its flat front face, kept inside the curved edges.
+const MUG = { x: 0.24, y: 0.36, w: 0.19, h: 0.22 };
 const TOTE = { x: 0.31, y: 0.45, w: 0.38, h: 0.30 };
-const POSTER = { x: 0.29, y: 0.075, w: 0.45, h: 0.61 }; // fills the white sheet
+// Pixel-detected white sheet: x≈0.265–0.751, y≈0.064–0.821 → fill it.
+const POSTER = { x: 0.265, y: 0.064, w: 0.486, h: 0.757 };
 
 function ratioOf(src: ImageSourcePropType): number {
   const r = Image.resolveAssetSource(src as any);
@@ -39,12 +43,12 @@ function photo(src: ImageSourcePropType, print: GarmentPhoto['print']): GarmentP
 
 const MOCKUPS: Record<string, ByView> = {
   TEE: {
-    FRONT: photo(require('@/assets/mockups/tee-front.png'), TEE),
-    BACK: photo(require('@/assets/mockups/tee-back.png'), TEE),
+    FRONT: photo(require('@/assets/mockups/tee-front.png'), APPAREL),
+    BACK: photo(require('@/assets/mockups/tee-back.png'), APPAREL),
   },
   HOODIE: {
-    FRONT: photo(require('@/assets/mockups/hoodie-front.png'), HOODIE),
-    BACK: photo(require('@/assets/mockups/hoodie-back.png'), HOODIE),
+    FRONT: photo(require('@/assets/mockups/hoodie-front.png'), APPAREL),
+    BACK: photo(require('@/assets/mockups/hoodie-back.png'), APPAREL),
   },
   CAP: { FRONT: photo(require('@/assets/mockups/cap-front.png'), CAP) },
   MUG: { FRONT: photo(require('@/assets/mockups/mug-front.png'), MUG) },
