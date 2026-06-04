@@ -17,7 +17,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Image } from '@/components/ui/Image';
-import { GarmentSvg, printAreaFor, type GarmentSide } from '@/components/merch/GarmentSvg';
+import { printAreaFor, type GarmentSide } from '@/components/merch/GarmentSvg';
+import { GarmentIcon } from '@/components/merch/GarmentIcon';
 
 export type ArtTransform = { x: number; y: number; scale: number };
 
@@ -44,7 +45,7 @@ export function PrintMockup({ type, side, color, artworkUri, transform, size }: 
 
   return (
     <View style={{ width: size, height: size }}>
-      <GarmentSvg type={type} side={side} color={color} size={size} />
+      <GarmentIcon type={type} side={side} color={color} size={size} />
       {artworkUri ? (
         <View style={[styles.clip, { left: ax, top: ay, width: aw, height: ah }]}>
           {/* Same base-box + transform model as PrintPlacer, so a placement made
@@ -125,7 +126,7 @@ export function PrintPlacer({
 
   return (
     <View style={{ width: size, height: size }}>
-      <GarmentSvg type={type} side={side} color={color} size={size} />
+      <GarmentIcon type={type} side={side} color={color} size={size} />
       {/* print-zone outline */}
       <View pointerEvents="none" style={[styles.zone, { left: ax, top: ay, width: aw, height: ah }]} />
       {artworkUri ? (

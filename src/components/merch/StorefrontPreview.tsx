@@ -21,7 +21,7 @@ import React, { useEffect, useState } from 'react';
 import { View, ScrollView, Text as RNText, StyleSheet } from 'react-native';
 import { Ionicons } from '@/icons';
 import { Image } from '@/components/ui/Image';
-import { PrintMockup } from '@/components/merch/PrintMockup';
+import { RealProductMockup } from '@/components/merch/RealProductMockup';
 import { useStore } from '@/store';
 import {
   getTheme,
@@ -369,13 +369,15 @@ function ProductTile({
           product.mockupUrl ? (
             <Image source={{ uri: product.mockupUrl }} style={{ width: artH, height: artH }} contentFit="cover" />
           ) : (
-            <PrintMockup
+            // Real garment photo + the creator's design composited on it — the
+            // storefront shows actual product photos, not vector silhouettes.
+            <RealProductMockup
               type={product.type}
-              side={(product.placement ?? 'FRONT') as any}
               color={product.color}
               artworkUri={product.artworkUri}
               transform={{ x: product.artX ?? 0, y: product.artY ?? 0, scale: product.artScale ?? 1 }}
               size={artH}
+              radius={mini ? 8 : 14}
             />
           )
         ) : (

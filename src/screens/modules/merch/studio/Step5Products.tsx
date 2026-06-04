@@ -29,7 +29,8 @@ import {
   useAutoHideFooter,
 } from '@/screens/modules/merch/studio/_chrome';
 import { StorefrontPreview } from '@/components/merch/StorefrontPreview';
-import { PrintMockup, PrintPlacer, type ArtTransform } from '@/components/merch/PrintMockup';
+import { PrintPlacer, type ArtTransform } from '@/components/merch/PrintMockup';
+import { RealProductMockup } from '@/components/merch/RealProductMockup';
 import {
   STORE_PRODUCT_TYPES,
   GARMENT_COLORS,
@@ -468,9 +469,10 @@ function ProductCard({
         {product.mockupUrl ? (
           <Image source={{ uri: product.mockupUrl }} style={styles.cardArtFill} contentFit="cover" />
         ) : (
-          <PrintMockup
+          // Finished product card → show the REAL garment photo with the design,
+          // same as the storefront. (The SVG placer above is only for positioning.)
+          <RealProductMockup
             type={product.type}
-            side={product.placement ?? 'FRONT'}
             color={product.color}
             artworkUri={product.artworkUri}
             transform={{ x: product.artX ?? 0, y: product.artY ?? 0, scale: product.artScale ?? 1 }}

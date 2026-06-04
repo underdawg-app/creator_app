@@ -30,7 +30,7 @@ import {
   useAutoHideFooter,
 } from '@/screens/modules/merch/studio/_chrome';
 import { StorefrontPreview } from '@/components/merch/StorefrontPreview';
-import { SkiaMockup } from '@/components/merch/SkiaMockup';
+import { RealProductMockup } from '@/components/merch/RealProductMockup';
 import {
   STORE_PRODUCT_TYPES,
   GARMENT_COLORS,
@@ -333,9 +333,9 @@ export default function Step6Mockups() {
                       {m.mockupUrl ? (
                         <Image source={{ uri: m.mockupUrl }} style={{ width: cardSize, height: cardSize }} contentFit="cover" />
                       ) : (
-                        <SkiaMockup
+                        // Real garment photo + design — no SVG/Skia silhouette.
+                        <RealProductMockup
                           type={m.type}
-                          side={placement}
                           color={m.color}
                           artworkUri={artworkUri}
                           transform={{ x: 0, y: 0, scale: 1 }}
