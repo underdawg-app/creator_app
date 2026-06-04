@@ -1,12 +1,10 @@
-// PrintMockup — renders a vector garment with the design placed + clipped inside
-// its print area, like a print-on-demand mockup.
+// PrintPlacer — the design-placement editor (Qikink-style): a REAL product photo
+// as the backdrop, with the uploaded design draggable/pinchable inside the
+// product's print zone (dashed outline). No SVG/icon garment here — the creator
+// sees their design on the actual product while positioning it.
 //
-//   <PrintMockup ... />            static (catalog cards, storefront tiles)
-//   <PrintMockup interactive ... > drag to move, pinch to zoom; reports the
-//                                  normalized transform via onChange.
-//
-// The transform is stored normalized to the print area, so the SAME placement
-// renders correctly at any mockup size.
+// The transform is normalized to the print area, so the SAME placement renders
+// pixel-identical in the storefront (RealProductMockup).
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
@@ -17,8 +15,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Image } from '@/components/ui/Image';
-import { printAreaFor, type GarmentSide } from '@/components/merch/GarmentSvg';
-import { GarmentIcon } from '@/components/merch/GarmentIcon';
+import { type GarmentSide } from '@/components/merch/GarmentSvg';
+import { garmentPhotoFor, type GarmentView } from '@/components/merch/garmentPhotos';
 
 export type ArtTransform = { x: number; y: number; scale: number };
 
@@ -31,44 +29,7 @@ type BaseProps = {
   size: number;
 };
 
-// ---- Static (no gestures) ----
-export function PrintMockup({ type, side, color, artworkUri, transform, size }: BaseProps) {
-  const area = printAreaFor(type, side);
-  const ax = area.x * size;
-  const ay = area.y * size;
-  const aw = area.w * size;
-  const ah = area.h * size;
-  const base = aw;
-  const s = transform?.scale ?? 1;
-  const dx = (transform?.x ?? 0) * aw;
-  const dy = (transform?.y ?? 0) * ah;
-
-  return (
-    <View style={{ width: size, height: size }}>
-      <GarmentIcon type={type} side={side} color={color} size={size} />
-      {artworkUri ? (
-        <View style={[styles.clip, { left: ax, top: ay, width: aw, height: ah }]}>
-          {/* Same base-box + transform model as PrintPlacer, so a placement made
-              in the editor renders pixel-identical here. */}
-          <View
-            style={{
-              position: 'absolute',
-              left: (aw - base) / 2,
-              top: (ah - base) / 2,
-              width: base,
-              height: base,
-              transform: [{ translateX: dx }, { translateY: dy }, { scale: s }],
-            }}
-          >
-            <Image source={{ uri: artworkUri }} style={{ width: base, height: base }} contentFit="contain" />
-          </View>
-        </View>
-      ) : null}
-    </View>
-  );
-}
-
-// ---- Interactive placer (drag + pinch) ----
+// ---- Interactive placer (drag + pinch) over a real product photo ----
 export function PrintPlacer({
   type,
   side,
@@ -76,10 +37,10 @@ export function PrintPlacer({
   artworkUri,
   transform,
   size,
-  zone,
   onChange,
 }: BaseProps & { zone?: string; onChange: (t: ArtTransform) => void }) {
-  const area = printAreaFor(type, side);
+  const photo = garmentPhotoFor(type, color, side as GarmentView);
+  const area = photo.print;
   const ax = area.x * size;
   const ay = area.y * size;
   const aw = area.w * size;
@@ -126,9 +87,12 @@ export function PrintPlacer({
 
   return (
     <View style={{ width: size, height: size }}>
-      <GarmentIcon type={type} side={side} color={color} size={size} />
-      {/* print-zone outline */}
+      {/* Real product photo backdrop */}
+      <Image source={photo.src} style={{ width: size, height: size }} contentFit="contain" transition={150} />
+
+      {/* print-zone outline (the selectable area) */}
       <View pointerEvents="none" style={[styles.zone, { left: ax, top: ay, width: aw, height: ah }]} />
+
       {artworkUri ? (
         <GestureDetector gesture={gesture}>
           <View style={[styles.clip, { left: ax, top: ay, width: aw, height: ah }]} collapsable={false}>
@@ -157,9 +121,9 @@ const styles = StyleSheet.create({
   clip: { position: 'absolute', overflow: 'hidden' },
   zone: {
     position: 'absolute',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderStyle: 'dashed',
-    borderColor: 'rgba(120,120,120,0.6)',
+    borderColor: 'rgba(255,90,31,0.9)',
     borderRadius: 4,
   },
 });

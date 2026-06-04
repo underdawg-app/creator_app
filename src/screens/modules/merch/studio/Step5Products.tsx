@@ -476,6 +476,7 @@ function ProductCard({
             color={product.color}
             artworkUri={product.artworkUri}
             transform={{ x: product.artX ?? 0, y: product.artY ?? 0, scale: product.artScale ?? 1 }}
+            view={(product.placement ?? 'FRONT') as any}
             size={120}
           />
         )}

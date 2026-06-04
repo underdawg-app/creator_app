@@ -339,6 +339,7 @@ export default function Step6Mockups() {
                           color={m.color}
                           artworkUri={artworkUri}
                           transform={{ x: 0, y: 0, scale: 1 }}
+                          view={placement as any}
                           size={cardSize - 6}
                         />
                       )}
