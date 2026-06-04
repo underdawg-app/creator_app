@@ -28,14 +28,18 @@ const TOTE_PRINT = { x: 0.32, y: 0.40, w: 0.36, h: 0.34 };
 const POSTER_PRINT = { x: 0.16, y: 0.12, w: 0.68, h: 0.74 };
 const CAP_PRINT = { x: 0.38, y: 0.40, w: 0.26, h: 0.18 };
 
+// PLAIN (no-print) flat-lay/product shots, so the creator's design is the ONLY
+// graphic on the garment. Centered framing so the print rect lands on the chest /
+// face of the product.
 const PHOTOS: Record<string, ByTone> = {
   TEE: {
-    light: { uri: U('photo-1521572163474-6864f9cf17ab'), print: TEE_PRINT },
-    dark: { uri: U('photo-1583743814966-8936f5b7be1a'), print: TEE_PRINT },
+    // plain white & plain black tees, front-flat, no logo
+    light: { uri: U('photo-1581655353564-df123a1eb820'), print: TEE_PRINT },
+    dark: { uri: U('photo-1618354691373-d851c5c3a990'), print: TEE_PRINT },
   },
   HOODIE: {
-    light: { uri: U('photo-1556821840-3a63f95609a7'), print: HOOD_PRINT },
-    dark: { uri: U('photo-1620799140408-edc6dcb6d633'), print: HOOD_PRINT },
+    light: { uri: U('photo-1556172732-2a4f5f9b9c5f'), print: HOOD_PRINT },
+    dark: { uri: U('photo-1542406775-ade58c52d2e4'), print: HOOD_PRINT },
   },
   MUG: {
     light: { uri: U('photo-1514228742587-6b1558fcca3d'), print: MUG_PRINT },
@@ -50,8 +54,8 @@ const PHOTOS: Record<string, ByTone> = {
     dark: { uri: U('photo-1493612276216-ee3925520721'), print: POSTER_PRINT },
   },
   CAP: {
-    light: { uri: U('photo-1588850561407-ed78c282e89b'), print: CAP_PRINT },
-    dark: { uri: U('photo-1521369909029-2afed882baee'), print: CAP_PRINT },
+    light: { uri: U('photo-1521369909029-2afed882baee'), print: CAP_PRINT },
+    dark: { uri: U('photo-1588850561407-ed78c282e89b'), print: CAP_PRINT },
   },
 };
 

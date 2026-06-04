@@ -18,7 +18,10 @@ const ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   MUG: 'cafe',
   TOTE: 'bag-handle',
   POSTER: 'image',
-  CAP: 'school', // closest realistic "cap" glyph in Ionicons
+  // Ionicons has no baseball-cap glyph (only graduation/chef/cowboy hats, which
+  // are wrong). 'ellipse' gives a neutral rounded crown the design sits on; the
+  // STORE shows a real cap photo anyway, this is only the editor backdrop.
+  CAP: 'ellipse-outline',
 };
 
 export function GarmentIcon({
