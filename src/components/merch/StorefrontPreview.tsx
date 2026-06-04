@@ -350,24 +350,26 @@ function ProductTile({
   mini: boolean;
 }) {
   const typeLabel = product ? getProductType(product.type).label : 'PRODUCT';
-  const artH = mini ? 64 : 150;
+  const radius = mini ? 8 : 14;
 
   return (
-    <View style={[styles.tile, { width: mini ? '48%' : '48%', marginBottom: mini ? 8 : 14 }]}>
+    <View style={[styles.tile, { width: '48%', marginBottom: mini ? 8 : 14 }]}>
+      {/* Square art box — aspectRatio:1 keeps it from stretching landscape, and
+          the mockup fills it edge-to-edge so no card background shows behind. */}
       <View
         style={[
           styles.tileArt,
           {
             backgroundColor: theme.surface,
             borderColor: theme.border,
-            height: artH,
-            borderRadius: mini ? 8 : 14,
+            aspectRatio: 1,
+            borderRadius: radius,
           },
         ]}
       >
         {product ? (
           product.mockupUrl ? (
-            <Image source={{ uri: product.mockupUrl }} style={{ width: artH, height: artH }} contentFit="cover" />
+            <Image source={{ uri: product.mockupUrl }} style={StyleSheet.absoluteFillObject} contentFit="cover" />
           ) : (
             // Real garment photo + the creator's design composited on it — the
             // storefront shows actual product photos, not vector silhouettes.
@@ -376,8 +378,8 @@ function ProductTile({
               color={product.color}
               artworkUri={product.artworkUri}
               transform={{ x: product.artX ?? 0, y: product.artY ?? 0, scale: product.artScale ?? 1 }}
-              size={artH}
-              radius={mini ? 8 : 14}
+              fill
+              radius={radius}
             />
           )
         ) : (
