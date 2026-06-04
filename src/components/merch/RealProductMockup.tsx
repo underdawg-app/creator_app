@@ -10,7 +10,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, type LayoutChangeEvent } from 'react-native';
 import { Image } from '@/components/ui/Image';
-import { garmentPhotoFor, type GarmentView } from '@/components/merch/garmentPhotos';
+import { garmentPhotoFor, containBox, type GarmentView } from '@/components/merch/garmentPhotos';
 
 type Props = {
   type: string;
@@ -32,11 +32,13 @@ export function RealProductMockup({ type, color, artworkUri, transform, view = '
     if (fill) setMeasured(Math.round(e.nativeEvent.layout.width));
   };
 
+  // Map the image-space print rect onto the letterboxed photo within the box.
+  const box = containBox(dim, photo.ratio);
   const area = photo.print;
-  const aw = area.w * dim;
-  const ah = area.h * dim;
-  const ax = area.x * dim;
-  const ay = area.y * dim;
+  const aw = area.w * box.w;
+  const ah = area.h * box.h;
+  const ax = box.x + area.x * box.w;
+  const ay = box.y + area.y * box.h;
   const base = aw;
   const s = transform?.scale ?? 1;
   const dx = (transform?.x ?? 0) * aw;

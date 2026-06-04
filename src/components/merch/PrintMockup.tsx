@@ -16,7 +16,7 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Image } from '@/components/ui/Image';
 import { type GarmentSide } from '@/components/merch/GarmentSvg';
-import { garmentPhotoFor, type GarmentView } from '@/components/merch/garmentPhotos';
+import { garmentPhotoFor, containBox, type GarmentView } from '@/components/merch/garmentPhotos';
 
 export type ArtTransform = { x: number; y: number; scale: number };
 
@@ -40,11 +40,12 @@ export function PrintPlacer({
   onChange,
 }: BaseProps & { zone?: string; onChange: (t: ArtTransform) => void }) {
   const photo = garmentPhotoFor(type, color, side as GarmentView);
+  const box = containBox(size, photo.ratio);
   const area = photo.print;
-  const ax = area.x * size;
-  const ay = area.y * size;
-  const aw = area.w * size;
-  const ah = area.h * size;
+  const ax = box.x + area.x * box.w;
+  const ay = box.y + area.y * box.h;
+  const aw = area.w * box.w;
+  const ah = area.h * box.h;
   const base = aw;
 
   const tx = useSharedValue((transform?.x ?? 0) * aw);
