@@ -22,6 +22,7 @@ import { withOpacity } from '@/theme/colorUtils';
 import { fonts, type as T } from '@/theme/typography';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Tap } from '@/components/ui/Tap';
+import { ModuleHeader } from '@/components/ui/ModuleHeader';
 import { useStore } from '@/store';
 import Animated, {
   Easing,
@@ -172,39 +173,52 @@ export default function ThreadDetail() {
     >
       <StatusBar barStyle={statusBar} />
 
-      <SafeAreaView edges={['top']}>
-        <View style={styles.header}>
-          <Tap onPress={() => router.back()} style={styles.iconBtn} burstColor={palette.ink}>
-            <Ionicons name="chevron-back" size={24} color={palette.ink} />
-          </Tap>
+      <SafeAreaView edges={['top']} style={styles.headerSafe}>
+        <ModuleHeader
+          left={
+            <View style={styles.headerLeft}>
+              <Tap
+                onPress={() => router.back()}
+                style={[styles.back, { borderColor: palette.line }]}
+                burstColor={palette.ink}
+              >
+                <Ionicons name="arrow-back" size={18} color={palette.ink} />
+              </Tap>
 
-          <View style={[styles.avatar, { backgroundColor: thread.accent }]}>
-            <RNText style={[styles.avatarText, { color: avatarFg }]}>
-              {initial}
-            </RNText>
-            {thread.verified ? (
-              <View style={styles.verifiedBadge}>
-                <Ionicons name="checkmark" size={9} color={palette.bone} />
+              <View style={[styles.avatar, { backgroundColor: thread.accent }]}>
+                <RNText style={[styles.avatarText, { color: avatarFg }]}>
+                  {initial}
+                </RNText>
+                {thread.verified ? (
+                  <View style={styles.verifiedBadge}>
+                    <Ionicons name="checkmark" size={9} color={palette.bone} />
+                  </View>
+                ) : null}
               </View>
-            ) : null}
-          </View>
 
-          <View style={{ flex: 1 }}>
-            <RNText style={styles.name} numberOfLines={1}>
-              {thread.name}
-            </RNText>
-            <View style={styles.statusRow}>
-              <View style={styles.statusDot} />
-              <RNText style={styles.statusText}>
-                {thread.typing ? 'typing…' : 'Active now'}
-              </RNText>
+              <View style={styles.headerMeta}>
+                <RNText style={styles.name} numberOfLines={1} maxFontSizeMultiplier={1.1}>
+                  {thread.name}
+                </RNText>
+                <View style={styles.statusRow}>
+                  <View style={styles.statusDot} />
+                  <RNText style={styles.statusText} maxFontSizeMultiplier={1.1}>
+                    {thread.typing ? 'typing…' : 'Active now'}
+                  </RNText>
+                </View>
+              </View>
             </View>
-          </View>
-
-          <Tap onPress={() => {}} style={styles.iconBtn} burstColor={palette.ink}>
-            <Ionicons name="ellipsis-horizontal" size={20} color={palette.ink} />
-          </Tap>
-        </View>
+          }
+          right={
+            <Tap
+              onPress={() => {}}
+              style={[styles.headerBtn, { borderColor: palette.line }]}
+              burstColor={palette.ink}
+            >
+              <Ionicons name="ellipsis-horizontal" size={18} color={palette.ink} />
+            </Tap>
+          }
+        />
       </SafeAreaView>
 
       <ScrollView
@@ -266,7 +280,10 @@ export default function ThreadDetail() {
                     styles.bubble,
                     isMe
                       ? [styles.bubbleMe, { backgroundColor: ACID }]
-                      : [styles.bubbleThem, { backgroundColor: palette.boneSoft }],
+                      : [
+                          styles.bubbleThem,
+                          { backgroundColor: palette.paper, borderColor: palette.line },
+                        ],
                     isMe
                       ? {
                           borderBottomRightRadius: endsGroup ? 6 : 18,
@@ -375,7 +392,8 @@ function TypingBubble({
             styles.bubble,
             styles.bubbleThem,
             {
-              backgroundColor: palette.boneSoft,
+              backgroundColor: palette.paper,
+              borderColor: palette.line,
               flexDirection: 'row',
               gap: 5,
               paddingVertical: 12,
@@ -427,26 +445,39 @@ function Dot({ delay, color }: { delay: number; color: string }) {
 }
 
 const makeStyles = (palette: Palette) => StyleSheet.create({
-  header: {
-    paddingHorizontal: 8,
-    paddingVertical: 8,
+  headerSafe: {
+    backgroundColor: palette.bone,
+    paddingHorizontal: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: palette.line,
+  },
+  headerLeft: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: withOpacity(palette.ink, 0.08),
   },
-  iconBtn: {
+  headerMeta: { flex: 1 },
+  back: {
     width: 38,
     height: 38,
     borderRadius: 19,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -505,7 +536,9 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 999,
-    backgroundColor: palette.boneSoft,
+    backgroundColor: palette.paper,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: palette.line,
   },
   dateChipText: {
     ...T.small,
@@ -544,7 +577,9 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     paddingHorizontal: 14,
   },
   bubbleMe: {},
-  bubbleThem: {},
+  bubbleThem: {
+    borderWidth: StyleSheet.hairlineWidth,
+  },
   bubbleText: {
     fontFamily: fonts.body,
     fontSize: 15,
@@ -562,8 +597,8 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     paddingHorizontal: 12,
     paddingTop: 6,
     paddingBottom: 0,
-    borderTopWidth: 1,
-    borderTopColor: withOpacity(palette.ink, 0.08),
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: palette.line,
     backgroundColor: palette.bone,
   },
   composer: {
@@ -575,7 +610,9 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: palette.boneSoft,
+    backgroundColor: palette.paper,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: palette.line,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -588,7 +625,9 @@ const makeStyles = (palette: Palette) => StyleSheet.create({
     fontFamily: fonts.body,
     fontSize: 15,
     color: palette.ink,
-    backgroundColor: palette.boneSoft,
+    backgroundColor: palette.paper,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: palette.line,
     borderRadius: 22,
   },
   sendBtn: {

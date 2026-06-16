@@ -42,6 +42,7 @@ import GigDeliver from '@/screens/modules/jobs/GigDeliver';
 import GigPayment from '@/screens/modules/jobs/GigPayment';
 
 import CommunityIndex from '@/screens/modules/community/CommunityIndex';
+import CommunityIntro from '@/screens/modules/community/CommunityIntro';
 import CommunityEvents from '@/screens/modules/community/CommunityEvents';
 import CommunityGroups from '@/screens/modules/community/CommunityGroups';
 import CommunityGroupDetail from '@/screens/modules/community/CommunityGroupDetail';
@@ -67,6 +68,7 @@ import ProfileReelViewer from '@/screens/modules/profile/ReelViewer';
 import ProfileEdit from '@/screens/modules/profile/ProfileEdit';
 import UserProfile from '@/screens/modules/profile/UserProfile';
 import SavedIndex from '@/screens/modules/profile/SavedIndex';
+import PostDetail from '@/screens/modules/profile/PostDetail';
 
 import ReputationIndex from '@/screens/modules/reputation/ReputationIndex';
 import ReputationBadges from '@/screens/modules/reputation/ReputationBadges';
@@ -171,6 +173,7 @@ export default function ModulesNavigator() {
       <Stack.Screen name="GigPayment" component={GigPayment} />
 
       <Stack.Screen name="CommunityIndex" component={CommunityIndex} />
+      <Stack.Screen name="CommunityIntro" component={CommunityIntro} />
       <Stack.Screen name="CommunityEvents" component={CommunityEvents} />
       <Stack.Screen name="CommunityEventDetail" component={CommunityEventDetail} />
       <Stack.Screen name="CommunityGroups" component={CommunityGroups} />
@@ -195,7 +198,7 @@ export default function ModulesNavigator() {
         options={{
           animation: 'slide_from_right',
           animationDuration: IS_ANDROID ? 220 : 300,
-          contentStyle: { backgroundColor: '#0A0A0A' },
+          contentStyle: { backgroundColor: palette.bone },
         }}
       />
 
@@ -226,6 +229,7 @@ export default function ModulesNavigator() {
       <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
       <Stack.Screen name="UserProfile" component={UserProfile} />
       <Stack.Screen name="SavedIndex" component={SavedIndex} />
+      <Stack.Screen name="PostDetail" component={PostDetail} />
 
       <Stack.Screen name="ReputationIndex" component={ReputationIndex} />
       <Stack.Screen name="ReputationBadges" component={ReputationBadges} />

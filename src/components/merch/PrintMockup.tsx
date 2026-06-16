@@ -16,7 +16,7 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Image } from '@/components/ui/Image';
 import { type GarmentSide } from '@/components/merch/GarmentSvg';
-import { garmentPhotoFor, containBox, type GarmentView } from '@/components/merch/garmentPhotos';
+import { garmentPhotoFor, photoLayout, type GarmentView } from '@/components/merch/garmentPhotos';
 
 export type ArtTransform = { x: number; y: number; scale: number };
 
@@ -40,12 +40,12 @@ export function PrintPlacer({
   onChange,
 }: BaseProps & { zone?: string; onChange: (t: ArtTransform) => void }) {
   const photo = garmentPhotoFor(type, color, side as GarmentView);
-  const box = containBox(size, photo.ratio);
+  const { fx, fy, fw, fh } = photoLayout(size, photo);
   const area = photo.print;
-  const ax = box.x + area.x * box.w;
-  const ay = box.y + area.y * box.h;
-  const aw = area.w * box.w;
-  const ah = area.h * box.h;
+  const ax = fx + area.x * fw;
+  const ay = fy + area.y * fh;
+  const aw = area.w * fw;
+  const ah = area.h * fh;
   const base = aw;
 
   const tx = useSharedValue((transform?.x ?? 0) * aw);
@@ -87,9 +87,14 @@ export function PrintPlacer({
   }));
 
   return (
-    <View style={{ width: size, height: size }}>
-      {/* Real product photo backdrop */}
-      <Image source={photo.src} style={{ width: size, height: size }} contentFit="contain" transition={150} />
+    <View style={{ width: size, height: size, overflow: 'hidden' }}>
+      {/* Real product photo backdrop — zoomed to the product's crop box */}
+      <Image
+        source={photo.src}
+        style={{ position: 'absolute', left: fx, top: fy, width: fw, height: fh }}
+        contentFit="contain"
+        transition={150}
+      />
 
       {/* print-zone outline (the selectable area) */}
       <View pointerEvents="none" style={[styles.zone, { left: ax, top: ay, width: aw, height: ah }]} />

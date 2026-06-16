@@ -9,10 +9,7 @@ import {
   FlatList,
   ListRenderItem,
   Platform,
-  Image as RNImage,
 } from 'react-native';
-
-const BRAND_LOGO = require('@/objects/brand-wordmark.png');
 
 const IS_ANDROID = Platform.OS === 'android';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,6 +25,7 @@ import {
   risingList,
 } from '@/data/mock';
 import { Tap } from '@/components/ui/Tap';
+import { BrandWordmark } from '@/components/brand/BrandWordmark';
 import { useStore } from '@/store';
 import { BadgePill } from '@/components/ui/BadgePill';
 import { Chip } from '@/components/ui/Chip';
@@ -171,11 +169,7 @@ function HeaderBar() {
         <View style={styles.dot} />
       </Tap>
       <View style={styles.brandLockup}>
-        <RNImage
-          source={BRAND_LOGO}
-          style={[styles.brandLogo, { tintColor: palette.ink }]}
-          resizeMode="contain"
-        />
+        <BrandWordmark style={styles.brandLogo} />
       </View>
       <Tap
         onPress={() => router.push('/(tabs)/inbox')}
@@ -332,7 +326,7 @@ function PostCardImpl({ post }: { post: Post }) {
 
   const likes = post.likes + (liked ? 1 : 0);
 
-  const openPost = useCallback(() => router.push(`/(modules)/profile/post/${post.id}` as any), [post.id]);
+  const openPost = useCallback(() => router.push(`/(modules)/post/${post.id}` as any), [post.id]);
   const openProfile = useCallback(() => router.push(profileHref(post.handle) as any), [post.handle]);
 
   // Double-tap the thumbnail to like; single tap opens the post.
@@ -639,11 +633,8 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     overflow: 'visible',
   },
   brandLogo: {
-    position: 'absolute',
-    left: 0,
-    top: -32,
-    width: 130,
-    height: 100,
+    width: 132,
+    height: 34,
   },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   iconBtn: {

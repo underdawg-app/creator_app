@@ -1,30 +1,32 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Dimensions, Text as RNText, Platform, Image as RNImage } from 'react-native';
+import Video from 'react-native-video';
 
 const IS_ANDROID = Platform.OS === 'android';
 import { router } from '@/navigation';
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withDelay,
-  withTiming,
 } from 'react-native-reanimated';
 import { palette as staticPalette } from '@/theme/colors';
-import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
-import { fonts, type as T } from '@/theme/typography';
-import { SkiaGrain } from '@/components/skia/SkiaGrain';
-import { SkiaWaveField } from '@/components/skia/SkiaWaveField';
-const BRAND_WORDMARK = require('@/objects/brand-splash.png');
-// Every bundled image the app uses, rendered invisibly below at 1×1 so the
-// PNG decoder warms the bitmap cache during splash. By the time the user
-// reaches the first real screen, none of these have to decode-on-render —
-// they paint instantly. Includes brand marks (header/tab-bar/splash) and
-// every decorative `obj-*.png` used across onboarding + auth + complete.
+import { useTheme, useThemedPaletteStyles } from '@/theme/ThemeContext';
+import { type as T } from '@/theme/typography';
+import { RuleDot } from '@/components/svg/Marks';
+import { BRAND_WORDMARK_ASSETS } from '@/components/brand/BrandWordmark';
+import { prefetchImages } from '@/components/ui/Image';
+import { feedPosts, profileMock, userFeed } from '@/data/mock';
+import { useStore } from '@/store';
+import { getAuth } from '@/lib/firebase';
+
+// Theme-aware splash films. Each already contains the animated underdawg
+// wordmark, so the screen renders no logo of its own — the video IS the logo.
+const SPLASH_DARK = require('@/objects/splash-dark.mp4');
+const SPLASH_LIGHT = require('@/objects/splash-light.mp4');
+
+// Off-screen warmers for the brand + decorative PNGs the first real screen
+// paints, so nothing decodes-on-render after the splash hands off.
 const PRELOAD_ASSETS = [
-  require('@/objects/brand-logo.png'),
-  require('@/objects/brand-wordmark.png'),
-  require('@/objects/brand-splash.png'),
+  ...BRAND_WORDMARK_ASSETS,
   require('@/objects/obj-1.png'),
   require('@/objects/obj-2.png'),
   require('@/objects/obj-3.png'),
@@ -36,29 +38,25 @@ const PRELOAD_ASSETS = [
   require('@/objects/obj-9.png'),
   require('@/objects/obj-10.png'),
 ];
-import { RuleDot } from '@/components/svg/Marks';
-import { prefetchImages } from '@/components/ui/Image';
-import { feedPosts, profileMock, userFeed } from '@/data/mock';
-import { useStore } from '@/store';
-import { getAuth } from '@/lib/firebase';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-// 3s on iOS gives the editorial reveal time to land. On Android the same
-// duration overlaps with the JS bundle settling and just feels like the app
-// is frozen, so we cut it roughly in half and let the user reach the actual
-// product faster.
-const SPLASH_MS = IS_ANDROID ? 1200 : 3000;
+// Hand-off is driven by the film actually finishing (`onEnd`), then we hold a
+// beat on the completed wordmark so it never jump-cuts into onboarding.
+const END_HOLD_MS = 850;
+// Safety net only — fires if the film never reports `onEnd` (stall / error).
+const FALLBACK_MS = IS_ANDROID ? 5200 : 5800;
+// Playback rate ramp: punch in hard at the open, ease to a calmer finish.
+const RATE_START = 3.2;
+const RATE_END = 1.2;
+// Scale the film down so the wordmark reads as a mark, not a billboard. The
+// film's own field is the backdrop colour, so the margin is seamless.
+const VIDEO_SCALE = 0.82;
 
 let CACHE_PREWARMED = false;
 function prewarmImageCache() {
   if (CACHE_PREWARMED) return;
   CACHE_PREWARMED = true;
-  // Pre-warm FastImage's memory + disk cache for every remote URL the app
-  // will likely render in the first session. Splits into priority tiers so
-  // the visible-first-paint covers download first.
-  // HIGH: the initial feed window + every avatar (small, fast, ubiquitous).
-  // NORMAL: the rest of the feed gallery + user-feed grid.
   const feedCoversHigh = feedPosts.slice(0, 12).map((p) => ({
     uri: p.image,
     targetWidth: width,
@@ -84,161 +82,137 @@ function prewarmImageCache() {
         priority: 'normal' as const,
       })),
   ];
-  prefetchImages([
-    ...feedCoversHigh,
-    ...feedAvatars,
-    ...profile,
-    ...feedCoversRest,
-  ]);
+  prefetchImages([...feedCoversHigh, ...feedAvatars, ...profile, ...feedCoversRest]);
 }
 
 export default function Splash() {
-  const palette = useThemedPalette();
+  const { scheme } = useTheme();
   const styles = useThemedPaletteStyles(makeStyles);
-  const markP = useSharedValue(0);
-  const wordP = useSharedValue(0);
-  const taglineP = useSharedValue(0);
-  const progressP = useSharedValue(0);
 
-  useEffect(() => {
-    const ease = Easing.bezier(0.22, 1, 0.36, 1);
+  const isDark = scheme === 'dark';
+  const source = isDark ? SPLASH_DARK : SPLASH_LIGHT;
+  // Match the film's own field so there's zero flash before the first frame.
+  const backdrop = isDark ? '#000000' : '#F4F1EA';
+  // Chrome ink reads against the film: light on the dark film, dark on light.
+  const ink = isDark ? '#F2EFE6' : '#11110E';
+  const accent = staticPalette.acid;
 
-    markP.value = withDelay(200, withTiming(1, { duration: 640, easing: ease }));
-    wordP.value = withDelay(900, withTiming(1, { duration: 820, easing: ease }));
-    taglineP.value = withDelay(1500, withTiming(1, { duration: 560, easing: ease }));
-    progressP.value = withTiming(1, { duration: SPLASH_MS - 200, easing: Easing.linear });
+  const [rate, setRate] = useState(RATE_START);
+  const vProg = useSharedValue(0);
+  const routedRef = useRef(false);
 
-    // Pre-warm the image cache while the splash plays. By the time the user
-    // lands on Feed/Profile, the first batch of avatars + cover photos is
-    // already on disk, so the first scroll has zero network wait.
-    prewarmImageCache();
-
-    // Route based on:
-    //   1. Persisted Zustand state (hydrated + onboarded flags)
-    //   2. Firebase auth currentUser (signed-in / signed-out)
-    //
-    // Truth table:
-    //   - !signedIn        → Welcome (run full onboarding incl. auth)
-    //   - signedIn + !onboarded → Auth screen (pick up where they left off)
-    //   - signedIn + onboarded → Tabs
-    //
-    // Wait for AsyncStorage hydration before reading; Firebase native SDK
-    // hydrates synchronously from disk so currentUser is reliable here.
+  const finish = () => {
+    if (routedRef.current) return;
+    routedRef.current = true;
+    // Wait for store hydration, then branch on auth.
     const route = () => {
       const { hydrated, onboarded } = useStore.getState();
       if (!hydrated) {
-        setTimeout(route, 80);
+        setTimeout(route, 60);
         return;
       }
       let signedIn = false;
       try {
         signedIn = !!getAuth().currentUser;
       } catch {
-        // Firebase native module unavailable (e.g. during dev without
-        // GoogleService-Info.plist). Fall back to onboarded flag alone.
         signedIn = false;
       }
-      if (!signedIn) {
-        router.replace('/(onboarding)/welcome');
-      } else if (!onboarded) {
-        router.replace('/(onboarding)/user-type');
-      } else {
-        router.replace('/(tabs)');
-      }
+      if (!signedIn) router.replace('/(onboarding)/welcome');
+      else if (!onboarded) router.replace('/(onboarding)/user-type');
+      else router.replace('/(tabs)');
     };
-    const t = setTimeout(route, SPLASH_MS);
+    route();
+  };
+
+  // The film hitting its end is the primary trigger; hold a beat on the final
+  // frame (video pauses there) before we route, so it doesn't jump-cut.
+  const onVideoEnd = () => {
+    setTimeout(finish, END_HOLD_MS);
+  };
+
+  useEffect(() => {
+    prewarmImageCache();
+    // Pure safety net in case `onEnd` never arrives.
+    const t = setTimeout(finish, FALLBACK_MS);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const markStyle = useAnimatedStyle(() => ({
-    opacity: markP.value,
-    transform: [{ scale: 0.9 + markP.value * 0.1 }],
-  }));
-  const wordStyle = useAnimatedStyle(() => ({
-    opacity: wordP.value,
-    transform: [{ translateY: (1 - wordP.value) * 44 }],
-  }));
-  const taglineStyle = useAnimatedStyle(() => ({
-    opacity: taglineP.value,
-    transform: [{ translateY: (1 - taglineP.value) * 12 }],
-  }));
-  const progressStyle = useAnimatedStyle(() => ({
-    width: `${progressP.value * 100}%`,
-  }));
+  // Drive the rate ramp + progress bar off real playback position.
+  const onProgress = (e: { currentTime: number; seekableDuration: number }) => {
+    const dur = e.seekableDuration > 0 ? e.seekableDuration : 5;
+    const f = Math.min(1, Math.max(0, e.currentTime / dur));
+    vProg.value = f;
+    const eased = Math.pow(f, 0.82);
+    const next = RATE_START + (RATE_END - RATE_START) * eased;
+    setRate((prev) => (Math.abs(prev - next) > 0.04 ? next : prev));
+  };
+
+  const progressStyle = useAnimatedStyle(() => ({ width: `${vProg.value * 100}%` }));
 
   return (
-    <View style={styles.root}>
-      {/* Backdrop — Skia wave field skipped on Android (see SkiaWaveField). */}
-      {!IS_ANDROID && (
-        <View style={styles.waveAbs} pointerEvents="none">
-          <SkiaWaveField
-            width={width}
-            height={height}
-            color="rgba(242,239,230,0.055)"
-            lines={22}
-            amplitude={12}
-            frequency={0.018}
-            speed={0.3}
-            strokeWidth={1}
-          />
-        </View>
-      )}
-
-      {/* Center wordmark */}
-      <View style={styles.center}>
-        <Animated.View style={[styles.wordmark, markStyle]}>
-          <RNImage
-            source={BRAND_WORDMARK}
-            style={styles.brandWordmark}
-            resizeMode="contain"
-          />
-        </Animated.View>
-
-        <Animated.View style={[styles.tagline, taglineStyle]}>
-          <RuleDot width={180} color={palette.bone} dotColor={palette.acid} />
-          <RNText
-            style={styles.taglineText}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.5}
-          >
-            GET DISCOVERED. GET CONNECTED. GET PAID.
-          </RNText>
-        </Animated.View>
+    <View style={[styles.root, { backgroundColor: backdrop }]}>
+      {/* The film — centered and scaled down; it already carries the wordmark.
+          `contain` shows the whole frame (no zoom-crop) so the logo stays at
+          its true, smaller size. */}
+      <View pointerEvents="none" style={styles.videoWrap}>
+        <Video
+          source={source}
+          style={styles.video}
+          resizeMode="contain"
+          rate={rate}
+          muted
+          repeat={false}
+          controls={false}
+          ignoreSilentSwitch="ignore"
+          playInBackground={false}
+          playWhenInactive={false}
+          progressUpdateInterval={50}
+          onProgress={onProgress}
+          onEnd={onVideoEnd}
+          onError={finish}
+        />
       </View>
 
-      {/* Bottom progress + status */}
-      <Animated.View style={[styles.bottom, taglineStyle]}>
+      {/* Subtle legibility scrims top + bottom; center stays clean for the logo. */}
+      <View pointerEvents="none" style={[styles.scrimTop, { backgroundColor: backdrop }]} />
+      <View pointerEvents="none" style={[styles.scrimBottom, { backgroundColor: backdrop }]} />
+
+      {/* Top status line — visible from frame one, no entrance delay. */}
+      <View style={styles.top}>
         <View style={styles.statusRow}>
-          <RNText style={styles.statusLabel}>LOADING EDITION</RNText>
-          <RNText style={styles.statusLabel}>
+          <RNText style={[styles.statusLabel, { color: ink }]} allowFontScaling={false}>
+            LOADING EDITION
+          </RNText>
+          <RNText style={[styles.statusLabel, { color: ink }]} allowFontScaling={false}>
             {`${String(new Date().getFullYear()).slice(-2)} / ${String(
-              new Date().getMonth() + 1
+              new Date().getMonth() + 1,
             ).padStart(2, '0')}`}
           </RNText>
         </View>
-        <View style={styles.progressTrack}>
-          <Animated.View style={[styles.progressFill, progressStyle]} />
+      </View>
+
+      {/* Bottom chrome — tagline, progress, copyright — also no entrance delay. */}
+      <View style={styles.bottom}>
+        <RuleDot width={width - 48} color={`${ink}22`} dotColor={accent} />
+        <RNText
+          style={[styles.tagline, { color: ink }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.5}
+          allowFontScaling={false}
+        >
+          GET DISCOVERED. GET CONNECTED. GET PAID.
+        </RNText>
+        <View style={[styles.progressTrack, { backgroundColor: `${ink}1F` }]}>
+          <Animated.View style={[styles.progressFill, { backgroundColor: accent }, progressStyle]} />
         </View>
-        <RNText style={styles.copyright}>© UNDERDAWGS · BUILT FOR THE UNDERRATED</RNText>
-      </Animated.View>
+        <RNText style={[styles.copyright, { color: ink }]} allowFontScaling={false}>
+          © UNDERDAWG · BUILT FOR THE UNDERRATED
+        </RNText>
+      </View>
 
-      {/* Skip the procedural grain on Android — running a full-screen
-          fragment shader during the first JS frames after font load is the
-          dominant cause of the splash signet stutter on mid-range devices. */}
-      {!IS_ANDROID && (
-        <SkiaGrain
-          width={width}
-          height={height}
-          intensity={0.1}
-          tint={[1, 1, 1, 0.16]}
-        />
-      )}
-
-      {/* Off-screen preloaders — force RN to decode brand PNGs so the
-          headers (Feed/Explore/Welcome) and tab-bar logo render instantly
-          on first mount after splash. 1×1 px, fully transparent, behind
-          everything, never touched by the user. */}
+      {/* Off-screen PNG warmers — 1×1, invisible, never touched. */}
       <View
         pointerEvents="none"
         style={styles.preloader}
@@ -253,78 +227,26 @@ export default function Splash() {
   );
 }
 
-const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
-  preloader: {
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    width: 1,
-    height: 1,
-    opacity: 0,
-  },
-  preloaderImg: { width: 1, height: 1 },
-  root: {
-    flex: 1,
-    backgroundColor: palette.bone,
-  },
-  waveAbs: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+const makeStyles = (_palette: typeof staticPalette) =>
+  StyleSheet.create({
+    root: { flex: 1 },
 
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 12,
-  },
-  wordmark: {
-    alignSelf: 'stretch',
-    alignItems: 'center',
-  },
-  brandWordmark: {
-    width: Math.min(width * 0.85, 380),
-    height: Math.min(width * 0.85, 380),
-  },
+    videoWrap: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center' },
+    video: { width: '100%', height: '100%', transform: [{ scale: VIDEO_SCALE }] },
 
-  tagline: {
-    marginTop: 32,
-    alignSelf: 'stretch',
-    alignItems: 'center',
-    gap: 14,
-  },
-  taglineText: {
-    ...T.labelLarge,
-    color: palette.ink,
-    opacity: 0.8,
-    textAlign: 'center',
-  },
+    scrimTop: { position: 'absolute', top: 0, left: 0, right: 0, height: 120, opacity: 0.4 },
+    scrimBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 240, opacity: 0.5 },
 
-  bottom: {
-    paddingBottom: 40,
-    paddingHorizontal: 12,
-    gap: 12,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statusLabel: {
-    ...T.micro,
-    color: palette.ink,
-    opacity: 0.5,
-  },
-  progressTrack: {
-    height: 2,
-    backgroundColor: palette.lineDark,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: 2,
-    backgroundColor: palette.acid,
-  },
-  copyright: {
-    ...T.micro,
-    color: palette.ink,
-    opacity: 0.4,
-    textAlign: 'center',
-    marginTop: 4,
-  },
-});
+    top: { position: 'absolute', top: 0, left: 0, right: 0, paddingTop: IS_ANDROID ? 28 : 58, paddingHorizontal: 24 },
+    statusRow: { flexDirection: 'row', justifyContent: 'space-between' },
+    statusLabel: { ...T.micro, opacity: 0.6 },
+
+    bottom: { position: 'absolute', left: 0, right: 0, bottom: 44, paddingHorizontal: 24, gap: 14, alignItems: 'center' },
+    tagline: { ...T.labelLarge, opacity: 0.9, textAlign: 'center' },
+    progressTrack: { alignSelf: 'stretch', height: 2, overflow: 'hidden', borderRadius: 1 },
+    progressFill: { height: 2 },
+    copyright: { ...T.micro, opacity: 0.45, textAlign: 'center' },
+
+    preloader: { position: 'absolute', left: 0, top: 0, width: 1, height: 1, opacity: 0 },
+    preloaderImg: { width: 1, height: 1 },
+  });

@@ -1550,6 +1550,26 @@ export const communityGroupsSeed: Array<{
   { id: 'cg4', name: 'THE BACK ROOM',        kind: 'PRIVATE',  members: 48,    blurb: 'invite-only — verified senior creators',      accent: '#FF5A1F' },
 ];
 
+// Scenes/rooms surfaced in the community intro picker. Crafts (what you make)
+// + rooms (what you want from the room). Accents reuse the brand palette.
+export type CommunityScene = { key: string; label: string; kind: 'CRAFT' | 'ROOM'; accent: string };
+export const communityScenes: CommunityScene[] = [
+  { key: 'art',     label: 'VISUAL ART',     kind: 'CRAFT', accent: '#9CA3AF' },
+  { key: 'music',   label: 'MUSIC',          kind: 'CRAFT', accent: '#2E5BFF' },
+  { key: 'film',    label: 'FILM',           kind: 'CRAFT', accent: '#FF6BB5' },
+  { key: 'dance',   label: 'DANCE',          kind: 'CRAFT', accent: '#FF5A1F' },
+  { key: 'poetry',  label: 'WRITING',        kind: 'CRAFT', accent: '#9CA3AF' },
+  { key: 'design',  label: 'DESIGN',         kind: 'CRAFT', accent: '#2E5BFF' },
+  { key: 'fashion', label: 'FASHION',        kind: 'CRAFT', accent: '#FF6BB5' },
+  { key: 'photo',   label: 'PHOTO',          kind: 'CRAFT', accent: '#FF5A1F' },
+  { key: 'feedback',  label: 'FEEDBACK CIRCLE',  kind: 'ROOM', accent: '#2E5BFF' },
+  { key: 'first1k',   label: 'FIRST 1K',         kind: 'ROOM', accent: '#FF6BB5' },
+  { key: 'pricing',   label: 'PRICING & DEALS',  kind: 'ROOM', accent: '#9CA3AF' },
+  { key: 'collab',    label: 'COLLAB FINDER',    kind: 'ROOM', accent: '#FF5A1F' },
+  { key: 'accountable', label: 'ACCOUNTABILITY', kind: 'ROOM', accent: '#2E5BFF' },
+  { key: 'gear',      label: 'GEAR & TOOLS',     kind: 'ROOM', accent: '#FF6BB5' },
+];
+
 export const communityEventsSeed: Array<{
   id: string;
   title: string;

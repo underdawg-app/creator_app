@@ -74,6 +74,7 @@ const STATIC: Record<string, ParseResult> = {
   '/(modules)/jobs/payment': { stack: 'Modules', screen: 'GigPayment' },
 
   '/(modules)/community': { stack: 'Modules', screen: 'CommunityIndex' },
+  '/(modules)/community/intro': { stack: 'Modules', screen: 'CommunityIntro' },
   '/(modules)/community/events': { stack: 'Modules', screen: 'CommunityEvents' },
   '/(modules)/community/event': { stack: 'Modules', screen: 'CommunityEventDetail' },
   '/(modules)/community/groups': { stack: 'Modules', screen: 'CommunityGroups' },
@@ -147,6 +148,7 @@ type DynamicEntry = {
 };
 
 const DYNAMIC: DynamicEntry[] = [
+  { test: /^\/\(modules\)\/post\/([^/?]+)$/, paramKeys: ['id'], stack: 'Modules', screen: 'PostDetail' },
   { test: /^\/\(modules\)\/art\/([^/?]+)$/, paramKeys: ['id'], stack: 'Modules', screen: 'ArtDetail' },
   { test: /^\/\(modules\)\/jobs\/([^/?]+)$/, paramKeys: ['id'], stack: 'Modules', screen: 'JobDetail' },
   { test: /^\/\(modules\)\/inbox\/([^/?]+)$/, paramKeys: ['id'], stack: 'Modules', screen: 'InboxThread' },

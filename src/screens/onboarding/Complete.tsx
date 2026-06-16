@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
 import { useStore } from '@/store';
 import { Image } from '@/components/ui/Image';
+import { BrandWordmark } from '@/components/brand/BrandWordmark';
 import * as Haptics from '@/haptics';
 import Animated, {
   Easing,
@@ -39,7 +40,6 @@ import { Asterisk, RuleDot } from '@/components/svg/Marks';
 const { width, height } = Dimensions.get('window');
 
 const heroObject = require('@/objects/obj-7.png');
-const enterLogo = require('@/objects/brand-splash.png');
 
 const ENTER_DURATION = 2800;
 
@@ -498,11 +498,7 @@ function EnterOverlay({
 
       {/* Brand wordmark image — replaces the old UNDERDAWGS text */}
       <Animated.View style={[overlayStyles.wordWrap, wordWrapStyle]}>
-        <Image
-          source={enterLogo}
-          style={{ width: LOGO_SIZE, height: LOGO_SIZE }}
-          contentFit="contain"
-        />
+        <BrandWordmark style={{ width: LOGO_SIZE, height: LOGO_SIZE * 0.22 }} />
       </Animated.View>
 
       {/* Subtitle */}

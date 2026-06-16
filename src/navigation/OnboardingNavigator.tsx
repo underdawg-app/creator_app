@@ -7,12 +7,14 @@ import Otp from '@/screens/onboarding/Otp';
 import UserType from '@/screens/onboarding/UserType';
 import CreatorType from '@/screens/onboarding/CreatorType';
 import Identity from '@/screens/onboarding/Identity';
+import { useThemedPalette } from '@/theme/ThemeContext';
 
 const Stack = createNativeStackNavigator();
 
 const IS_ANDROID = Platform.OS === 'android';
 
 export default function OnboardingNavigator() {
+  const palette = useThemedPalette();
   return (
     <Stack.Navigator
       screenOptions={{
@@ -24,7 +26,7 @@ export default function OnboardingNavigator() {
         animationDuration: IS_ANDROID ? 280 : 460,
         gestureEnabled: true,
         animationTypeForReplace: 'push',
-        contentStyle: { backgroundColor: '#0A0A0A' },
+        contentStyle: { backgroundColor: palette.bone },
         freezeOnBlur: true,
       }}
     >

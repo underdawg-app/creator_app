@@ -7,11 +7,14 @@ import {
   Pressable,
   TextInput,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
+import { ScreenFrame } from '@/components/ui/ScreenFrame';
+import { ModuleHeader } from '@/components/ui/ModuleHeader';
+import { Section } from '@/components/ui/Section';
+import { Chip } from '@/components/ui/Chip';
 import { Tap } from '@/components/ui/Tap';
 import { Ionicons } from '@/icons';
 import { useStore } from '@/store';
@@ -79,6 +82,13 @@ function postedFor(id: string) {
   }
 }
 
+const TAB_LABEL: Record<TabKey, string> = {
+  ALL: 'All',
+  PROPOSED: 'Proposed',
+  ACTIVE: 'Active',
+  CLOSED: 'Closed',
+};
+
 /* -------------------------------------------------------------------------
  * Screen
  * ----------------------------------------------------------------------- */
@@ -88,7 +98,6 @@ export default function MyDeals() {
   const styles = useThemedPaletteStyles(makeStyles);
   const deals = useStore((s) => s.deals);
   const apps = useStore((s) => s.applications);
-  const toast = useStore((s) => s.toast);
 
   const [tab, setTab] = useState<TabKey>('ALL');
   const [query, setQuery] = useState('');
@@ -159,97 +168,88 @@ export default function MyDeals() {
       ? 'Deals in flight. Hit your next milestone to keep them moving.'
       : 'Wrapped deals. Payouts cleared, work delivered.';
 
+  function openRow(row: RowItem) {
+    if (row.kind !== 'deal') {
+      router.push('/(modules)/jobs/applications');
+      return;
+    }
+    const s = String(row.status).toUpperCase();
+    if (s.includes('NEGOTIAT') || s.includes('SHORTLIST')) {
+      router.push('/(modules)/jobs/negotiation');
+    } else if (s.includes('CONTRACT')) {
+      router.push('/(modules)/jobs/contract');
+    } else if (s.includes('COMPLETE') || s.includes('PAID')) {
+      router.push('/(modules)/jobs/payment');
+    } else {
+      // ACTIVE / IN REVIEW / REVISION → deliverables workspace
+      router.push('/(modules)/jobs/deliver');
+    }
+  }
+
   return (
-    <View style={styles.root}>
-      <SafeAreaView edges={['top']} style={styles.headerSafe}>
-        <View style={styles.header}>
-          <Pressable
-            onPress={() => router.back()}
-            style={styles.iconBtn}
-            hitSlop={6}
-          >
-            <Ionicons name="arrow-back" size={18} color={palette.ink} />
+    <ScreenFrame
+      header={
+        <ModuleHeader
+          title="DEALS"
+          showBack
+          right={
+            <Tap
+              onPress={() => router.push('/(tabs)/inbox')}
+              style={styles.headerBtn}
+              burstColor={palette.electric}
+            >
+              <Ionicons name="chatbubble-outline" size={16} color={palette.ink} />
+            </Tap>
+          }
+        />
+      }
+    >
+      {/* ── Search ── */}
+      <View style={styles.searchBar}>
+        <Ionicons name="search" size={16} color={palette.mute} />
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder="Search deals"
+          placeholderTextColor={palette.mute}
+          style={styles.searchInput}
+          returnKeyType="search"
+          selectionColor={palette.electric}
+        />
+        {query.length > 0 ? (
+          <Pressable onPress={() => setQuery('')} hitSlop={6}>
+            <Ionicons name="close-circle" size={16} color={palette.mute} />
           </Pressable>
-          <View style={styles.searchBar}>
-            <Ionicons name="search" size={16} color={palette.mute} />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Search deals"
-              placeholderTextColor={palette.mute}
-              style={styles.searchInput}
-              returnKeyType="search"
-              selectionColor={palette.acid}
-            />
-            {query.length > 0 ? (
-              <Pressable onPress={() => setQuery('')} hitSlop={6}>
-                <Ionicons name="close-circle" size={16} color={palette.mute} />
-              </Pressable>
-            ) : null}
-          </View>
-          <Tap
-            onPress={() => router.push('/(tabs)/inbox')}
-            style={styles.iconBtn}
-            burstColor={palette.acid}
-          >
-            <Ionicons name="chatbubble-outline" size={18} color={palette.ink} />
-          </Tap>
-        </View>
-      </SafeAreaView>
+        ) : null}
+      </View>
 
+      {/* ── Status tabs ── */}
       <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.tabScroll}
+        contentContainerStyle={styles.tabRow}
       >
-        <View style={styles.titleBlock}>
-          <RNText style={styles.title} maxFontSizeMultiplier={1.1}>
-            My Deals
-          </RNText>
-        </View>
+        {TABS.map((tk) => {
+          const count = counts[tk];
+          const label = count ? `${TAB_LABEL[tk]} (${count})` : TAB_LABEL[tk];
+          return (
+            <Chip
+              key={tk}
+              label={label}
+              active={tab === tk}
+              onPress={() => setTab(tk)}
+              accent={palette.electric}
+            />
+          );
+        })}
+      </ScrollView>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.tabBarScroll}
-          contentContainerStyle={styles.tabBar}
-        >
-          {TABS.map((tk) => {
-            const active = tab === tk;
-            const count = counts[tk];
-            const baseLabel =
-              tk === 'ALL'
-                ? 'All'
-                : tk === 'PROPOSED'
-                ? 'Proposed'
-                : tk === 'ACTIVE'
-                ? 'Active'
-                : 'Closed';
-            const label = count ? `${baseLabel} (${count})` : baseLabel;
-            return (
-              <Tap
-                key={tk}
-                onPress={() => setTab(tk)}
-                burstColor={palette.acid}
-                style={styles.tabItem}
-              >
-                <RNText
-                  style={[styles.tabLabel, active && styles.tabLabelActive]}
-                  maxFontSizeMultiplier={1.1}
-                >
-                  {label}
-                </RNText>
-                {active ? <View style={styles.tabUnderline} /> : null}
-              </Tap>
-            );
-          })}
-        </ScrollView>
-
-        <View style={styles.helperRow}>
-          <RNText style={styles.helperText} maxFontSizeMultiplier={1.2}>
-            {helper}
-          </RNText>
-        </View>
+      {/* ── Feed ── */}
+      <Section eyebrow={`${TAB_LABEL[tab].toUpperCase()} · ${visible.length}`} title="your deals.">
+        <RNText style={styles.helperText} maxFontSizeMultiplier={1.2}>
+          {helper}
+        </RNText>
 
         {visible.length === 0 ? (
           <View style={styles.empty}>
@@ -264,60 +264,35 @@ export default function MyDeals() {
                 : 'No closed deals yet. Your wrapped work will show up here.'}
             </RNText>
             {(tab === 'ALL' || tab === 'PROPOSED') ? (
-              <Pressable
+              <Tap
                 onPress={() => router.push('/(modules)/jobs')}
-                style={styles.emptyCta}
+                variant="heavy"
+                burstColor={palette.electric}
+                style={[styles.emptyCta, { backgroundColor: palette.ink }]}
               >
-                <RNText style={styles.emptyCtaLabel} maxFontSizeMultiplier={1.1}>
+                <RNText style={[styles.emptyCtaLabel, { color: palette.bone }]} maxFontSizeMultiplier={1.1}>
                   BROWSE GIGS
                 </RNText>
-              </Pressable>
+              </Tap>
             ) : null}
           </View>
         ) : (
-          visible.map((row, i) => (
-            <DealRow
-              key={row.id}
-              row={row}
-              isFirst={i === 0}
-              onOpen={() => {
-                if (row.kind !== 'deal') {
-                  router.push('/(modules)/jobs/applications');
-                  return;
-                }
-                const s = String(row.status).toUpperCase();
-                if (s.includes('NEGOTIAT') || s.includes('SHORTLIST')) {
-                  router.push('/(modules)/jobs/negotiation');
-                } else if (s.includes('CONTRACT')) {
-                  router.push('/(modules)/jobs/contract');
-                } else if (s.includes('COMPLETE') || s.includes('PAID')) {
-                  router.push('/(modules)/jobs/payment');
-                } else {
-                  // ACTIVE / IN REVIEW / REVISION → deliverables workspace
-                  router.push('/(modules)/jobs/deliver');
-                }
-              }}
-            />
-          ))
+          <View style={styles.feed}>
+            {visible.map((row) => (
+              <DealCard key={row.id} row={row} onOpen={() => openRow(row)} />
+            ))}
+          </View>
         )}
-      </ScrollView>
-    </View>
+      </Section>
+    </ScreenFrame>
   );
 }
 
 /* -------------------------------------------------------------------------
- * Deal / application row
+ * Deal / application card
  * ----------------------------------------------------------------------- */
 
-function DealRow({
-  row,
-  isFirst,
-  onOpen,
-}: {
-  row: RowItem;
-  isFirst: boolean;
-  onOpen: () => void;
-}) {
+function DealCard({ row, onOpen }: { row: RowItem; onOpen: () => void }) {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
 
@@ -326,19 +301,21 @@ function DealRow({
       ? { bg: 'rgba(46,91,255,0.16)', fg: palette.electric }
       : row.bucket === 'CLOSED'
       ? { bg: 'rgba(156,152,138,0.22)', fg: palette.mute }
-      : { bg: 'rgba(216,255,61,0.32)', fg: staticPalette.ink };
+      : { bg: 'rgba(46,91,255,0.10)', fg: palette.electric };
 
   const pct = Math.round(row.progress * 100);
   const showProgress = row.bucket !== 'PROPOSED' && row.progress > 0;
 
   return (
-    <Pressable
+    <Tap
       onPress={onOpen}
-      style={[styles.row, !isFirst && styles.rowBorderTop]}
-      android_ripple={{ color: 'rgba(10,10,10,0.06)' }}
+      burstColor={row.accent}
+      style={[styles.card, { borderColor: palette.line }]}
     >
+      <View style={[styles.cardAccent, { backgroundColor: row.accent }]} />
+
       {/* Status chip + posted ago */}
-      <View style={styles.rowTopRow}>
+      <View style={styles.cardTopRow}>
         <View style={[styles.statusChip, { backgroundColor: statusTone.bg }]}>
           <RNText style={[styles.statusChipLabel, { color: statusTone.fg }]} maxFontSizeMultiplier={1.1}>
             {row.status}
@@ -349,7 +326,7 @@ function DealRow({
         </RNText>
       </View>
 
-      {/* Title + amount on right */}
+      {/* Title + amount */}
       <View style={styles.titleRow}>
         <RNText
           style={styles.dealTitle}
@@ -385,7 +362,7 @@ function DealRow({
 
       {row.nextAction ? (
         <View style={styles.nextRow}>
-          <View style={styles.nextDot} />
+          <View style={[styles.nextDot, { backgroundColor: palette.electric }]} />
           <View style={styles.nextTextWrap}>
             <RNText style={styles.nextLabel} maxFontSizeMultiplier={1.1}>
               NEXT
@@ -400,7 +377,7 @@ function DealRow({
           </View>
         </View>
       ) : null}
-    </Pressable>
+    </Tap>
   );
 }
 
@@ -410,33 +387,28 @@ function DealRow({
 
 const makeStyles = (palette: typeof staticPalette) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: palette.bone },
-
-    /* ── Header ── */
-    headerSafe: {
-      backgroundColor: palette.bone,
-      borderBottomWidth: 1,
-      borderBottomColor: palette.line,
-    },
-    header: {
-      flexDirection: 'row',
+    headerBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      borderWidth: 1,
+      borderColor: palette.line,
       alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingTop: 6,
-      paddingBottom: 12,
-      gap: 10,
+      justifyContent: 'center',
     },
+
+    /* ── Search ── */
     searchBar: {
-      flex: 1,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
       paddingHorizontal: 14,
-      height: 40,
-      borderRadius: 20,
+      height: 44,
+      borderRadius: 22,
       borderWidth: 1,
       borderColor: palette.line,
       backgroundColor: palette.paper,
+      marginTop: 6,
     },
     searchInput: {
       flex: 1,
@@ -446,87 +418,40 @@ const makeStyles = (palette: typeof staticPalette) =>
       paddingVertical: 0,
       includeFontPadding: false,
     },
-    iconBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: palette.line,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
 
-    /* ── Scroll ── */
-    scrollContent: { paddingBottom: 160 },
+    /* ── Tabs ── */
+    tabScroll: { marginHorizontal: -12, marginTop: 14 },
+    tabRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 12 },
 
-    /* ── Title + tabs ── */
-    titleBlock: {
-      paddingHorizontal: 20,
-      paddingTop: 22,
-      paddingBottom: 14,
-    },
-    title: {
-      fontFamily: fonts.displayBold,
-      fontSize: 28,
-      lineHeight: 30,
-      letterSpacing: -0.8,
-      color: palette.ink,
-    },
-    tabBarScroll: {
-      borderBottomWidth: 1,
-      borderBottomColor: palette.line,
-    },
-    tabBar: {
-      paddingHorizontal: 20,
-      gap: 18,
-    },
-    tabItem: {
-      paddingVertical: 8,
-      paddingBottom: 12,
-    },
-    tabLabel: {
-      fontFamily: fonts.bodyBold,
-      fontSize: 13,
-      letterSpacing: 0.2,
-      color: palette.ink,
-      opacity: 0.55,
-    },
-    tabLabelActive: { opacity: 1 },
-    tabUnderline: {
-      position: 'absolute',
-      left: 0,
-      right: 0,
-      bottom: 0,
-      height: 3,
-      backgroundColor: palette.ink,
-      borderRadius: 2,
-    },
-    helperRow: {
-      paddingHorizontal: 20,
-      paddingTop: 14,
-      paddingBottom: 8,
-      borderBottomWidth: 1,
-      borderBottomColor: palette.line,
-    },
     helperText: {
       ...T.body,
       color: palette.ink,
       opacity: 0.65,
-      lineHeight: 19,
+      lineHeight: 20,
     },
 
-    /* ── Row ── */
-    row: {
-      paddingHorizontal: 20,
-      paddingTop: 18,
-      paddingBottom: 22,
+    /* ── Feed ── */
+    feed: { gap: 12, marginTop: 2 },
+
+    /* ── Card ── */
+    card: {
+      padding: 18,
+      borderRadius: 20,
+      borderWidth: 1,
+      backgroundColor: palette.paper,
       gap: 8,
+      overflow: 'hidden',
     },
-    rowBorderTop: {
-      borderTopWidth: 1,
-      borderTopColor: palette.line,
+    cardAccent: {
+      position: 'absolute',
+      top: 16,
+      left: 0,
+      width: 4,
+      height: 26,
+      borderTopRightRadius: 3,
+      borderBottomRightRadius: 3,
     },
-    rowTopRow: {
+    cardTopRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -534,7 +459,7 @@ const makeStyles = (palette: typeof staticPalette) =>
     statusChip: {
       paddingHorizontal: 10,
       paddingVertical: 5,
-      borderRadius: 6,
+      borderRadius: 999,
       alignSelf: 'flex-start',
     },
     statusChipLabel: {
@@ -552,7 +477,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       flexDirection: 'row',
       alignItems: 'flex-start',
       gap: 10,
-      marginTop: 4,
+      marginTop: 2,
     },
     dealTitle: {
       flex: 1,
@@ -617,7 +542,6 @@ const makeStyles = (palette: typeof staticPalette) =>
       width: 6,
       height: 6,
       borderRadius: 3,
-      backgroundColor: palette.acid,
       marginTop: 7,
     },
     nextTextWrap: { flex: 1, gap: 2 },
@@ -638,8 +562,7 @@ const makeStyles = (palette: typeof staticPalette) =>
 
     /* ── Empty ── */
     empty: {
-      paddingHorizontal: 20,
-      paddingVertical: 56,
+      paddingVertical: 48,
       gap: 16,
       alignItems: 'center',
     },
@@ -653,9 +576,8 @@ const makeStyles = (palette: typeof staticPalette) =>
     emptyCta: {
       marginTop: 4,
       paddingHorizontal: 22,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: palette.ink,
+      height: 46,
+      borderRadius: 23,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -663,6 +585,5 @@ const makeStyles = (palette: typeof staticPalette) =>
       fontFamily: fonts.bodyBold,
       fontSize: 12,
       letterSpacing: 1.6,
-      color: palette.bone,
     },
   });

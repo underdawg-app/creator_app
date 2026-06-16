@@ -18,7 +18,9 @@ import {
 } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import { Ionicons } from '@/icons';
-import { Tap } from '@/components/ui/Tap';
+import { ScreenFrame } from '@/components/ui/ScreenFrame';
+import { ModuleHeader } from '@/components/ui/ModuleHeader';
+import { Section } from '@/components/ui/Section';
 import { jobsSeed } from '@/data/mock';
 import { useStore } from '@/store';
 
@@ -76,24 +78,25 @@ export default function ApplyScreen() {
   };
 
   return (
-    <View style={styles.root}>
-      {/* Clean header — back + chat. No empty placeholder circles. */}
-      <SafeAreaView edges={['top']} style={styles.headerSafe}>
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.iconBtn} hitSlop={6}>
-            <Ionicons name="arrow-back" size={18} color={palette.ink} />
-          </Pressable>
-          <View style={{ flex: 1 }} />
-          <Tap
-            onPress={() => router.push('/(tabs)/inbox')}
-            style={styles.iconBtn}
-            burstColor={palette.acid}
-          >
-            <Ionicons name="chatbubble-outline" size={18} color={palette.ink} />
-          </Tap>
-        </View>
-      </SafeAreaView>
-
+    <ScreenFrame
+      scroll={false}
+      header={<ModuleHeader title="APPLY" showBack />}
+      footer={
+        <SafeAreaView edges={['bottom']} style={styles.footerSafe}>
+          <View style={styles.footerInner}>
+            <Pressable
+              onPress={submit}
+              disabled={!canSubmit}
+              style={[styles.submitBtn, !canSubmit && styles.submitBtnDisabled]}
+            >
+              <RNText style={styles.submitLabel} maxFontSizeMultiplier={1.1}>
+                SUBMIT PROPOSAL
+              </RNText>
+            </Pressable>
+          </View>
+        </SafeAreaView>
+      }
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
@@ -142,12 +145,15 @@ export default function ApplyScreen() {
           ) : null}
 
           {/* Pitch field */}
-          <Field
-            step="01"
-            label="Your pitch"
-            hint="Why you, in your voice. Three sentences is plenty."
-            counter={`${pitch.length}/${PITCH_MAX}`}
-          >
+          <Section eyebrow="01 · YOUR PITCH" title="why you.">
+            <RNText style={styles.fieldHint} maxFontSizeMultiplier={1.2}>
+              In your voice. Three sentences is plenty.
+            </RNText>
+            <View style={styles.counterRow}>
+              <RNText style={styles.fieldCounter} maxFontSizeMultiplier={1.1}>
+                {pitch.length}/{PITCH_MAX}
+              </RNText>
+            </View>
             <TextInput
               style={[styles.input, styles.inputArea]}
               value={pitch}
@@ -159,16 +165,22 @@ export default function ApplyScreen() {
               maxFontSizeMultiplier={1.2}
               selectionColor={palette.acid}
             />
-          </Field>
+          </Section>
 
           {/* Rate field */}
-          <Field
-            step="02"
-            label="Your rate"
-            hint="Charge what your work is worth. Brands respect clarity."
-            counter={job ? `Use ₹${formatINR(suggested)}` : undefined}
-            onCounterPress={() => setRate(String(suggested))}
-          >
+          <Section eyebrow="02 · YOUR RATE" title="the number.">
+            <RNText style={styles.fieldHint} maxFontSizeMultiplier={1.2}>
+              Charge what your work is worth. Brands respect clarity.
+            </RNText>
+            {job ? (
+              <View style={styles.counterRow}>
+                <Pressable onPress={() => setRate(String(suggested))} hitSlop={6}>
+                  <RNText style={styles.fieldCounterLink} maxFontSizeMultiplier={1.1}>
+                    Use ₹{formatINR(suggested)}
+                  </RNText>
+                </Pressable>
+              </View>
+            ) : null}
             <View style={styles.rateRow}>
               <View style={styles.rateCurrency}>
                 <RNText style={styles.rateCurrencyText}>₹</RNText>
@@ -184,14 +196,13 @@ export default function ApplyScreen() {
                 selectionColor={palette.acid}
               />
             </View>
-          </Field>
+          </Section>
 
           {/* Timeline field */}
-          <Field
-            step="03"
-            label="Timeline"
-            hint="When can you deliver from contract signing?"
-          >
+          <Section eyebrow="03 · TIMELINE" title="when you deliver.">
+            <RNText style={styles.fieldHint} maxFontSizeMultiplier={1.2}>
+              When can you deliver from contract signing?
+            </RNText>
             <TextInput
               style={styles.input}
               value={timeline}
@@ -201,7 +212,7 @@ export default function ApplyScreen() {
               maxFontSizeMultiplier={1.2}
               selectionColor={palette.acid}
             />
-          </Field>
+          </Section>
 
           {/* Footnote */}
           <View style={styles.footnote}>
@@ -213,78 +224,7 @@ export default function ApplyScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-
-      {/* Sticky submit */}
-      <SafeAreaView edges={['bottom']} style={styles.footerSafe}>
-        <View style={styles.footerInner}>
-          <Pressable
-            onPress={submit}
-            disabled={!canSubmit}
-            style={[
-              styles.submitBtn,
-              !canSubmit && styles.submitBtnDisabled,
-            ]}
-          >
-            <RNText style={styles.submitLabel} maxFontSizeMultiplier={1.1}>
-              SUBMIT PROPOSAL
-            </RNText>
-          </Pressable>
-        </View>
-      </SafeAreaView>
-    </View>
-  );
-}
-
-/* -------------------------------------------------------------------------
- * Field — labeled form section with hairline divider
- * ----------------------------------------------------------------------- */
-
-function Field({
-  step,
-  label,
-  hint,
-  counter,
-  onCounterPress,
-  children,
-}: {
-  step: string;
-  label: string;
-  hint: string;
-  counter?: string;
-  onCounterPress?: () => void;
-  children: React.ReactNode;
-}) {
-  const styles = useThemedPaletteStyles(makeStyles);
-  return (
-    <View style={styles.field}>
-      <View style={styles.fieldHead}>
-        <View style={styles.fieldHeadLeft}>
-          <RNText style={styles.fieldStep} maxFontSizeMultiplier={1.1}>
-            {step}
-          </RNText>
-          <RNText style={styles.fieldLabel} maxFontSizeMultiplier={1.1}>
-            {label}
-          </RNText>
-        </View>
-        {counter ? (
-          onCounterPress ? (
-            <Pressable onPress={onCounterPress} hitSlop={6}>
-              <RNText style={styles.fieldCounterLink} maxFontSizeMultiplier={1.1}>
-                {counter}
-              </RNText>
-            </Pressable>
-          ) : (
-            <RNText style={styles.fieldCounter} maxFontSizeMultiplier={1.1}>
-              {counter}
-            </RNText>
-          )
-        ) : null}
-      </View>
-      <RNText style={styles.fieldHint} maxFontSizeMultiplier={1.2}>
-        {hint}
-      </RNText>
-      {children}
-    </View>
+    </ScreenFrame>
   );
 }
 
@@ -294,40 +234,13 @@ function Field({
 
 const makeStyles = (palette: typeof staticPalette) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: palette.bone },
-
-    /* ── Header ── */
-    headerSafe: {
-      backgroundColor: palette.bone,
-      borderBottomWidth: 1,
-      borderBottomColor: palette.line,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingTop: 6,
-      paddingBottom: 12,
-      gap: 10,
-    },
-    iconBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: palette.line,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-
     /* ── Scroll ── */
     scroll: { paddingBottom: 28 },
 
     /* ── Title ── */
     titleBlock: {
-      paddingHorizontal: 20,
-      paddingTop: 22,
-      paddingBottom: 18,
+      paddingTop: 8,
+      paddingBottom: 4,
       gap: 6,
     },
     title: {
@@ -347,12 +260,12 @@ const makeStyles = (palette: typeof staticPalette) =>
 
     /* ── Recap row ── */
     recap: {
-      paddingHorizontal: 20,
-      paddingVertical: 18,
-      borderTopWidth: 1,
-      borderTopColor: palette.line,
-      borderBottomWidth: 1,
-      borderBottomColor: palette.line,
+      marginTop: 18,
+      padding: 16,
+      borderRadius: 18,
+      borderWidth: 1,
+      borderColor: palette.line,
+      backgroundColor: palette.paper,
     },
     recapRow: {
       flexDirection: 'row',
@@ -389,27 +302,17 @@ const makeStyles = (palette: typeof staticPalette) =>
       marginTop: 6,
     },
 
-    /* ── Field ── */
-    field: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 8 },
-    fieldHead: {
+    /* ── Field bits ── */
+    fieldHint: {
+      ...T.body,
+      fontSize: 13,
+      lineHeight: 18,
+      color: palette.ink,
+      opacity: 0.6,
+    },
+    counterRow: {
       flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      gap: 8,
-    },
-    fieldHeadLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-    fieldStep: {
-      fontFamily: fonts.bodyBold,
-      fontSize: 11,
-      letterSpacing: 1.4,
-      color: palette.ink,
-      opacity: 0.45,
-    },
-    fieldLabel: {
-      fontFamily: fonts.displayBold,
-      fontSize: 16,
-      letterSpacing: -0.2,
-      color: palette.ink,
+      justifyContent: 'flex-end',
     },
     fieldCounter: {
       fontFamily: fonts.bodyBold,
@@ -424,15 +327,6 @@ const makeStyles = (palette: typeof staticPalette) =>
       letterSpacing: 0.4,
       color: palette.electric,
       textDecorationLine: 'underline',
-    },
-    fieldHint: {
-      ...T.body,
-      fontSize: 13,
-      lineHeight: 18,
-      color: palette.ink,
-      opacity: 0.6,
-      marginTop: 4,
-      marginBottom: 12,
     },
 
     /* ── Inputs ── */
@@ -480,8 +374,7 @@ const makeStyles = (palette: typeof staticPalette) =>
 
     /* ── Footnote ── */
     footnote: {
-      marginTop: 20,
-      marginHorizontal: 20,
+      marginTop: 28,
       paddingTop: 16,
       borderTopWidth: 1,
       borderTopColor: palette.line,

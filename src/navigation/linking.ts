@@ -59,6 +59,7 @@ export const linking: LinkingOptions<any> = {
           GigPayment: 'jobs/payment',
           JobDetail: 'jobs/:id',
           CommunityIndex: 'community',
+          CommunityIntro: 'community/intro',
           CommunityEvents: 'community/events',
           CommunityEventDetail: 'community/event',
           CommunityGroups: 'community/groups',

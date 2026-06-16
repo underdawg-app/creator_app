@@ -11,7 +11,6 @@ import {
   Platform,
   TextInput,
   Pressable,
-  Image as RNImage,
   Animated as RNAnimated,
 } from 'react-native';
 
@@ -21,7 +20,6 @@ import {
 const SCROLLAWAY_HEIGHT = 104;
 const HIDE_THRESHOLD = 12;
 
-const HEADER_LOGO = require('@/objects/brand-wordmark.png');
 
 const IS_ANDROID = Platform.OS === 'android';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -40,6 +38,7 @@ import {
   jobsSeed,
 } from '@/data/mock';
 import { Tap } from '@/components/ui/Tap';
+import { BrandWordmark } from '@/components/brand/BrandWordmark';
 import { useStore } from '@/store';
 import { BadgePill } from '@/components/ui/BadgePill';
 import { JobRow } from '@/components/jobs/JobRow';
@@ -294,11 +293,7 @@ function HeaderBar() {
         <View style={styles.notifDot} />
       </Tap>
       <View style={styles.headerCenter}>
-        <RNImage
-          source={HEADER_LOGO}
-          style={[styles.headerLogo, { tintColor: palette.ink }]}
-          resizeMode="contain"
-        />
+        <BrandWordmark style={styles.headerLogo} />
       </View>
       <Tap
         onPress={() => router.push('/(tabs)/inbox')}
@@ -542,7 +537,7 @@ function PostCardImpl({ post }: { post: Post }) {
 
   const likes = post.likes + (liked ? 1 : 0);
 
-  const openPost = useCallback(() => router.push(`/(modules)/profile/post/${post.id}` as any), [post.id]);
+  const openPost = useCallback(() => router.push(`/(modules)/post/${post.id}` as any), [post.id]);
   const openProfile = useCallback(() => router.push(profileHref(post.handle) as any), [post.handle]);
 
   // Single tap opens the post; double tap likes it. We debounce the single tap
@@ -875,11 +870,8 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     overflow: 'visible',
   },
   headerLogo: {
-    position: 'absolute',
-    alignSelf: 'center',
-    top: -38,
-    width: 160,
-    height: 120,
+    width: 168,
+    height: 34,
   },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   iconBtn: {

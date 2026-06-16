@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   Text as RNText,
-  ScrollView,
   Pressable,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +14,10 @@ import {
 } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
 import { Ionicons } from '@/icons';
+import { ScreenFrame } from '@/components/ui/ScreenFrame';
+import { ModuleHeader } from '@/components/ui/ModuleHeader';
+import { Section } from '@/components/ui/Section';
+import { Chip } from '@/components/ui/Chip';
 import { Tap } from '@/components/ui/Tap';
 import { jobsSeed } from '@/data/mock';
 import { useStore } from '@/store';
@@ -86,20 +89,13 @@ export default function JobDetail() {
 
   if (!job) {
     return (
-      <View style={styles.root}>
-        <SafeAreaView edges={['top']} style={styles.headerSafe}>
-          <View style={styles.header}>
-            <Pressable onPress={() => router.back()} style={styles.iconBtn} hitSlop={6}>
-              <Ionicons name="arrow-back" size={18} color={palette.ink} />
-            </Pressable>
-          </View>
-        </SafeAreaView>
+      <ScreenFrame header={<ModuleHeader title="JOB" showBack />}>
         <View style={styles.notFoundWrap}>
           <RNText style={styles.notFoundText} maxFontSizeMultiplier={1.15}>
             That gig isn&apos;t open anymore.
           </RNText>
         </View>
-      </View>
+      </ScreenFrame>
     );
   }
 
@@ -114,40 +110,32 @@ export default function JobDetail() {
   const exp = experienceLevel(job.budgetMax);
 
   return (
-    <View style={styles.root}>
-      {/* Clean header — back left, chat right. No empty placeholder circles. */}
-      <SafeAreaView edges={['top']} style={styles.headerSafe}>
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.iconBtn} hitSlop={6}>
-            <Ionicons name="arrow-back" size={18} color={palette.ink} />
-          </Pressable>
-          <View style={{ flex: 1 }} />
-          <Tap
-            onPress={() => router.push('/(tabs)/inbox')}
-            style={styles.iconBtn}
-            burstColor={palette.acid}
-          >
-            <Ionicons name="chatbubble-outline" size={18} color={palette.ink} />
-          </Tap>
-        </View>
-      </SafeAreaView>
-
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+    <View style={{ flex: 1 }}>
+      <ScreenFrame
+        header={
+          <ModuleHeader
+            title="JOB"
+            showBack
+            right={
+              <Tap
+                onPress={() => router.push('/(tabs)/inbox')}
+                style={styles.headerBtn}
+                burstColor={palette.acid}
+              >
+                <Ionicons name="chatbubble-outline" size={16} color={palette.ink} />
+              </Tap>
+            }
+          />
+        }
       >
-        {/* Posted meta chip */}
-        <View style={styles.metaWrap}>
+        {/* ===== Hero ===== */}
+        <View style={styles.hero}>
           <View style={styles.metaChip}>
             <RNText style={styles.metaChipText} maxFontSizeMultiplier={1.1}>
               Posted {postedAgo(job.id)}  ·  Proposals: {proposalRange(job.applicants)}
             </RNText>
           </View>
-        </View>
 
-        {/* Title + brand */}
-        <View style={styles.titleBlock}>
           <RNText
             style={styles.title}
             numberOfLines={3}
@@ -157,6 +145,7 @@ export default function JobDetail() {
           >
             {job.title}
           </RNText>
+
           <View style={styles.brandRow}>
             <RNText style={styles.brand} numberOfLines={1} maxFontSizeMultiplier={1.15}>
               {job.brand}
@@ -167,20 +156,21 @@ export default function JobDetail() {
               </View>
             ) : null}
           </View>
+
           <RNText style={styles.payLine} maxFontSizeMultiplier={1.15}>
             {payLabel}  ·  ₹{formatINR(job.budgetMin)}–{formatINR(job.budgetMax)}  ·  {exp}
           </RNText>
         </View>
 
-        {/* About this gig */}
-        <Section title="About this gig">
+        {/* ===== About ===== */}
+        <Section eyebrow="THE BRIEF" title="about this gig.">
           <RNText style={styles.body} maxFontSizeMultiplier={1.2}>
             {job.description}
           </RNText>
         </Section>
 
-        {/* Budget summary — compact, NOT giant */}
-        <Section title="Budget & timing">
+        {/* ===== Budget & timing ===== */}
+        <Section eyebrow="THE NUMBERS" title="budget & timing.">
           <View style={styles.summaryGrid}>
             <SummaryCell label="Budget" value={`₹${formatINR(job.budgetMin)}–${formatINR(job.budgetMax)}`} />
             <SummaryCell label="Deadline" value={days > 0 ? `${days} days` : 'Closed'} />
@@ -189,8 +179,8 @@ export default function JobDetail() {
           </View>
         </Section>
 
-        {/* Deliverables */}
-        <Section title="Deliverables">
+        {/* ===== Deliverables ===== */}
+        <Section eyebrow={`DELIVERABLES · ${deliverables.length}`} title="what you ship.">
           <View style={styles.delivList}>
             {deliverables.map((d, i) => (
               <View key={`${i}-${d}`} style={styles.delivRow}>
@@ -203,21 +193,22 @@ export default function JobDetail() {
           </View>
         </Section>
 
-        {/* Skills + tags */}
-        <Section title="Skills">
-          <View style={styles.tagsRow}>
-            {tags.map((tag) => (
-              <View key={tag} style={styles.tagChip}>
-                <RNText style={styles.tagLabel} maxFontSizeMultiplier={1.1}>
-                  {tag}
-                </RNText>
-              </View>
+        {/* ===== Skills ===== */}
+        <Section eyebrow="SKILLS" title="what it takes.">
+          <View style={styles.chipRow}>
+            {tags.map((tag, i) => (
+              <Chip
+                key={tag}
+                label={tag}
+                active
+                accent={i % 3 === 0 ? palette.electric : i % 3 === 1 ? palette.blush : palette.ember}
+              />
             ))}
           </View>
         </Section>
 
-        {/* Activity on the brand */}
-        <Section title="Activity">
+        {/* ===== Activity ===== */}
+        <Section eyebrow="ACTIVITY" title="on the brand.">
           <View style={styles.activityList}>
             <ActivityRow label="Proposals" value={proposalRange(job.applicants)} />
             <ActivityRow label="Posted" value={postedAgo(job.id)} />
@@ -226,8 +217,8 @@ export default function JobDetail() {
           </View>
         </Section>
 
-        {/* What happens next */}
-        <Section title="What happens next">
+        {/* ===== What happens next ===== */}
+        <Section eyebrow="THE FLOW" title="what happens next.">
           <View style={styles.stepsList}>
             {[
               'Submit your pitch with the rate you want.',
@@ -245,7 +236,7 @@ export default function JobDetail() {
             ))}
           </View>
         </Section>
-      </ScrollView>
+      </ScreenFrame>
 
       {/* Sticky footer — Save + Apply */}
       <SafeAreaView edges={['bottom']} style={styles.footerSafe}>
@@ -289,20 +280,6 @@ export default function JobDetail() {
 /* -------------------------------------------------------------------------
  * Reusable bits
  * ----------------------------------------------------------------------- */
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  const styles = useThemedPaletteStyles(makeStyles);
-  return (
-    <View style={styles.section}>
-      <View style={styles.sectionHead}>
-        <RNText style={styles.sectionTitle} maxFontSizeMultiplier={1.15}>
-          {title}
-        </RNText>
-      </View>
-      <View style={styles.sectionBody}>{children}</View>
-    </View>
-  );
-}
 
 function SummaryCell({ label, value }: { label: string; value: string }) {
   const styles = useThemedPaletteStyles(makeStyles);
@@ -356,37 +333,26 @@ function ActivityRow({
 
 const makeStyles = (palette: typeof staticPalette) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: palette.bone },
-
-    /* ── Header ── */
-    headerSafe: {
-      backgroundColor: palette.bone,
-      borderBottomWidth: 1,
-      borderBottomColor: palette.line,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingTop: 6,
-      paddingBottom: 12,
-      gap: 10,
-    },
-    iconBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+    headerBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
       borderWidth: 1,
       borderColor: palette.line,
       alignItems: 'center',
       justifyContent: 'center',
     },
 
-    /* ── Scroll ── */
-    scrollContent: { paddingBottom: 24 },
-
-    /* ── Top meta chip ── */
-    metaWrap: { paddingHorizontal: 20, paddingTop: 18 },
+    /* ── Hero ── */
+    hero: {
+      marginTop: 6,
+      padding: 18,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: palette.line,
+      backgroundColor: palette.paper,
+      gap: 10,
+    },
     metaChip: {
       paddingHorizontal: 10,
       paddingVertical: 5,
@@ -400,20 +366,13 @@ const makeStyles = (palette: typeof staticPalette) =>
       letterSpacing: 0.1,
       color: palette.electric,
     },
-
-    /* ── Title block ── */
-    titleBlock: {
-      paddingHorizontal: 20,
-      paddingTop: 12,
-      paddingBottom: 22,
-      gap: 8,
-    },
     title: {
       fontFamily: fonts.displayBold,
       fontSize: 30,
       lineHeight: 34,
       letterSpacing: -1,
       color: palette.ink,
+      marginTop: 4,
     },
     brandRow: {
       flexDirection: 'row',
@@ -444,23 +403,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       marginTop: 4,
     },
 
-    /* ── Section ── */
-    section: { paddingHorizontal: 20 },
-    sectionHead: {
-      borderTopWidth: 1,
-      borderTopColor: palette.line,
-      paddingTop: 18,
-      paddingBottom: 10,
-    },
-    sectionTitle: {
-      fontFamily: fonts.displayBold,
-      fontSize: 18,
-      lineHeight: 22,
-      letterSpacing: -0.4,
-      color: palette.ink,
-    },
-    sectionBody: { paddingBottom: 22 },
-
+    /* ── Body ── */
     body: {
       ...T.body,
       fontSize: 15,
@@ -469,7 +412,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       opacity: 0.88,
     },
 
-    /* ── Summary grid (compact, replaces the old huge budget card) ── */
+    /* ── Summary grid ── */
     summaryGrid: {
       flexDirection: 'row',
       flexWrap: 'wrap',
@@ -524,24 +467,8 @@ const makeStyles = (palette: typeof staticPalette) =>
       color: palette.ink,
     },
 
-    /* ── Tags ── */
-    tagsRow: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 8,
-    },
-    tagChip: {
-      paddingHorizontal: 12,
-      paddingVertical: 8,
-      borderRadius: 8,
-      backgroundColor: palette.boneMuted,
-    },
-    tagLabel: {
-      fontFamily: fonts.body,
-      fontSize: 13,
-      color: palette.ink,
-      opacity: 0.85,
-    },
+    /* ── Chip row ── */
+    chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 
     /* ── Activity rows ── */
     activityList: {},
@@ -648,6 +575,7 @@ const makeStyles = (palette: typeof staticPalette) =>
       alignItems: 'center',
       justifyContent: 'center',
       paddingHorizontal: 32,
+      paddingTop: 120,
     },
     notFoundText: {
       ...T.body,

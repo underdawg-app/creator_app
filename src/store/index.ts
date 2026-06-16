@@ -491,6 +491,11 @@ type StoreState = {
   markHydrated: () => void;
   onboarded: boolean;
   setOnboarded: (v: boolean) => void;
+  // community — one-time intro gating + picked scenes/crafts
+  communityOnboarded: boolean;
+  setCommunityOnboarded: (v: boolean) => void;
+  communityInterests: string[];
+  setCommunityInterests: (v: string[]) => void;
   logout: () => void;
   resetDemo: () => void;
 };
@@ -945,12 +950,18 @@ export const useStore = create<StoreState>()(
       markHydrated: () => set({ hydrated: true }),
       onboarded: false,
       setOnboarded: (v) => set({ onboarded: v }),
+      communityOnboarded: false,
+      setCommunityOnboarded: (v) => set({ communityOnboarded: v }),
+      communityInterests: [],
+      setCommunityInterests: (v) => set({ communityInterests: v }),
       logout: () => {
-        set({ onboarded: false, profile: initialProfile });
+        set({ onboarded: false, communityOnboarded: false, communityInterests: [], profile: initialProfile });
       },
       resetDemo: () => {
         set({
           profile: initialProfile,
+          communityOnboarded: false,
+          communityInterests: [],
           platforms: platformSeed.map((p) => ({ ...p })),
           subscribers: [...emailSubscribersSeed],
           drafts: [],
@@ -1021,6 +1032,8 @@ export const useStore = create<StoreState>()(
         settings: s.settings,
         themePreference: s.themePreference,
         onboarded: s.onboarded,
+        communityOnboarded: s.communityOnboarded,
+        communityInterests: s.communityInterests,
       }),
       onRehydrateStorage: () => (state) => {
         state?.markHydrated();

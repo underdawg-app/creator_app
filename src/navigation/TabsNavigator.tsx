@@ -1,7 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, Pressable, Text as RNText, Image as RNImage } from 'react-native';
+import { View, StyleSheet, Pressable, Text as RNText } from 'react-native';
 
-const BRAND_LOGO = require('@/objects/brand-logo.png');
 import { createBottomTabNavigator, BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@/icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -159,6 +158,7 @@ const TabButton = React.memo(function TabButton({
 
 function PlusButton({ onPress }: { onPress: () => void }) {
   const styles = useThemedPaletteStyles(makeStyles);
+  const palette = useThemedPalette();
   return (
     <Pressable
       style={styles.plusWrap}
@@ -167,7 +167,7 @@ function PlusButton({ onPress }: { onPress: () => void }) {
       hitSlop={8}
     >
       <View style={styles.plusBtn}>
-        <RNImage source={BRAND_LOGO} style={styles.plusLogo} resizeMode="contain" />
+        <Ionicons name="add" size={28} color={palette.bone} />
       </View>
     </Pressable>
   );
@@ -201,14 +201,12 @@ const makeStyles = (palette: typeof staticPalette) => StyleSheet.create({
     justifyContent: 'center',
   },
   plusBtn: {
-    width: 76,
-    height: 76,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -14,
-  },
-  plusLogo: {
-    width: 72,
-    height: 72,
+    marginTop: 0,
+    backgroundColor: palette.ink,
   },
 });

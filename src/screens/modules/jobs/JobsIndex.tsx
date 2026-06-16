@@ -3,15 +3,17 @@ import {
   View,
   StyleSheet,
   Text as RNText,
-  ScrollView,
   Pressable,
   TextInput,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from '@/navigation';
 import { palette as staticPalette } from '@/theme/colors';
 import { useThemedPalette, useThemedPaletteStyles } from '@/theme/ThemeContext';
 import { fonts, type as T } from '@/theme/typography';
+import { ScreenFrame } from '@/components/ui/ScreenFrame';
+import { ModuleHeader } from '@/components/ui/ModuleHeader';
+import { Section } from '@/components/ui/Section';
+import { ListCell } from '@/components/ui/ListCell';
 import { Tap } from '@/components/ui/Tap';
 import { Sheet } from '@/components/ui/Sheet';
 import { Ionicons } from '@/icons';
@@ -80,132 +82,137 @@ export default function JobsHome() {
       : 'Gigs you saved to apply later.';
 
   return (
-    <View style={styles.root}>
-      <SafeAreaView edges={['top']} style={styles.headerSafe}>
-        <View style={styles.header}>
-          <View style={styles.searchBar}>
-            <Ionicons name="search" size={16} color={palette.mute} />
-            <TextInput
-              value={query}
-              onChangeText={setQuery}
-              placeholder="Search gigs"
-              placeholderTextColor={palette.mute}
-              style={styles.searchInput}
-              returnKeyType="search"
-              selectionColor={palette.acid}
-            />
-            {query.length > 0 ? (
-              <Pressable onPress={() => setQuery('')} hitSlop={6}>
-                <Ionicons name="close-circle" size={16} color={palette.mute} />
-              </Pressable>
-            ) : null}
-          </View>
-          <Tap
-            onPress={() => router.push('/(tabs)/inbox')}
-            style={styles.iconBtn}
-            burstColor={palette.acid}
-          >
-            <Ionicons name="chatbubble-outline" size={18} color={palette.ink} />
-          </Tap>
-        </View>
-      </SafeAreaView>
-
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
+    <View style={{ flex: 1 }}>
+      <ScreenFrame
+        contentStyle={styles.scrollContent}
+        header={
+          <ModuleHeader
+            eyebrow="THE BOARD"
+            title="GIGS"
+            showBack={false}
+            right={
+              <Tap
+                onPress={() => router.push('/(tabs)/inbox')}
+                style={styles.headerBtn}
+                burstColor={palette.acid}
+              >
+                <Ionicons name="chatbubble-outline" size={16} color={palette.ink} />
+              </Tap>
+            }
+          />
+        }
       >
-        {/* Quick links — list rows with a right chevron, hairline dividers */}
-        <View style={styles.quickRows}>
-          <QuickRow
-            label="My Deals"
-            count={deals.length + apps.length}
+        {/* Search row */}
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={16} color={palette.mute} />
+          <TextInput
+            value={query}
+            onChangeText={setQuery}
+            placeholder="Search gigs"
+            placeholderTextColor={palette.mute}
+            style={styles.searchInput}
+            returnKeyType="search"
+            selectionColor={palette.acid}
+          />
+          {query.length > 0 ? (
+            <Pressable onPress={() => setQuery('')} hitSlop={6}>
+              <Ionicons name="close-circle" size={16} color={palette.mute} />
+            </Pressable>
+          ) : null}
+        </View>
+
+        {/* Quick links — list cells with right chevron, hairline dividers */}
+        <Section eyebrow="YOUR WORK" title="track it.">
+          <ListCell
+            icon="briefcase-outline"
+            title="My Deals"
+            subtitle="Active campaigns and accepted offers."
+            right={<CountPill count={deals.length + apps.length} />}
             onPress={() => router.push('/(modules)/jobs/active-deals')}
           />
-          <QuickRow
-            label="Applications"
-            count={apps.length}
+          <ListCell
+            icon="paper-plane-outline"
+            title="Applications"
+            subtitle="Pitches you've sent to brands."
+            right={<CountPill count={apps.length} />}
             onPress={() => router.push('/(modules)/jobs/applications')}
           />
-          <QuickRow
-            label="Rate Card"
+          <ListCell
+            icon="pricetags-outline"
+            title="Rate Card"
+            subtitle="Set what your craft is worth."
             onPress={() => router.push('/(modules)/jobs/rate-card')}
-            last
           />
-        </View>
+        </Section>
 
         {/* "Gigs you might like" + segmented tabs */}
-        <View style={styles.feedHead}>
-          <RNText style={styles.feedHeadTitle} maxFontSizeMultiplier={1.1}>
-            Gigs you might like
-          </RNText>
-        </View>
-
-        <View style={styles.tabBar}>
-          {TABS.map((tk) => {
-            const active = tab === tk;
-            const label =
-              tk === 'SAVED' && savedCount > 0
-                ? `Saved (${savedCount})`
-                : tk === 'BEST MATCH'
-                ? 'Best Match'
-                : tk === 'MOST RECENT'
-                ? 'Most Recent'
-                : 'Saved';
-            return (
-              <Tap
-                key={tk}
-                onPress={() => setTab(tk)}
-                burstColor={palette.acid}
-                style={styles.tabItem}
-              >
-                <RNText
-                  style={[styles.tabLabel, active && styles.tabLabelActive]}
-                  maxFontSizeMultiplier={1.1}
+        <Section eyebrow="THE FEED" title="gigs you might like.">
+          <View style={styles.tabBar}>
+            {TABS.map((tk) => {
+              const active = tab === tk;
+              const label =
+                tk === 'SAVED' && savedCount > 0
+                  ? `Saved (${savedCount})`
+                  : tk === 'BEST MATCH'
+                  ? 'Best Match'
+                  : tk === 'MOST RECENT'
+                  ? 'Most Recent'
+                  : 'Saved';
+              return (
+                <Tap
+                  key={tk}
+                  onPress={() => setTab(tk)}
+                  burstColor={palette.acid}
+                  style={styles.tabItem}
                 >
-                  {label}
-                </RNText>
-                {active ? <View style={styles.tabUnderline} /> : null}
-              </Tap>
-            );
-          })}
-        </View>
+                  <RNText
+                    style={[styles.tabLabel, active && styles.tabLabelActive]}
+                    maxFontSizeMultiplier={1.1}
+                  >
+                    {label}
+                  </RNText>
+                  {active ? <View style={styles.tabUnderline} /> : null}
+                </Tap>
+              );
+            })}
+          </View>
 
-        <View style={styles.helperRow}>
-          <RNText style={styles.helperText} maxFontSizeMultiplier={1.2}>
-            {helper}
-          </RNText>
-        </View>
-
-        {/* Job rows */}
-        {visibleJobs.length === 0 ? (
-          <View style={styles.empty}>
-            <Ionicons name="briefcase-outline" size={28} color={palette.mute} />
-            <RNText style={styles.emptyText} maxFontSizeMultiplier={1.15}>
-              {tab === 'SAVED'
-                ? 'No saved gigs yet. Tap the heart on any gig to save it for later.'
-                : 'Nothing matches your filters. Tap Filters to broaden the search.'}
+          <View style={styles.helperRow}>
+            <RNText style={styles.helperText} maxFontSizeMultiplier={1.2}>
+              {helper}
             </RNText>
           </View>
-        ) : (
-          visibleJobs.map((job, i) => (
-            <JobRow
-              key={job.id}
-              job={job}
-              isFirst={i === 0}
-              saved={!!saved[job.id]}
-              onSave={() => {
-                setSaved((s) => ({ ...s, [job.id]: !s[job.id] }));
-                toast(saved[job.id] ? 'Removed from saved.' : 'Saved for later.', 'success');
-              }}
-              onHide={() => {
-                setHidden((h) => ({ ...h, [job.id]: true }));
-                toast('Gig hidden from your feed.', 'default');
-              }}
-            />
-          ))
-        )}
-      </ScrollView>
+
+          {/* Job rows */}
+          {visibleJobs.length === 0 ? (
+            <View style={styles.empty}>
+              <Ionicons name="briefcase-outline" size={28} color={palette.mute} />
+              <RNText style={styles.emptyText} maxFontSizeMultiplier={1.15}>
+                {tab === 'SAVED'
+                  ? 'No saved gigs yet. Tap the heart on any gig to save it for later.'
+                  : 'Nothing matches your filters. Tap Filters to broaden the search.'}
+              </RNText>
+            </View>
+          ) : (
+            visibleJobs.map((job, i) => (
+              <JobRow
+                key={job.id}
+                job={job}
+                isFirst={i === 0}
+                saved={!!saved[job.id]}
+                onSave={() => {
+                  setSaved((s) => ({ ...s, [job.id]: !s[job.id] }));
+                  toast(saved[job.id] ? 'Removed from saved.' : 'Saved for later.', 'success');
+                }}
+                onHide={() => {
+                  setHidden((h) => ({ ...h, [job.id]: true }));
+                  toast('Gig hidden from your feed.', 'default');
+                }}
+              />
+            ))
+          )}
+        </Section>
+      </ScreenFrame>
 
       {/* Floating Filters pill */}
       <FiltersFab onPress={() => setFiltersOpen(true)} />
@@ -277,38 +284,24 @@ export default function JobsHome() {
 }
 
 /* -------------------------------------------------------------------------
- * Quick links row
+ * Count pill (right slot of a quick-link ListCell)
  * ----------------------------------------------------------------------- */
 
-function QuickRow({
-  label,
-  count,
-  onPress,
-  last,
-}: {
-  label: string;
-  count?: number;
-  onPress: () => void;
-  last?: boolean;
-}) {
+function CountPill({ count }: { count?: number }) {
   const palette = useThemedPalette();
   const styles = useThemedPaletteStyles(makeStyles);
+  if (typeof count !== 'number' || count <= 0) {
+    return <Ionicons name="chevron-forward" size={16} color={palette.ink} style={{ opacity: 0.5 }} />;
+  }
   return (
-    <Tap onPress={onPress} burstColor={palette.acid}>
-      <View style={[styles.quickRow, !last && styles.quickRowBorder]}>
-        <RNText style={styles.quickRowLabel} maxFontSizeMultiplier={1.15}>
-          {label}
+    <View style={styles.quickRowCountWrap}>
+      <View style={styles.quickRowCount}>
+        <RNText style={styles.quickRowCountLabel} maxFontSizeMultiplier={1.1}>
+          {count}
         </RNText>
-        {typeof count === 'number' && count > 0 ? (
-          <View style={styles.quickRowCount}>
-            <RNText style={styles.quickRowCountLabel} maxFontSizeMultiplier={1.1}>
-              {count}
-            </RNText>
-          </View>
-        ) : null}
-        <Ionicons name="chevron-forward" size={18} color={palette.ink} style={{ opacity: 0.55 }} />
       </View>
-    </Tap>
+      <Ionicons name="chevron-forward" size={16} color={palette.ink} style={{ opacity: 0.5 }} />
+    </View>
   );
 }
 
@@ -340,30 +333,28 @@ function FiltersFab({ onPress }: { onPress: () => void }) {
 
 const makeStyles = (palette: typeof staticPalette) =>
   StyleSheet.create({
-    root: { flex: 1, backgroundColor: palette.bone },
-
-    /* ── Header ── */
-    headerSafe: {
-      backgroundColor: palette.bone,
-      borderBottomWidth: 1,
-      borderBottomColor: palette.line,
-    },
-    header: {
-      flexDirection: 'row',
+    headerBtn: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      borderWidth: 1,
+      borderColor: palette.line,
       alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingTop: 6,
-      paddingBottom: 12,
-      gap: 10,
+      justifyContent: 'center',
     },
+
+    /* ── Scroll ── */
+    scrollContent: { paddingHorizontal: 12, paddingBottom: 200 },
+
+    /* ── Search ── */
     searchBar: {
-      flex: 1,
+      marginTop: 6,
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8,
       paddingHorizontal: 14,
-      height: 40,
-      borderRadius: 20,
+      height: 44,
+      borderRadius: 22,
       borderWidth: 1,
       borderColor: palette.line,
       backgroundColor: palette.paper,
@@ -376,40 +367,9 @@ const makeStyles = (palette: typeof staticPalette) =>
       paddingVertical: 0,
       includeFontPadding: false,
     },
-    iconBtn: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      borderWidth: 1,
-      borderColor: palette.line,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
 
-    /* ── Scroll ── */
-    scrollContent: { paddingBottom: 200 },
-
-    /* ── Quick links rows ── */
-    quickRows: {
-      paddingHorizontal: 20,
-    },
-    quickRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 18,
-      gap: 10,
-    },
-    quickRowBorder: {
-      borderBottomWidth: 1,
-      borderBottomColor: palette.line,
-    },
-    quickRowLabel: {
-      flex: 1,
-      fontFamily: fonts.displayBold,
-      fontSize: 18,
-      letterSpacing: -0.4,
-      color: palette.ink,
-    },
+    /* ── Quick links count pill ── */
+    quickRowCountWrap: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     quickRowCount: {
       paddingHorizontal: 9,
       paddingVertical: 3,
@@ -423,22 +383,9 @@ const makeStyles = (palette: typeof staticPalette) =>
       color: staticPalette.ink,
     },
 
-    /* ── "Gigs you might like" + tabs ── */
-    feedHead: {
-      paddingHorizontal: 20,
-      paddingTop: 28,
-      paddingBottom: 14,
-    },
-    feedHeadTitle: {
-      fontFamily: fonts.displayBold,
-      fontSize: 26,
-      lineHeight: 28,
-      letterSpacing: -0.7,
-      color: palette.ink,
-    },
+    /* ── Tabs ── */
     tabBar: {
       flexDirection: 'row',
-      paddingHorizontal: 20,
       gap: 18,
       borderBottomWidth: 1,
       borderBottomColor: palette.line,
@@ -467,7 +414,6 @@ const makeStyles = (palette: typeof staticPalette) =>
       borderRadius: 2,
     },
     helperRow: {
-      paddingHorizontal: 20,
       paddingTop: 14,
       paddingBottom: 8,
       borderBottomWidth: 1,
@@ -482,7 +428,6 @@ const makeStyles = (palette: typeof staticPalette) =>
 
     /* ── Empty ── */
     empty: {
-      paddingHorizontal: 20,
       paddingVertical: 48,
       gap: 14,
       alignItems: 'center',

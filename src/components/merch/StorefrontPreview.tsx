@@ -17,8 +17,8 @@
 // The storefront is styled by the creator's chosen palette + fonts, NOT by the
 // app's theme tokens — the chrome around it stays in the app's look.
 
-import React, { useEffect, useState } from 'react';
-import { View, ScrollView, Text as RNText, StyleSheet } from 'react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, ScrollView, Text as RNText, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@/icons';
 import { Image } from '@/components/ui/Image';
 import { RealProductMockup } from '@/components/merch/RealProductMockup';
@@ -61,6 +61,29 @@ export function StorefrontPreview({ mode = 'mini' }: Props) {
   const hasHeaderImg = !!b.headerImageUri;
   const headerFg = hasHeaderImg ? '#FFFFFF' : theme.text;
   const headerSub = hasHeaderImg ? 'rgba(255,255,255,0.85)' : theme.sub;
+
+  // ── Shopping flow (full mode only) ──────────────────────────────────────
+  const [view, setView] = useState<ShopView>('home');
+  const [active, setActive] = useState<BuilderProduct | null>(null);
+  const [cart, setCart] = useState<CartLine[]>([]);
+  const cartCount = cart.reduce((n, l) => n + l.qty, 0);
+  const realProducts = useMemo(() => b.products, [b.products]);
+
+  const openProduct = (p: BuilderProduct) => { setActive(p); setView('product'); };
+  const openCart = () => setView('cart');
+  const backHome = () => setView('home');
+  const addToCart = (p: BuilderProduct, size: string, qty: number) => {
+    setCart((prev) => {
+      const key = `${p.id}-${size}`;
+      const hit = prev.find((l) => l.key === key);
+      if (hit) return prev.map((l) => (l.key === key ? { ...l, qty: l.qty + qty } : l));
+      return [...prev, { key, product: p, size, qty }];
+    });
+    setView('cart');
+  };
+  const setLineQty = (key: string, delta: number) =>
+    setCart((prev) => prev.flatMap((l) => (l.key === key ? (l.qty + delta <= 0 ? [] : [{ ...l, qty: l.qty + delta }]) : [l])));
+  const checkout = () => setView('done');
 
   const body = (
     <>
@@ -108,12 +131,14 @@ export function StorefrontPreview({ mode = 'mini' }: Props) {
           )}
         </View>
         {/* Cart */}
-        <View style={styles.cartWrap}>
+        <Pressable style={styles.cartWrap} onPress={mini ? undefined : openCart} hitSlop={8}>
           <Ionicons name="bag-outline" size={mini ? 15 : 22} color={headerFg} />
-          <View style={[styles.cartDot, { backgroundColor: theme.accent, width: mini ? 12 : 16, height: mini ? 12 : 16, borderRadius: mini ? 6 : 8 }]}>
-            <RNText style={{ fontFamily: font.body, color: theme.accentText, fontSize: mini ? 7 : 9 }}>2</RNText>
-          </View>
-        </View>
+          {(mini || cartCount > 0) && (
+            <View style={[styles.cartDot, { backgroundColor: theme.accent, width: mini ? 12 : 16, height: mini ? 12 : 16, borderRadius: mini ? 6 : 8 }]}>
+              <RNText style={{ fontFamily: font.body, color: theme.accentText, fontSize: mini ? 7 : 9 }}>{mini ? 2 : cartCount}</RNText>
+            </View>
+          )}
+        </Pressable>
       </View>
 
       {/* Menu links */}
@@ -167,6 +192,7 @@ export function StorefrontPreview({ mode = 'mini' }: Props) {
                 fontDisplay={font.display}
                 fontBody={font.body}
                 mini={mini}
+                onPress={p && !mini ? () => openProduct(p) : undefined}
               />
             ))}
           </View>
@@ -218,16 +244,268 @@ export function StorefrontPreview({ mode = 'mini' }: Props) {
   if (mini) {
     return <View style={[styles.root, { backgroundColor: theme.bg }]}>{body}</View>;
   }
+
+  // Full mode = an interactive store with a tiny in-component router:
+  // home → product detail (size/colour/qty) → cart → order placed.
   return (
-    <ScrollView
-      style={{ flex: 1, backgroundColor: theme.bg }}
-      contentContainerStyle={{ paddingBottom: 24 }}
-      showsVerticalScrollIndicator={false}
-    >
-      {body}
-    </ScrollView>
+    <View style={{ flex: 1, backgroundColor: theme.bg }}>
+      {view === 'home' && (
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+          {body}
+        </ScrollView>
+      )}
+      {view === 'product' && active && (
+        <ProductDetail
+          product={active}
+          products={realProducts}
+          theme={theme}
+          font={font}
+          cartCount={cartCount}
+          onBack={backHome}
+          onOpenCart={openCart}
+          onSelectProduct={setActive}
+          onAdd={addToCart}
+        />
+      )}
+      {view === 'cart' && (
+        <CartView cart={cart} theme={theme} font={font} onBack={backHome} onChangeQty={setLineQty} onCheckout={checkout} />
+      )}
+      {view === 'done' && (
+        <OrderDone theme={theme} font={font} total={cartTotal(cart)} onDone={() => { setCart([]); backHome(); }} />
+      )}
+    </View>
   );
 }
+
+// ── Shopping-flow types + helpers ─────────────────────────────────────────
+type ShopView = 'home' | 'product' | 'cart' | 'done';
+type CartLine = { key: string; product: BuilderProduct; size: string; qty: number };
+type ShopFont = { display: string; body: string };
+
+const APPAREL = new Set(['TEE', 'HOODIE', 'CAP']);
+const SIZES = ['S', 'M', 'L', 'XL', 'XXL'];
+const sizesFor = (type: string) => (APPAREL.has(type) ? SIZES : ['ONE SIZE']);
+const cartTotal = (cart: CartLine[]) => cart.reduce((n, l) => n + l.product.price * l.qty, 0);
+
+function productImage(product: BuilderProduct, theme: StoreTheme, radius: number) {
+  if (product.mockupUrl) {
+    return <Image source={{ uri: product.mockupUrl }} style={StyleSheet.absoluteFillObject} contentFit="cover" />;
+  }
+  return (
+    <RealProductMockup
+      type={product.type}
+      color={product.color}
+      artworkUri={product.artworkUri}
+      transform={{ x: product.artX ?? 0, y: product.artY ?? 0, scale: product.artScale ?? 1 }}
+      view={(product.placement ?? 'FRONT') as any}
+      fill
+      radius={radius}
+    />
+  );
+}
+
+// ── Product detail — pick size + colour variant + qty, add to cart ────────
+function ProductDetail({
+  product,
+  products,
+  theme,
+  font,
+  cartCount,
+  onBack,
+  onOpenCart,
+  onSelectProduct,
+  onAdd,
+}: {
+  product: BuilderProduct;
+  products: BuilderProduct[];
+  theme: StoreTheme;
+  font: ShopFont;
+  cartCount: number;
+  onBack: () => void;
+  onOpenCart: () => void;
+  onSelectProduct: (p: BuilderProduct) => void;
+  onAdd: (p: BuilderProduct, size: string, qty: number) => void;
+}) {
+  const sizes = sizesFor(product.type);
+  const [size, setSize] = useState(sizes[Math.min(1, sizes.length - 1)]);
+  const [qty, setQty] = useState(1);
+
+  // Same-type pieces become colour variants you can switch between.
+  const variants = products.filter((p) => p.type === product.type);
+
+  return (
+    <View style={{ flex: 1 }}>
+      <ShopTopBar theme={theme} font={font} title={getProductType(product.type).label} cartCount={cartCount} onBack={onBack} onCart={onOpenCart} />
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
+        <View style={[shop.hero, { backgroundColor: theme.surface }]}>{productImage(product, theme, 0)}</View>
+
+        <View style={{ padding: 20, gap: 4 }}>
+          <RNText style={{ fontFamily: font.display, color: theme.text, fontSize: 24, letterSpacing: -0.4 }}>{product.name.toUpperCase()}</RNText>
+          <RNText style={{ fontFamily: font.display, color: theme.accent, fontSize: 20 }}>₹{product.price.toLocaleString()}</RNText>
+          {!!product.method && (
+            <RNText style={{ fontFamily: font.body, color: theme.sub, fontSize: 12, marginTop: 2 }}>{product.method} · {(product.placement ?? 'FRONT')}</RNText>
+          )}
+
+          {variants.length > 1 && (
+            <>
+              <RNText style={[shop.label, { color: theme.sub }]}>COLOUR</RNText>
+              <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap' }}>
+                {variants.map((v) => (
+                  <Pressable key={v.id} onPress={() => onSelectProduct(v)} style={[shop.swatch, { backgroundColor: v.color, borderColor: v.id === product.id ? theme.text : theme.border, borderWidth: v.id === product.id ? 2.5 : 1 }]} />
+                ))}
+              </View>
+            </>
+          )}
+
+          <RNText style={[shop.label, { color: theme.sub }]}>SIZE</RNText>
+          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
+            {sizes.map((sz) => {
+              const on = sz === size;
+              return (
+                <Pressable key={sz} onPress={() => setSize(sz)} style={[shop.sizeChip, { borderColor: on ? theme.text : theme.border, backgroundColor: on ? theme.text : 'transparent' }]}>
+                  <RNText style={{ fontFamily: font.body, fontSize: 12, letterSpacing: 0.5, color: on ? theme.bg : theme.text }}>{sz}</RNText>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <RNText style={[shop.label, { color: theme.sub }]}>QUANTITY</RNText>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 18 }}>
+            <Pressable onPress={() => setQty((q) => Math.max(1, q - 1))} style={[shop.qtyBtn, { borderColor: theme.border }]}>
+              <Ionicons name="remove" size={18} color={theme.text} />
+            </Pressable>
+            <RNText style={{ fontFamily: font.display, color: theme.text, fontSize: 18, minWidth: 24, textAlign: 'center' }}>{qty}</RNText>
+            <Pressable onPress={() => setQty((q) => q + 1)} style={[shop.qtyBtn, { borderColor: theme.border }]}>
+              <Ionicons name="add" size={18} color={theme.text} />
+            </Pressable>
+          </View>
+        </View>
+      </ScrollView>
+
+      <View style={[shop.bottomBar, { backgroundColor: theme.bg, borderColor: theme.border }]}>
+        <Pressable onPress={() => onAdd(product, size, qty)} style={[shop.cartBtn, { backgroundColor: theme.accent }]}>
+          <Ionicons name="bag-add-outline" size={18} color={theme.accentText} />
+          <RNText style={{ fontFamily: font.body, color: theme.accentText, fontSize: 14, letterSpacing: 1.5 }}>ADD TO CART · ₹{(product.price * qty).toLocaleString()}</RNText>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
+// ── Cart ──────────────────────────────────────────────────────────────────
+function CartView({
+  cart,
+  theme,
+  font,
+  onBack,
+  onChangeQty,
+  onCheckout,
+}: {
+  cart: CartLine[];
+  theme: StoreTheme;
+  font: ShopFont;
+  onBack: () => void;
+  onChangeQty: (key: string, delta: number) => void;
+  onCheckout: () => void;
+}) {
+  const total = cartTotal(cart);
+  return (
+    <View style={{ flex: 1 }}>
+      <ShopTopBar theme={theme} font={font} title="CART" cartCount={cart.reduce((n, l) => n + l.qty, 0)} onBack={onBack} />
+      {cart.length === 0 ? (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 10, padding: 32 }}>
+          <Ionicons name="bag-outline" size={36} color={theme.sub} />
+          <RNText style={{ fontFamily: font.body, color: theme.sub, fontSize: 14 }}>Your cart is empty.</RNText>
+        </View>
+      ) : (
+        <>
+          <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 130 }} showsVerticalScrollIndicator={false}>
+            {cart.map((l) => (
+              <View key={l.key} style={[shop.cartRow, { borderColor: theme.border }]}>
+                <View style={[shop.cartThumb, { backgroundColor: theme.surface }]}>{productImage(l.product, theme, 10)}</View>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <RNText numberOfLines={1} style={{ fontFamily: font.body, color: theme.text, fontSize: 14, fontWeight: '600' }}>{l.product.name}</RNText>
+                  <RNText style={{ fontFamily: font.body, color: theme.sub, fontSize: 12 }}>Size {l.size}</RNText>
+                  <RNText style={{ fontFamily: font.display, color: theme.text, fontSize: 14 }}>₹{(l.product.price * l.qty).toLocaleString()}</RNText>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                  <Pressable onPress={() => onChangeQty(l.key, -1)} style={[shop.qtyMini, { borderColor: theme.border }]}><Ionicons name="remove" size={14} color={theme.text} /></Pressable>
+                  <RNText style={{ fontFamily: font.display, color: theme.text, fontSize: 14, minWidth: 16, textAlign: 'center' }}>{l.qty}</RNText>
+                  <Pressable onPress={() => onChangeQty(l.key, 1)} style={[shop.qtyMini, { borderColor: theme.border }]}><Ionicons name="add" size={14} color={theme.text} /></Pressable>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
+          <View style={[shop.bottomBar, { backgroundColor: theme.bg, borderColor: theme.border }]}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+              <RNText style={{ fontFamily: font.body, color: theme.sub, fontSize: 13 }}>Subtotal · free shipping</RNText>
+              <RNText style={{ fontFamily: font.display, color: theme.text, fontSize: 18 }}>₹{total.toLocaleString()}</RNText>
+            </View>
+            <Pressable onPress={onCheckout} style={[shop.cartBtn, { backgroundColor: theme.accent }]}>
+              <RNText style={{ fontFamily: font.body, color: theme.accentText, fontSize: 14, letterSpacing: 1.5 }}>CHECKOUT</RNText>
+              <Ionicons name="arrow-forward" size={16} color={theme.accentText} />
+            </Pressable>
+          </View>
+        </>
+      )}
+    </View>
+  );
+}
+
+function OrderDone({ theme, font, total, onDone }: { theme: StoreTheme; font: ShopFont; total: number; onDone: () => void }) {
+  return (
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 }}>
+      <View style={[shop.doneRing, { backgroundColor: theme.accent }]}>
+        <Ionicons name="checkmark" size={36} color={theme.accentText} />
+      </View>
+      <RNText style={{ fontFamily: font.display, color: theme.text, fontSize: 26, letterSpacing: -0.5 }}>ORDER PLACED</RNText>
+      <RNText style={{ fontFamily: font.body, color: theme.sub, fontSize: 14, textAlign: 'center' }}>
+        ₹{total.toLocaleString()} · A confirmation is on its way. (Demo checkout.)
+      </RNText>
+      <Pressable onPress={onDone} style={[shop.cartBtn, { backgroundColor: theme.text, marginTop: 8, paddingHorizontal: 28 }]}>
+        <RNText style={{ fontFamily: font.body, color: theme.bg, fontSize: 14, letterSpacing: 1.5 }}>CONTINUE SHOPPING</RNText>
+      </Pressable>
+    </View>
+  );
+}
+
+function ShopTopBar({ theme, font, title, cartCount, onBack, onCart }: { theme: StoreTheme; font: ShopFont; title: string; cartCount: number; onBack: () => void; onCart?: () => void }) {
+  return (
+    <View style={[shop.topBar, { borderColor: theme.border, backgroundColor: theme.bg }]}>
+      <Pressable onPress={onBack} hitSlop={8} style={shop.topBtn}><Ionicons name="arrow-back" size={20} color={theme.text} /></Pressable>
+      <RNText style={{ fontFamily: font.body, color: theme.text, fontSize: 13, letterSpacing: 1.5 }}>{title.toUpperCase()}</RNText>
+      {onCart ? (
+        <Pressable onPress={onCart} hitSlop={8} style={shop.topBtn}>
+          <Ionicons name="bag-outline" size={20} color={theme.text} />
+          {cartCount > 0 && (
+            <View style={[shop.topBadge, { backgroundColor: theme.accent }]}>
+              <RNText style={{ fontFamily: font.body, color: theme.accentText, fontSize: 9 }}>{cartCount}</RNText>
+            </View>
+          )}
+        </Pressable>
+      ) : (
+        <View style={shop.topBtn} />
+      )}
+    </View>
+  );
+}
+
+const shop = StyleSheet.create({
+  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 12, height: 52, borderBottomWidth: 1 },
+  topBtn: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
+  topBadge: { position: 'absolute', top: 4, right: 2, minWidth: 16, height: 16, borderRadius: 8, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center' },
+  hero: { width: '100%', aspectRatio: 1 },
+  label: { fontFamily: 'System', fontSize: 11, letterSpacing: 1.4, marginTop: 18, marginBottom: 8 },
+  swatch: { width: 34, height: 34, borderRadius: 17 },
+  sizeChip: { minWidth: 44, height: 38, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  qtyBtn: { width: 40, height: 40, borderRadius: 20, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  qtyMini: { width: 28, height: 28, borderRadius: 14, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+  bottomBar: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: 16, paddingBottom: 28, borderTopWidth: 1 },
+  cartBtn: { height: 52, borderRadius: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  cartRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, borderBottomWidth: 1 },
+  cartThumb: { width: 64, height: 64, borderRadius: 10, overflow: 'hidden' },
+  doneRing: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center' },
+});
 
 // Default slide when the creator hasn't set any banners yet.
 const FALLBACK_BANNER: BannerItem = {
@@ -342,18 +620,20 @@ function ProductTile({
   fontDisplay,
   fontBody,
   mini,
+  onPress,
 }: {
   product?: BuilderProduct;
   theme: StoreTheme;
   fontDisplay: string;
   fontBody: string;
   mini: boolean;
+  onPress?: () => void;
 }) {
   const typeLabel = product ? getProductType(product.type).label : 'PRODUCT';
   const radius = mini ? 8 : 14;
 
   return (
-    <View style={[styles.tile, { width: '48%', marginBottom: mini ? 8 : 14 }]}>
+    <Pressable style={[styles.tile, { width: '48%', marginBottom: mini ? 8 : 14 }]} onPress={onPress} disabled={!onPress}>
       {/* Square art box — aspectRatio:1 keeps it from stretching landscape, and
           the mockup fills it edge-to-edge so no card background shows behind. */}
       <View
@@ -395,7 +675,7 @@ function ProductTile({
       <RNText style={{ fontFamily: fontDisplay, color: theme.text, fontSize: mini ? 10 : 15, marginTop: 1 }}>
         {product ? `₹${product.price.toLocaleString()}` : '—'}
       </RNText>
-    </View>
+    </Pressable>
   );
 }
 
