@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SOLA.STORE — underdawg</title>
+<meta name="description" content="For the ones still climbing." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@600;800;900&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0A0A0A; --surface:#161616; --text:#F2EFE6; --sub:#9C988A;
+    --border:rgba(242,239,230,0.14); --accent:#9CA3AF; --accentText:#0A0A0A;
+    --fDisplay:'Archivo'; --fwDisplay:900; --fsDisplay:normal;
+    --serif:'Instrument Serif'; --mono:'Space Grotesk';
+    --ease:cubic-bezier(.22,1,.36,1);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--mono),system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .5s var(--ease),color .5s var(--ease);cursor:none;}
+  @media (pointer:coarse){body{cursor:auto;} #cursor{display:none!important;}}
+  a{color:inherit;text-decoration:none;}
+  .disp{font-family:var(--fDisplay),sans-serif;font-weight:var(--fwDisplay);font-style:var(--fsDisplay);line-height:.92;letter-spacing:-.02em;}
+  .serif{font-family:var(--serif),Georgia,serif;}
+  .mono{font-family:var(--mono),sans-serif;}
+  .eyebrow{font-family:var(--serif),serif;font-style:italic;font-size:clamp(15px,1.7vw,20px);color:var(--accent);}
+  .kicker{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--sub);}
+
+  /* grain + vignette atmosphere */
+  .grain{position:fixed;inset:0;z-index:60;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+  /* custom cursor */
+  #cursor{position:fixed;top:0;left:0;width:10px;height:10px;border-radius:50%;background:var(--accent);
+    z-index:70;pointer-events:none;transform:translate(-50%,-50%);transition:width .25s var(--ease),height .25s var(--ease),background .25s,opacity .2s;mix-blend-mode:difference;}
+  #cursor.lg{width:54px;height:54px;background:var(--text);}
+
+  .wrap{max-width:1500px;margin:0 auto;padding:0 clamp(14px,2.2vw,28px);}
+
+  /* sticky mini bar (appears on scroll) */
+  .mini{position:fixed;top:0;left:0;right:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
+    padding:12px clamp(14px,2.2vw,28px);background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);transform:translateY(-110%);transition:transform .5s var(--ease);}
+  .mini.show{transform:none;}
+  .mini .nm{font-family:var(--fDisplay);font-weight:var(--fwDisplay);font-size:15px;letter-spacing:-.01em;text-transform:uppercase;}
+  .mini .right{display:flex;align-items:center;gap:18px;}
+  .bag{position:relative;display:inline-flex;align-items:center;gap:7px;font-size:12px;letter-spacing:.1em;}
+  .bag b{background:var(--accent);color:var(--accentText);border-radius:999px;min-width:18px;height:18px;
+    display:grid;place-items:center;font-size:10px;padding:0 5px;}
+
+  /* HERO */
+  .hero{padding:clamp(34px,6vh,68px) 0 0;position:relative;}
+  .hero .toprow{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:clamp(18px,3vh,34px);}
+  .logo{width:52px;height:52px;border-radius:13px;background:var(--accent);color:var(--accentText);display:grid;place-items:center;overflow:hidden;flex:none;}
+  .logo span{font-family:var(--fDisplay);font-weight:var(--fwDisplay);font-size:20px;}
+  .logo img{width:100%;height:100%;object-fit:cover;}
+  .hero h1{margin:0;font-size:clamp(56px,15vw,210px);text-transform:uppercase;}
+  .hero h1 .ln{display:block;overflow:hidden;}
+  .hero h1 .ln i{display:inline-block;font-style:normal;transform:translateY(110%);animation:rise 1s var(--ease) forwards;}
+  .hero h1 .ln:nth-child(2) i{animation-delay:.08s;}
+  @keyframes rise{to{transform:none;}}
+  .hero .lede{display:flex;justify-content:space-between;flex-wrap:wrap;gap:18px;align-items:flex-end;margin-top:clamp(16px,3vh,30px);}
+  .hero .lede p{margin:0;max-width:42ch;font-size:clamp(14px,1.5vw,17px);color:var(--sub);line-height:1.5;}
+  .cta{display:inline-flex;align-items:center;gap:12px;background:var(--accent);color:var(--accentText);
+    font-family:var(--mono);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
+    padding:16px 26px;border-radius:999px;border:0;cursor:none;transition:transform .3s var(--ease),background .3s;}
+  .cta:hover{transform:translateY(-2px) scale(1.02);}
+  .cta .arr{transition:transform .3s var(--ease);}
+  .cta:hover .arr{transform:translateX(4px);}
+
+  /* MARQUEE */
+  .marquee{margin-top:clamp(22px,4vh,42px);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+    overflow:hidden;white-space:nowrap;padding:14px 0;}
+  .marquee .track{display:inline-block;animation:scroll 26s linear infinite;}
+  .marquee span{font-family:var(--fDisplay);font-weight:var(--fwDisplay);font-size:clamp(26px,4vw,52px);
+    text-transform:uppercase;letter-spacing:-.01em;opacity:.9;}
+  .marquee .dot{display:inline-block;margin:0 .5em;color:var(--accent);}
+  @keyframes scroll{to{transform:translateX(-50%);}}
+
+  /* PRODUCTS */
+  .sec-head{display:flex;justify-content:space-between;align-items:baseline;margin:clamp(34px,5vh,56px) 0 clamp(16px,3vh,28px);gap:20px;flex-wrap:wrap;}
+  .sec-head h2{margin:0;font-size:clamp(34px,7vw,90px);text-transform:uppercase;}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.6vw,24px);}
+  @media(max-width:860px){.grid{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:520px){.grid{grid-template-columns:1fr;}}
+  .card{cursor:none;}
+  .card .frame{position:relative;aspect-ratio:4/5;border-radius:16px;overflow:hidden;background:var(--surface);
+    border:1px solid var(--border);display:grid;place-items:center;}
+  .card .swatch{position:absolute;inset:0;transition:transform .6s var(--ease);}
+  .card:hover .swatch{transform:scale(1.04);}
+  .card .idx{position:absolute;top:14px;left:16px;font-family:var(--fDisplay);font-weight:var(--fwDisplay);
+    font-size:clamp(26px,4vw,54px);mix-blend-mode:difference;color:#fff;opacity:.92;}
+  .card .ptype{position:absolute;bottom:14px;left:16px;font-family:var(--mono);font-size:11px;letter-spacing:.18em;mix-blend-mode:difference;color:#fff;opacity:.85;}
+  .card .flood{position:absolute;inset:0;background:var(--accent);transform:translateY(101%);transition:transform .5s var(--ease);
+    display:flex;align-items:flex-end;padding:18px;}
+  .card:hover .flood{transform:none;}
+  .card .flood .view{font-family:var(--mono);font-weight:700;font-size:12px;letter-spacing:.18em;color:var(--accentText);text-transform:uppercase;}
+  .card .meta{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;gap:14px;}
+  .card .meta .nm{font-family:var(--mono);font-size:clamp(14px,1.5vw,17px);font-weight:500;}
+  .card .meta .pr{font-family:var(--fDisplay);font-weight:var(--fwDisplay);font-size:clamp(15px,1.6vw,19px);white-space:nowrap;}
+
+  /* STORY split */
+  .story{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,5vw,70px);align-items:center;
+    margin:clamp(44px,7vh,80px) 0;}
+  @media(max-width:760px){.story{grid-template-columns:1fr;}}
+  .story .big{font-size:clamp(40px,7vw,96px);text-transform:uppercase;}
+  .story .big em{font-family:var(--serif);font-style:italic;text-transform:none;color:var(--accent);font-weight:400;}
+  .story p{margin:0;color:var(--sub);font-size:clamp(15px,1.6vw,18px);line-height:1.65;max-width:46ch;}
+
+  /* FOOTER */
+  footer{border-top:1px solid var(--border);padding:clamp(28px,5vh,52px) 0 48px;margin-top:28px;}
+  .footgrid{display:flex;justify-content:space-between;flex-wrap:wrap;gap:30px;}
+  .footlinks{display:flex;flex-direction:column;gap:10px;}
+  .footlinks a{font-size:13px;letter-spacing:.04em;color:var(--sub);transition:color .2s;}
+  .footlinks a:hover{color:var(--text);}
+  .storeurl{font-family:var(--fDisplay);font-weight:var(--fwDisplay);color:var(--accent);font-size:clamp(20px,3vw,34px);text-transform:lowercase;}
+  .powered{margin-top:14px;font-size:11px;letter-spacing:.2em;color:var(--sub);opacity:.6;text-transform:uppercase;}
+
+  /* reveal */
+  [data-rise]{opacity:0;transform:translateY(34px);transition:opacity .9s var(--ease),transform .9s var(--ease);}
+  [data-rise].in{opacity:1;transform:none;}
+
+  /* ───── BAG DRAWER ───── */
+  .scrim{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .35s;}
+  .scrim.on{opacity:1;pointer-events:auto;}
+  .drawer{position:fixed;top:0;right:0;bottom:0;width:min(420px,92vw);z-index:81;background:var(--bg);
+    border-left:1px solid var(--border);transform:translateX(100%);transition:transform .45s var(--ease);
+    display:flex;flex-direction:column;cursor:auto;}
+  .drawer.on{transform:none;}
+  .drawer h3{font-family:var(--fDisplay);font-weight:var(--fwDisplay);font-size:20px;text-transform:uppercase;margin:0;}
+  .drawer .dh{display:flex;justify-content:space-between;align-items:center;padding:22px;border-bottom:1px solid var(--border);}
+  .drawer .body{flex:1;overflow:auto;padding:22px;display:flex;flex-direction:column;gap:16px;}
+  .drawer .line{display:flex;gap:14px;align-items:center;}
+  .drawer .line .sw{width:54px;height:64px;border-radius:9px;flex:none;}
+  .drawer .line .nm{font-size:14px;}
+  .drawer .line .pr{font-family:var(--fDisplay);font-weight:var(--fwDisplay);font-size:14px;margin-top:3px;}
+  .drawer .foot{padding:22px;border-top:1px solid var(--border);}
+  .drawer .total{display:flex;justify-content:space-between;margin-bottom:14px;font-size:14px;}
+  .drawer .total b{font-family:var(--fDisplay);font-weight:var(--fwDisplay);font-size:20px;}
+  .bigbtn{width:100%;background:var(--accent);color:var(--accentText);border:0;border-radius:12px;height:54px;
+    font-family:var(--mono);font-weight:700;letter-spacing:.14em;text-transform:uppercase;font-size:13px;cursor:none;}
+  .iconbtn{background:none;border:0;color:var(--text);cursor:none;font-size:20px;line-height:1;}
+
+  /* ───── EDITOR ───── */
+  .modeswitch{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:50;display:flex;gap:3px;
+    background:rgba(20,20,22,.82);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:4px;cursor:auto;}
+  .modeswitch button{border:0;background:transparent;color:#cfd2d8;cursor:pointer;font-family:'Space Grotesk',sans-serif;
+    font-size:12px;font-weight:700;letter-spacing:.12em;padding:9px 18px;border-radius:999px;text-transform:uppercase;transition:.2s;}
+  .modeswitch button[aria-pressed="true"]{background:#fff;color:#111;}
+
+  body.editing [data-edit]{outline:1px dashed color-mix(in srgb,var(--accent) 70%,transparent);outline-offset:4px;cursor:text;border-radius:3px;}
+  body.editing [data-edit]:hover{outline-style:solid;}
+  body.editing [data-edit]:focus{outline:2px solid var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent);}
+  body.editing .card{cursor:auto;}
+  body.editing #cursor{display:none;}
+  body.editing{cursor:auto;}
+
+  .panel{position:fixed;top:0;right:0;bottom:0;width:min(360px,94vw);z-index:55;background:#101113;color:#e9eaee;
+    border-left:1px solid rgba(255,255,255,.1);transform:translateX(100%);transition:transform .45s var(--ease);
+    display:flex;flex-direction:column;font-family:'Space Grotesk',sans-serif;cursor:auto;}
+  .panel.on{transform:none;}
+  .panel .ph{padding:18px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;justify-content:space-between;align-items:center;}
+  .panel .ph b{font-size:12px;letter-spacing:.16em;text-transform:uppercase;}
+  .panel .pbody{flex:1;overflow:auto;padding:18px;display:flex;flex-direction:column;gap:22px;}
+  .panel .grp>label{display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#8b8f98;margin-bottom:10px;}
+  .swatches{display:flex;flex-wrap:wrap;gap:8px;}
+  .swatches .s{width:34px;height:34px;border-radius:9px;border:2px solid transparent;cursor:pointer;position:relative;overflow:hidden;}
+  .swatches .s.on{border-color:#fff;}
+  .swatches .s i{position:absolute;left:0;top:0;right:0;height:50%;}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .chips .c{border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.04);color:#cfd2d8;border-radius:999px;
+    padding:7px 12px;font-size:11px;font-weight:600;letter-spacing:.06em;cursor:pointer;}
+  .chips .c.on{background:#fff;color:#111;border-color:#fff;}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
+  .field span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#8b8f98;}
+  .field input{background:#1a1c1f;border:1px solid rgba(255,255,255,.12);color:#fff;border-radius:8px;padding:9px 11px;font:inherit;font-size:13px;}
+  .toggles{display:flex;flex-direction:column;gap:8px;}
+  .toggles label{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#cfd2d8;}
+  .toggles input{appearance:none;width:38px;height:22px;border-radius:999px;background:rgba(255,255,255,.16);position:relative;cursor:pointer;transition:.2s;}
+  .toggles input:checked{background:var(--accent);}
+  .toggles input::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s;}
+  .toggles input:checked::after{left:18px;}
+  .prodedit{display:flex;flex-direction:column;gap:10px;}
+  .prow{display:flex;gap:8px;align-items:center;background:#16181b;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px;}
+  .prow .pc{width:30px;height:36px;border-radius:6px;flex:none;border:1px solid rgba(255,255,255,.12);cursor:pointer;}
+  .prow .pin{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0;}
+  .prow .pin input{background:#1f2125;border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:6px;padding:6px 8px;font:inherit;font-size:12px;}
+  .prow .del{background:none;border:0;color:#ff7a7a;cursor:pointer;font-size:16px;}
+  .addbtn{border:1px dashed rgba(255,255,255,.22);background:transparent;color:#cfd2d8;border-radius:10px;padding:11px;font:inherit;font-size:12px;letter-spacing:.06em;cursor:pointer;}
+  .panel .pfoot{padding:16px 18px;border-top:1px solid rgba(255,255,255,.1);display:flex;gap:10px;}
+  .panel .pfoot button{flex:1;border:0;border-radius:10px;height:46px;font:inherit;font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:12px;cursor:pointer;}
+  .pubbtn{background:var(--accent);color:var(--accentText);}
+  .resetbtn{background:rgba(255,255,255,.08);color:#cfd2d8;}
+
+  .toast{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(20px);z-index:90;
+    background:#fff;color:#111;padding:12px 20px;border-radius:999px;font-family:'Space Grotesk';font-size:13px;font-weight:600;
+    opacity:0;pointer-events:none;transition:.35s var(--ease);}
+  .toast.on{opacity:1;transform:translateX(-50%);}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div id="cursor"></div>
+
+<div class="mini" id="mini">
+  <span class="nm" data-bind-name>SOLA.STORE</span>
+  <div class="right">
+    <span class="kicker" data-bind-handle>underdawgstore.com/sola</span>
+    <button class="bag iconbtn" onclick="openBag()"><span>BAG</span> <b id="miniCount">0</b></button>
+  </div>
+</div>
+
+<main class="wrap" id="store"></main>
+
+<!-- bag drawer -->
+<div class="scrim" id="scrim" onclick="closeBag()"></div>
+<aside class="drawer" id="drawer">
+  <div class="dh"><h3>YOUR BAG</h3><button class="iconbtn" onclick="closeBag()">✕</button></div>
+  <div class="body" id="bagBody"></div>
+  <div class="foot">
+    <div class="total"><span>Subtotal · free shipping</span><b id="bagTotal">₹0</b></div>
+    <button class="bigbtn" onclick="checkout()">CHECKOUT</button>
+  </div>
+</aside>
+
+<!-- mode switch -->
+<div class="modeswitch">
+  <button id="mLive" aria-pressed="true" onclick="setMode('live')">LIVE</button>
+  <button id="mEdit" aria-pressed="false" onclick="setMode('edit')">EDIT</button>
+</div>
+
+<!-- editor panel -->
+<aside class="panel" id="panel">
+  <div class="ph"><b>Customize store</b><button class="iconbtn" style="color:#cfd2d8" onclick="setMode('live')">✕</button></div>
+  <div class="pbody" id="panelBody"></div>
+  <div class="pfoot">
+    <button class="resetbtn" onclick="resetStore()">RESET</button>
+    <button class="pubbtn" onclick="publish()">PUBLISH</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ════════════ DATA (same shape the app's storeBuilder produces) ════════════ */
+const THEMES = {
+  midnight:{name:'MIDNIGHT',bg:'#0A0A0A',surface:'#161616',text:'#F2EFE6',sub:'#9C988A',border:'rgba(242,239,230,0.14)',accent:'#9CA3AF',accentText:'#0A0A0A'},
+  bone:{name:'BONE',bg:'#F2EFE6',surface:'#FFFFFF',text:'#0A0A0A',sub:'#6B675C',border:'rgba(10,10,10,0.12)',accent:'#0A0A0A',accentText:'#F2EFE6'},
+  sand:{name:'SAND',bg:'#E8E0D2',surface:'#F6F1E7',text:'#2A2620',sub:'#7A7464',border:'rgba(42,38,32,0.14)',accent:'#C2502B',accentText:'#F6F1E7'},
+  ocean:{name:'OCEAN',bg:'#0C1B2A',surface:'#12283C',text:'#EAF2F8',sub:'#8AA6BC',border:'rgba(234,242,248,0.14)',accent:'#46D8C8',accentText:'#06131F'},
+  bloom:{name:'BLOOM',bg:'#FBEFF2',surface:'#FFFFFF',text:'#2A1620',sub:'#8A6B76',border:'rgba(42,22,32,0.12)',accent:'#FF6BB5',accentText:'#2A1620'},
+  mono:{name:'MONO',bg:'#FFFFFF',surface:'#F4F4F4',text:'#111111',sub:'#8A8A8A',border:'rgba(17,17,17,0.12)',accent:'#2E5BFF',accentText:'#FFFFFF'},
+};
+const FONTS = {
+  grotesk:{name:'GROTESK',display:'Archivo',weight:900,style:'normal'},
+  anton:{name:'ANTON',display:'Anton',weight:400,style:'normal'},
+  stack:{name:'STACK',display:'Archivo',weight:800,style:'normal'},
+  syne:{name:'SYNE',display:'Syne',weight:800,style:'normal'},
+  editorial:{name:'EDITORIAL',display:'Instrument Serif',weight:400,style:'normal'},
+};
+const DEFAULT = {
+  name:'SOLA.STORE', handle:'sola', tagline:'For the ones still climbing.',
+  themeKey:'midnight', fontKey:'grotesk',
+  heroA:'SALT', heroB:'STUDY', lede:'Made by a creator, for the people who get it. Small batches, honest prints, no middlemen — every drop ships from a real studio.',
+  ctaLabel:'SHOP THE DROP',
+  marquee:['NEW DROP','SHIPS WORLDWIDE','SMALL BATCHES','MADE TO LAST'],
+  products:[
+    {name:'SALT / STUDY TEE', type:'TEE', color:'#2E5BFF', price:1000},
+    {name:'BONE PAINT HOODIE', type:'HOODIE', color:'#9CA3AF', price:2000},
+    {name:'LAST TRAIN POSTER', type:'POSTER', color:'#111111', price:400},
+    {name:'AFTER WATER CAP', type:'CAP', color:'#46D8C8', price:780},
+    {name:'STUDIO TOTE', type:'TOTE', color:'#C2502B', price:640},
+    {name:'MONOGRAM MUG', type:'MUG', color:'#EDE7D8', price:480},
+  ],
+  storyA:'NOT A', storyEm:'warehouse.', storyBody:'A studio. Every piece is printed in small runs, packed by hand, and shipped worldwide. No dead stock, no middlemen — just the work and the people who wear it.',
+  footerLinks:['SHIPPING','RETURNS','CONTACT','INSTAGRAM'],
+  footerNote:'Ships in 3–5 days. Returns within 14 days. Worldwide via DHL.',
+  showStory:true, showMarquee:true,
+};
+
+const KEY='ud-webstore-v2';
+
+// A shared store can travel inside the link itself (#s=<base64 json>). When a
+// creator publishes in the app, it encodes their store into this param, so one
+// hosted page renders ANY creator's store with no backend. The link wins over
+// local edits; otherwise we fall back to your own saved/default store.
+function fromURL(){
+  const all = location.hash + location.search;
+  try{
+    // #d= : plain URL-encoded JSON (what the mobile app sends — no base64 dep)
+    const d = all.match(/[#?&]d=([^#?&]+)/);
+    if(d) return JSON.parse(decodeURIComponent(d[1]));
+    // #s= : base64-encoded JSON (what the web editor's Publish produces)
+    const s = all.match(/[#?&]s=([^#?&]+)/);
+    if(s) return JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(s[1])))));
+  }catch(e){}
+  return null;
+}
+const SHARED = fromURL();
+let STORE = SHARED ? {...structuredClone(DEFAULT), ...SHARED} : load();
+let mode='live';
+let cart=[];
+
+function load(){ try{const s=localStorage.getItem(KEY); return s?{...structuredClone(DEFAULT),...JSON.parse(s)}:structuredClone(DEFAULT);}catch(e){return structuredClone(DEFAULT);} }
+function save(){ if(SHARED) return; try{localStorage.setItem(KEY, JSON.stringify(STORE));}catch(e){} }
+
+// Build a shareable link that carries the whole store in the URL.
+function shareLink(){
+  const enc = btoa(unescape(encodeURIComponent(JSON.stringify(STORE))));
+  return location.origin + location.pathname + '#s=' + enc;
+}
+
+/* helpers */
+const $=(s,r=document)=>r.querySelector(s);
+const el=(t,c,txt)=>{const e=document.createElement(t);if(c)e.className=c;if(txt!=null)e.textContent=txt;return e;};
+const rupee=n=>'₹'+(+n).toLocaleString('en-IN');
+const monogram=n=>{const w=(n||'').trim().split(/\s+/).filter(Boolean);return !w.length?'UD':w.length===1?w[0].slice(0,2).toUpperCase():(w[0][0]+w[1][0]).toUpperCase();};
+const readableOn=hex=>{const h=hex.replace('#','');if(h.length<6)return '#fff';const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return (0.299*r+0.587*g+0.114*b)/255>0.6?'#0A0A0A':'#FFFFFF';};
+
+function applyTheme(){
+  const t=THEMES[STORE.themeKey]||THEMES.midnight, f=FONTS[STORE.fontKey]||FONTS.grotesk, r=document.documentElement.style;
+  for(const k of ['bg','surface','text','sub','border','accent','accentText']) r.setProperty('--'+k,t[k]);
+  r.setProperty('--fDisplay',`'${f.display}'`); r.setProperty('--fwDisplay',f.weight); r.setProperty('--fsDisplay',f.style);
+}
+
+/* ════════════ RENDER STORE ════════════ */
+function render(){
+  applyTheme();
+  const t=THEMES[STORE.themeKey]||THEMES.midnight;
+  const url='underdawgstore.com/'+(STORE.handle||'your-store');
+  document.title=STORE.name+' — underdawg';
+  $('[data-bind-name]').textContent=STORE.name.toUpperCase();
+  $('[data-bind-handle]').textContent=url;
+
+  const root=$('#store'); root.innerHTML='';
+
+  /* HERO */
+  const hero=el('section','hero');
+  const top=el('div','toprow');
+  const logo=el('div','logo'); logo.appendChild(el('span',null,monogram(STORE.name))); top.appendChild(logo);
+  const tagWrap=el('div'); tagWrap.style.textAlign='right';
+  const eb=el('div','eyebrow'); eb.setAttribute('data-edit','tagline'); eb.textContent=STORE.tagline; tagWrap.appendChild(eb);
+  const k=el('div','kicker'); k.textContent='EST · WORLDWIDE'; k.style.marginTop='6px'; tagWrap.appendChild(k);
+  top.appendChild(tagWrap); hero.appendChild(top);
+
+  const h1=el('h1','disp');
+  h1.innerHTML=`<span class="ln"><i data-edit="heroA">${STORE.heroA}</i></span><span class="ln"><i data-edit="heroB" style="color:var(--accent)">${STORE.heroB}</i></span>`;
+  hero.appendChild(h1);
+
+  const lede=el('div','lede');
+  const p=el('p'); p.setAttribute('data-edit','lede'); p.textContent=STORE.lede; lede.appendChild(p);
+  const cta=el('button','cta'); cta.innerHTML=`<span data-edit="ctaLabel">${STORE.ctaLabel}</span><span class="arr">→</span>`;
+  cta.onclick=()=>{ if(mode==='live'){ $('#products').scrollIntoView({behavior:'smooth'}); } };
+  lede.appendChild(cta); hero.appendChild(lede);
+  root.appendChild(hero);
+
+  /* MARQUEE */
+  if(STORE.showMarquee){
+    const mq=el('div','marquee'); mq.setAttribute('data-rise','');
+    const track=el('div','track');
+    const items=STORE.marquee.length?STORE.marquee:['NEW DROP'];
+    const two=[...items,...items,...items,...items];
+    two.forEach(s=>{const sp=el('span',null,s.toUpperCase());track.appendChild(sp);const d=el('span','dot','✦');track.appendChild(d);});
+    mq.appendChild(track); root.appendChild(mq);
+  }
+
+  /* PRODUCTS */
+  const sh=el('div','sec-head'); sh.id='products'; sh.setAttribute('data-rise','');
+  const h2=el('h2','disp','THE DROP'); sh.appendChild(h2);
+  sh.appendChild(el('div','kicker',(STORE.products.length||0)+' PIECES'));
+  root.appendChild(sh);
+
+  const grid=el('div','grid');
+  STORE.products.forEach((pr,i)=>{
+    const card=el('div','card'); card.setAttribute('data-rise','');
+    const frame=el('div','frame');
+    const sw=el('div','swatch'); sw.style.background=pr.color; frame.appendChild(sw);
+    const idx=el('div','idx',String(i+1).padStart(2,'0')); frame.appendChild(idx);
+    frame.appendChild(el('div','ptype',pr.type));
+    const flood=el('div','flood'); flood.appendChild(el('div','view','Quick view →')); frame.appendChild(flood);
+    card.appendChild(frame);
+    const meta=el('div','meta');
+    const nm=el('div','meta nm'); nm.classList.remove('meta'); nm.className='nm'; nm.setAttribute('data-edit',`prod:${i}:name`); nm.textContent=pr.name; meta.appendChild(nm);
+    const prc=el('div','pr disp'); prc.setAttribute('data-edit',`prod:${i}:price`); prc.textContent=rupee(pr.price); meta.appendChild(prc);
+    card.appendChild(meta);
+    card.onclick=()=>{ if(mode==='live') addToCart(i); };
+    grid.appendChild(card);
+  });
+  root.appendChild(grid);
+
+  /* STORY */
+  if(STORE.showStory){
+    const st=el('section','story'); st.setAttribute('data-rise','');
+    const left=el('div');
+    const big=el('div','big disp'); big.innerHTML=`<span data-edit="storyA">${STORE.storyA}</span> <em data-edit="storyEm">${STORE.storyEm}</em>`;
+    left.appendChild(big); st.appendChild(left);
+    const right=el('div');
+    const sp=el('p'); sp.setAttribute('data-edit','storyBody'); sp.textContent=STORE.storyBody; right.appendChild(sp);
+    st.appendChild(right); root.appendChild(st);
+  }
+
+  /* FOOTER */
+  const f=el('footer'); f.setAttribute('data-rise','');
+  const fg=el('div','footgrid');
+  const fl=el('div','footlinks');
+  STORE.footerLinks.forEach(l=>{const a=el('a',null,l.toUpperCase());a.href='#';fl.appendChild(a);});
+  fg.appendChild(fl);
+  const fr=el('div'); fr.style.textAlign='right';
+  const su=el('div','storeurl',url); fr.appendChild(su);
+  const fn=el('div'); fn.style.color='var(--sub)'; fn.style.fontSize='13px'; fn.style.marginTop='10px'; fn.style.maxWidth='40ch'; fn.style.marginLeft='auto';
+  fn.setAttribute('data-edit','footerNote'); fn.textContent=STORE.footerNote; fr.appendChild(fn);
+  fr.appendChild(el('div','powered','POWERED BY UNDERDAWG'));
+  fg.appendChild(fr); f.appendChild(fg); root.appendChild(f);
+
+  observeRise();
+  if(mode==='edit') bindInline();
+  updateBag();
+}
+
+/* ════════════ SCROLL REVEAL + MINI BAR ════════════ */
+let io;
+function observeRise(){
+  if(io) io.disconnect();
+  io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12});
+  document.querySelectorAll('[data-rise]').forEach(n=>io.observe(n));
+}
+addEventListener('scroll',()=>{ $('#mini').classList.toggle('show', scrollY>520); });
+
+/* ════════════ CUSTOM CURSOR ════════════ */
+const cur=$('#cursor'); let cx=innerWidth/2,cy=innerHeight/2,tx=cx,ty=cy;
+addEventListener('mousemove',e=>{tx=e.clientX;ty=e.clientY;});
+(function loop(){cx+=(tx-cx)*.2;cy+=(ty-cy)*.2;cur.style.left=cx+'px';cur.style.top=cy+'px';requestAnimationFrame(loop);})();
+addEventListener('mouseover',e=>{ if(e.target.closest('.card,.cta,.bag,a,button,.s,.c')) cur.classList.add('lg'); });
+addEventListener('mouseout',e=>{ if(e.target.closest('.card,.cta,.bag,a,button,.s,.c')) cur.classList.remove('lg'); });
+
+/* ════════════ BAG (demo checkout) ════════════ */
+function addToCart(i){ const p=STORE.products[i]; const hit=cart.find(l=>l.i===i); if(hit)hit.q++; else cart.push({i,q:1}); updateBag(); openBag(); toast('Added to bag'); }
+function updateBag(){
+  const t=THEMES[STORE.themeKey]||THEMES.midnight;
+  const count=cart.reduce((n,l)=>n+l.q,0);
+  $('#miniCount').textContent=count;
+  const body=$('#bagBody'); body.innerHTML='';
+  if(!cart.length){ const e=el('div',null,'Your bag is empty.'); e.style.color='var(--sub)'; e.style.fontSize='14px'; body.appendChild(e); }
+  let total=0;
+  cart.forEach(l=>{ const p=STORE.products[l.i]; total+=p.price*l.q;
+    const row=el('div','line');
+    const sw=el('div','sw'); sw.style.background=p.color; row.appendChild(sw);
+    const mid=el('div'); mid.style.flex='1';
+    mid.appendChild(el('div','nm',p.name));
+    mid.appendChild(el('div','pr',rupee(p.price*l.q)+'  ·  ×'+l.q));
+    row.appendChild(mid);
+    const q=el('button','iconbtn','–'); q.onclick=()=>{l.q--;if(l.q<=0)cart=cart.filter(x=>x!==l);updateBag();}; row.appendChild(q);
+    body.appendChild(row);
+  });
+  $('#bagTotal').textContent=rupee(total);
+}
+function openBag(){ $('#scrim').classList.add('on'); $('#drawer').classList.add('on'); }
+function closeBag(){ $('#scrim').classList.remove('on'); $('#drawer').classList.remove('on'); }
+function checkout(){ if(!cart.length){toast('Bag is empty');return;} toast('Demo checkout — payments not wired'); }
+
+/* ════════════ INLINE EDITING ════════════ */
+function bindInline(){
+  document.querySelectorAll('[data-edit]').forEach(node=>{
+    node.setAttribute('contenteditable','true');
+    node.spellcheck=false;
+    node.oninput=()=>{ writeBind(node.getAttribute('data-edit'), node.textContent); save(); };
+    node.onkeydown=e=>{ if(e.key==='Enter'){e.preventDefault();node.blur();} };
+  });
+}
+function writeBind(path,val){
+  if(path.startsWith('prod:')){
+    const [,i,field]=path.split(':'); const p=STORE.products[+i]; if(!p)return;
+    if(field==='price') p.price=parseInt(String(val).replace(/[^0-9]/g,''))||0;
+    else p[field]=val;
+  } else { STORE[path]=val; }
+  // light live-updates that don't need full re-render
+  if(path==='name'){ $('[data-bind-name]').textContent=val.toUpperCase(); }
+}
+
+/* ════════════ EDIT PANEL ════════════ */
+function buildPanel(){
+  const t=THEMES[STORE.themeKey]||THEMES.midnight;
+  const b=$('#panelBody'); b.innerHTML='';
+
+  // identity
+  const idg=el('div','grp');
+  idg.appendChild(labeled('Store name', inputFor('name')));
+  idg.appendChild(labeled('Handle', inputFor('handle')));
+  b.appendChild(idg);
+
+  // content
+  const cg=el('div','grp'); cg.appendChild(tag('Content'));
+  cg.appendChild(labeled('Hero line 1', inputFor('heroA')));
+  cg.appendChild(labeled('Hero line 2', inputFor('heroB')));
+  cg.appendChild(labeled('Tagline', inputFor('tagline')));
+  cg.appendChild(labeled('Intro', inputFor('lede')));
+  cg.appendChild(labeled('Button label', inputFor('ctaLabel')));
+  cg.appendChild(labeled('Story heading', inputFor('storyA')));
+  cg.appendChild(labeled('Story accent word', inputFor('storyEm')));
+  cg.appendChild(labeled('Story body', inputFor('storyBody')));
+  cg.appendChild(labeled('Footer note', inputFor('footerNote')));
+  b.appendChild(cg);
+
+  // lists
+  const lg=el('div','grp'); lg.appendChild(tag('Lists'));
+  lg.appendChild(labeled('Marquee (comma-separated)', listInput('marquee')));
+  lg.appendChild(labeled('Footer links (comma-separated)', listInput('footerLinks')));
+  b.appendChild(lg);
+
+  // theme
+  const tg=el('div','grp'); tg.appendChild(tag('Theme'));
+  const sws=el('div','swatches');
+  Object.keys(THEMES).forEach(k=>{ const th=THEMES[k]; const s=el('div','s'+(k===STORE.themeKey?' on':'')); s.style.background=th.bg;
+    const i=el('i'); i.style.background=th.accent; s.appendChild(i); s.title=th.name;
+    s.onclick=()=>{STORE.themeKey=k;save();render();buildPanel();}; sws.appendChild(s); });
+  tg.appendChild(sws); b.appendChild(tg);
+
+  // font
+  const fg=el('div','grp'); fg.appendChild(tag('Headline font'));
+  const ch=el('div','chips');
+  Object.keys(FONTS).forEach(k=>{const c=el('div','c'+(k===STORE.fontKey?' on':''),FONTS[k].name);c.onclick=()=>{STORE.fontKey=k;save();render();buildPanel();};ch.appendChild(c);});
+  fg.appendChild(ch); b.appendChild(fg);
+
+  // products
+  const pg=el('div','grp'); pg.appendChild(tag('Products'));
+  const pe=el('div','prodedit');
+  STORE.products.forEach((p,i)=>{
+    const row=el('div','prow');
+    const pc=el('label','pc'); pc.style.background=p.color; pc.title='colour';
+    const ci=el('input'); ci.type='color'; ci.value=toHex(p.color); ci.style.opacity='0'; ci.style.width='0'; ci.style.height='0'; ci.style.position='absolute';
+    ci.oninput=()=>{p.color=ci.value;pc.style.background=ci.value;save();render();};
+    pc.appendChild(ci); row.appendChild(pc);
+    const pin=el('div','pin');
+    const ni=el('input'); ni.value=p.name; ni.oninput=()=>{p.name=ni.value;save();updateCardText(i,'name',ni.value);}; pin.appendChild(ni);
+    const r2=el('div'); r2.style.display='flex'; r2.style.gap='6px';
+    const pri=el('input'); pri.value=p.price; pri.inputMode='numeric'; pri.style.flex='1'; pri.oninput=()=>{p.price=parseInt(pri.value.replace(/[^0-9]/g,''))||0;save();updateCardText(i,'price',rupee(p.price));}; r2.appendChild(pri);
+    const sel=el('select'); sel.style.cssText='background:#1f2125;border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:6px;font-size:12px;padding:6px';
+    PRODUCT_TYPES.forEach(tp=>{const o=el('option',null,tp);o.value=tp;if(tp===p.type)o.selected=true;sel.appendChild(o);});
+    sel.onchange=()=>{p.type=sel.value;save();render();}; r2.appendChild(sel);
+    pin.appendChild(r2);
+    row.appendChild(pin);
+    const del=el('button','del','✕'); del.onclick=()=>{STORE.products.splice(i,1);save();render();buildPanel();}; row.appendChild(del);
+    pe.appendChild(row);
+  });
+  const add=el('button','addbtn','+ ADD PRODUCT'); add.onclick=()=>{STORE.products.push({name:'NEW PIECE',type:'TEE',color:'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0'),price:600});save();render();buildPanel();};
+  pe.appendChild(add); pg.appendChild(pe); b.appendChild(pg);
+
+  // sections
+  const og=el('div','grp'); og.appendChild(tag('Sections'));
+  const tgl=el('div','toggles');
+  tgl.appendChild(toggle('Marquee','showMarquee'));
+  tgl.appendChild(toggle('The story','showStory'));
+  og.appendChild(tgl); b.appendChild(og);
+
+  const hint=el('div',null,'Tip: in EDIT mode, click any text on the page to rewrite it.');
+  hint.style.fontSize='11px'; hint.style.color='#8b8f98'; hint.style.lineHeight='1.5'; b.appendChild(hint);
+}
+function tag(t){const l=el('label',null,t);return l;}
+function labeled(label,inp){const f=el('div','field');f.appendChild(el('span',null,label));f.appendChild(inp);return f;}
+function inputFor(field){const i=el('input');i.value=STORE[field]||'';i.oninput=()=>{STORE[field]=i.value;save();render();};return i;}
+function listInput(field){const i=el('input');i.value=(STORE[field]||[]).join(', ');i.oninput=()=>{STORE[field]=i.value.split(',').map(s=>s.trim()).filter(Boolean);save();render();};return i;}
+const PRODUCT_TYPES=['TEE','HOODIE','CAP','TOTE','MUG','POSTER','STICKER','PHONE'];
+function toggle(label,field){const l=el('label',null,label);const i=el('input');i.type='checkbox';i.checked=!!STORE[field];i.onchange=()=>{STORE[field]=i.checked;save();render();};l.appendChild(i);return l;}
+function updateCardText(i,field,val){ const node=document.querySelector(`[data-edit="prod:${i}:${field}"]`); if(node)node.textContent=val; }
+function toHex(c){ if(c[0]==='#'&&c.length===7)return c; const m=c.match(/\d+/g); if(!m)return '#888888'; return '#'+m.slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join(''); }
+
+/* ════════════ MODE ════════════ */
+function setMode(m){
+  mode=m;
+  document.body.classList.toggle('editing', m==='edit');
+  $('#mLive').setAttribute('aria-pressed', String(m==='live'));
+  $('#mEdit').setAttribute('aria-pressed', String(m==='edit'));
+  $('#panel').classList.toggle('on', m==='edit');
+  if(m==='edit'){ buildPanel(); bindInline(); }
+  else { document.querySelectorAll('[data-edit]').forEach(n=>n.removeAttribute('contenteditable')); }
+}
+function publish(){
+  save();
+  const link = shareLink();
+  if(navigator.clipboard){ navigator.clipboard.writeText(link).then(()=>toast('Store link copied — share it anywhere')).catch(()=>toast('Store link ready')); }
+  else { toast('Store link ready'); }
+  console.log('Shareable store link:\n', link);
+}
+function resetStore(){ STORE=structuredClone(DEFAULT); save(); render(); buildPanel(); toast('Reset to default'); }
+
+/* toast */
+let toastT;
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('on'),1900); }
+
+render();
+if(location.hash==='#edit') setMode('edit');
+</script>
+</body>
+</html>

@@ -54,8 +54,8 @@ const MEDIA: Record<TransitionKey, { kind: MediaKind; source: any }> = {
   streamer:  { kind: 'video', source: require('../../../assets/transitions/streamer.mp4') },
   writer:    { kind: 'gif',   source: require('../../../assets/transitions/writer.gif') },
   fashion:   { kind: 'gif',   source: require('../../../assets/transitions/fashion.gif') },
-  podcaster: { kind: null,    source: null },
-  multi:     { kind: null,    source: null },
+  podcaster: { kind: 'video', source: require('../../../assets/transitions/podcaster.mp4') },
+  multi:     { kind: 'video', source: require('../../../assets/transitions/multi.mp4') },
 };
 
 // One-line title (large display) + a short editorial quote underneath.
