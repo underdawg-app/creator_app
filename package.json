@@ -7,7 +7,7 @@
     "start": "node init && react-native start",
     "android": "react-native run-android",
     "ios": "react-native run-ios --scheme UnderdawgsScratch",
-    "build:android": "cd android && ./gradlew assembleRelease",
+    "build:android": "node init && cd android && ./gradlew assembleRelease",
     "asset": "react-native-asset",
     "typecheck": "tsc --noEmit",
     "postinstall": "patch-package"
